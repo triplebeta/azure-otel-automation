@@ -4,15 +4,23 @@ import azure.functions as func
 
 app = func.FunctionApp()
 
+# for logging in Python Function Apps, see:
+#  https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python?tabs=asgi%2Capplication-level&pivots=python-mode-decorators
+
 # Events GBR simulation: pretents that a batch of events is processed
 # Http POST should contain json to specify the details of the batch:
 #   - machinenr
 #   - number of events
 #   - package name
 @app.route(route="EventsGBRFake", auth_level=func.AuthLevel.ANONYMOUS)
-def EventsGBRFake(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info('Python HTTP trigger function processed a request.')
-    logging.warning('Test to see if this working from EventsGBR will show up somewhere...');
+def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
+    logger = logging.getLogger('HttpTriggerLogger')
+
+    logging.info('Test if info shows up in AppInsights.')
+#    logging.warning('Test if a warning shows up in AppInsights');
+#    logging.error('Test if an error shows up in AppInsights')
+
+#    raise ValueError('Test if this exception show up in AppInsights.')
 
     name = req.params.get('name')
     if not name:
