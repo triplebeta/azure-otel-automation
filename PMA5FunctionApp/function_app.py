@@ -1,6 +1,8 @@
 import datetime
 import logging
 import azure.functions as func
+from azure.monitor.opentelemetry import configure_azure_monitor
+from opentelemetry import trace
 
 app = func.FunctionApp()
 
@@ -12,6 +14,7 @@ app = func.FunctionApp()
 @app.route(route="EventsGBRFake", auth_level=func.AuthLevel.ANONYMOUS)
 def EventsGBRFake(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
+    logging.warning('Test to see if this working from EventsGBR will show up somewhere...');
 
     name = req.params.get('name')
     if not name:
@@ -32,7 +35,7 @@ def EventsGBRFake(req: func.HttpRequest) -> func.HttpResponse:
 
 
 # Simulate the tasker
-@app.schedule(schedule="0 */5 * * * *", arg_name="myTimer", run_on_startup=True,
+@app.schedule(schedule="0 0 */1 * * *", arg_name="myTimer", run_on_startup=True,
               use_monitor=False) 
 def TaskerFake(myTimer: func.TimerRequest) -> None:
     utc_timestamp = datetime.datetime.utcnow().replace(
