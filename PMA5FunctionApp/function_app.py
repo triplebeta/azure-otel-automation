@@ -2,6 +2,11 @@ import datetime
 import logging
 import azure.functions as func
 
+from opencensus.extension.azure.functions import OpenCensusExtension
+logger = logging.getLogger('HttpTriggerLogger')
+OpenCensusExtension.configure()
+
+
 app = func.FunctionApp()
 
 # for logging in Python Function Apps, see:
@@ -16,10 +21,14 @@ app = func.FunctionApp()
 def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
     logger = logging.getLogger('HttpTriggerLogger')
 
-    logging.info('Test if info shows up in AppInsights.')
+    context.tracer.
+    # You must use context.tracer to create spans
+    with context.tracer.span("parent"):
+        logger.info('Message from HttpTrigger using the OpenCensus logger.info using a context.')
+
+#    logging.info('Test if info shows up in AppInsights.')
 #    logging.warning('Test if a warning shows up in AppInsights');
 #    logging.error('Test if an error shows up in AppInsights')
-
 #    raise ValueError('Test if this exception show up in AppInsights.')
 
     name = req.params.get('name')
