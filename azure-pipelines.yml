@@ -17,7 +17,7 @@ variables:
   vmImageName: 'ubuntu-latest'
 
   # Working Directory
-  workingDirectory: '$(System.DefaultWorkingDirectory)'
+  workingDirectory: '$(System.DefaultWorkingDirectory)/PMA5FunctionApp'
 
 stages:
 - stage: Build
