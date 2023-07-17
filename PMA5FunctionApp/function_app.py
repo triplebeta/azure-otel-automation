@@ -1,8 +1,6 @@
 import datetime
 import logging
 import azure.functions as func
-from azure.monitor.opentelemetry import configure_azure_monitor
-from opentelemetry import trace
 
 app = func.FunctionApp()
 
