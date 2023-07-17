@@ -21,7 +21,6 @@ app = func.FunctionApp()
 def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
     logger = logging.getLogger('HttpTriggerLogger')
 
-    context.tracer.
     # You must use context.tracer to create spans
     with context.tracer.span("parent"):
         logger.info('Message from HttpTrigger using the OpenCensus logger.info using a context.')
