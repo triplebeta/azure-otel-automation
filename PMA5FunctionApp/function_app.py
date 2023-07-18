@@ -16,6 +16,9 @@ logger = logging.getLogger('HttpTriggerLogger')
 logger.addHandler(AzureLogHandler())
 OpenCensusExtension.configure()
 
+
+# ===============
+# All code in this block is for the sample code that sends metrics to AppInsights
 stats = stats_module.stats
 view_manager = stats.view_manager
 stats_recorder = stats.stats_recorder
@@ -37,6 +40,9 @@ exporter = metrics_exporter.new_metrics_exporter()
 # exporter = metrics_exporter.new_metrics_exporter(connection_string='<appinsights-connection-string>')
 
 view_manager.register_exporter(exporter)
+# ===============
+
+
 
 app = func.FunctionApp()
 
@@ -67,11 +73,11 @@ def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
     logger.setLevel(logging.INFO)
     logger.info('Hello World Custom Event!')
 
-    # Show metrics 
+    # Send metrics 
     for _ in range(4):
         mmap.measure_int_put(prompt_measure, 1)
         mmap.record(tmap)
-#          the next line fails...
+        # I expect the next 2 lines are just to show the metrics also in the log, not needed for AppInsights
         metrics = list(mmap.measure_to_view_map.get_metrics(datetime.datetime.utcnow()))
         print(metrics[0].time_series[0].points[0])
 
