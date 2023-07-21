@@ -1,0 +1,13 @@
+{
+  "body": {
+    "content": "ewogICJwYWNrYWdlTmFtZSI6ICJmcTMzXzIwMjMwNzE1XzAxIiwKICAibWFjaGluZW5yIjogIkZRMzMiLAogICAibnVtYmVyT2ZFdmVudHMiOiAxNTAKfQ==",
+    "file": false,
+    "fileSize": false
+  },
+  "headers": {
+    "content-type": "application/json"
+  },
+  "method": "POST",
+  "title": "Events GBR - process batch of 150 events for FQ33",
+  "url": "http://localhost:7071/api/EventsGBRFake"
+}
