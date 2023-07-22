@@ -1,13 +1,14 @@
 {
 	"folders": [
 		{
-			"path": "PMA5FunctionApp"
+			"path": "PMA5EventsGBR"
 		},
 		{
 			"path": "PMA5Tasks"
 		}
 	],
 	"settings": {
-		"debug.internalConsoleOptions": "neverOpen"
+		"debug.internalConsoleOptions": "neverOpen",
+		"azurite.location": "c:\\temp\\azurite"
 	}
 }
