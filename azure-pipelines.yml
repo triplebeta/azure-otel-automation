@@ -11,7 +11,8 @@ variables:
   azureSubscription: '76c789ca-15e1-4424-a3e6-25641cf8b860'
 
   # Function app name
-  functionAppName: 'pma5telemetrypoc'
+  functionAppNameEventsGBR: 'pma5telemetrypoc'
+  functionAppNameTasks: 'testtasker'
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
@@ -20,8 +21,8 @@ variables:
   workingDirectory: '$(System.DefaultWorkingDirectory)'
 
 stages:
-- stage: Build FunctionApp
-  displayName: Build function app
+- stage: Build
+  displayName: Build Events GBR Fake
 
   jobs:
   - job: Build
@@ -60,8 +61,8 @@ stages:
     - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).PMA5EventsGBR.zip
       artifact: drop
 
-- stage: Build States
-  displayName: Build states
+- stage: Build
+  displayName: Build Tasks Fake
 
   jobs:
   - job: Build
@@ -75,7 +76,7 @@ stages:
         then
             dotnet build extensions.csproj --runtime ubuntu.16.04-x64 --output ./bin
         fi
-      workingDirectory: $(workingDirectory)/PMA5States
+      workingDirectory: $(workingDirectory)/PMA5Tasks
       displayName: 'Build extensions'
 
     - task: UsePythonVersion@0
@@ -85,19 +86,19 @@ stages:
 
     - bash: |
         pip install --target="./.python_packages/lib/site-packages" -r ./requirements.txt
-      workingDirectory: $(workingDirectory)/PMA5States
+      workingDirectory: $(workingDirectory)/PMA5Tasks
       displayName: 'Install application dependencies'
 
     - task: ArchiveFiles@2
       displayName: 'Archive files'
       inputs:
-        rootFolderOrFile: '$(workingDirectory)/PMA5States'
+        rootFolderOrFile: '$(workingDirectory)/PMA5Tasks'
         includeRootFolder: false
         archiveType: zip
-        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).PMA5States.zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).PMA5Tasks.zip
         replaceExistingArchive: true
 
-    - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).PMA5States.zip
+    - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).PMA5Tasks.zip
       artifact: drop
 
 - stage: Deploy
@@ -118,17 +119,17 @@ stages:
 
           steps:
           - task: AzureFunctionApp@1
-            displayName: 'Azure functions app deploy: EventsGBR'
+            displayName: 'Azure functions app deploy: PMA5 Events GBR Fake'
             inputs:
               azureSubscription: '$(azureSubscription)'
               appType: functionAppLinux
-              appName: $(functionAppName)
+              appName: $(functionAppNameEventsGBR)
               package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).PMA5EventsGBR.zip'
 
           - task: AzureFunctionApp@1
-            displayName: 'Azure functions app deploy: States'
+            displayName: 'Azure functions app deploy: PMA5 Tasks Fake'
             inputs:
               azureSubscription: '$(azureSubscription)'
               appType: functionAppLinux
-              appName: $(functionAppName)
-              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).PMA5States.zip'
+              appName: $(functionAppNameTasks)
+              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).PMA5Tasks.zip'
