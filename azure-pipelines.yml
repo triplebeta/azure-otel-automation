@@ -124,7 +124,7 @@ stages:
               appType: functionAppLinux
               appName: $(functionAppName)
               package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).PMA5EventsGBR.zip'
-		
+
           - task: AzureFunctionApp@1
             displayName: 'Azure functions app deploy: States'
             inputs:
