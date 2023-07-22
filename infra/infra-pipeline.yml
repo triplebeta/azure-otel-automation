@@ -1,5 +1,11 @@
+
 trigger:
-- main
+  branches:
+    include:
+    - main
+  paths:
+    include:
+      - infra
 
 name: Deploy Bicep files
 
