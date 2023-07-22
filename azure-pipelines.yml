@@ -21,7 +21,7 @@ variables:
   workingDirectory: '$(System.DefaultWorkingDirectory)'
 
 stages:
-- stage: Build
+- stage: BuildEventsGBRFake
   displayName: Build Events GBR Fake
 
   jobs:
@@ -61,7 +61,7 @@ stages:
     - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).PMA5EventsGBR.zip
       artifact: drop
 
-- stage: Build
+- stage: BuildTaskerFake
   displayName: Build Tasks Fake
 
   jobs:
