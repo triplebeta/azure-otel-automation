@@ -59,7 +59,7 @@ stages:
         replaceExistingArchive: true
 
     - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).PMA5EventsGBR.zip
-      artifact: drop
+      artifact: PMA5EventsGBR
 
 - stage: BuildTaskerFake
   displayName: Build Tasks Fake
@@ -99,7 +99,7 @@ stages:
         replaceExistingArchive: true
 
     - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).PMA5Tasks.zip
-      artifact: drop
+      artifact: PMA5Tasks
 
 - stage: Deploy
   displayName: Deploy stage
@@ -124,7 +124,7 @@ stages:
               azureSubscription: '$(azureSubscription)'
               appType: functionAppLinux
               appName: $(functionAppNameEventsGBR)
-              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).PMA5EventsGBR.zip'
+              package: '$(Pipeline.Workspace)/PMA5EventsGBR/$(Build.BuildId).PMA5EventsGBR.zip'
 
           - task: AzureFunctionApp@1
             displayName: 'Azure functions app deploy: PMA5 Tasks Fake'
@@ -132,4 +132,4 @@ stages:
               azureSubscription: '$(azureSubscription)'
               appType: functionAppLinux
               appName: $(functionAppNameTasks)
-              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).PMA5Tasks.zip'
+              package: '$(Pipeline.Workspace)/PMA5Tasks/$(Build.BuildId).PMA5Tasks.zip'
