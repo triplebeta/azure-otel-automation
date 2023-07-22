@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "PMA5FunctionApp"
+		},
+		{
+			"path": "PMA5Tasks"
+		}
+	],
+	"settings": {
+		"debug.internalConsoleOptions": "neverOpen"
+	}
+}

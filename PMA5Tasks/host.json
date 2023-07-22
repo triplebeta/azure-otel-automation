@@ -4,7 +4,7 @@
     "fileLoggingMode": "debugOnly",
     "logLevel": {
       "default": "Information",
-      "Host.Results": "Information",
+      "Host.Results": "Warning",
       "Function": "Information",
       "Host.Aggregator": "Trace"
     },
