@@ -13,7 +13,7 @@ trigger:
 
 variables:
   # Azure Resource Manager connection created during pipeline creation
-  azureSubscription: '76c789ca-15e1-4424-a3e6-25641cf8b860'
+  azureSubscription: 'Triple Beta Production subscription ARM Service connection' # '76c789ca-15e1-4424-a3e6-25641cf8b860'
 
   # Function app name
   functionAppNameEventsGBR: 'pma5telemetrypoc'
