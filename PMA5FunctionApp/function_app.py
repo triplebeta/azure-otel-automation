@@ -99,7 +99,7 @@ def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
     
     # event_data = "this is the first message"
     event_data_batch = producer.create_batch()
-    event_data_batch.add(EventData('Single message'))
+    event_data_batch.add(EventData('Single message from GBR Events'))
     with producer:
         producer.send_batch(event_data_batch)
 

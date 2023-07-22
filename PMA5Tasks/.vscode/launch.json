@@ -7,11 +7,6 @@
             "request": "attach",
             "port": 9092,
             "preLaunchTask": "func: host start"
-        },
-        {
-            "name": "Local Process with Kubernetes (Preview)",
-            "type": "dev-spaces-connect-configuration",
-            "request": "launch"
         }
     ]
 }
