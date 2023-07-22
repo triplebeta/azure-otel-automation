@@ -23,7 +23,7 @@ resource eventHubEventsGBR 'Microsoft.EventHub/namespaces/eventhubs@2021-11-01' 
   parent: eventHubNamespace
   name: 'eventsgbr'
   properties: {
-    messageRetentionInDays: 7
+    messageRetentionInDays: 1
     partitionCount: 1
   }
 }
@@ -32,7 +32,7 @@ resource eventHubTasks 'Microsoft.EventHub/namespaces/eventhubs@2021-11-01' = {
   parent: eventHubNamespace
   name: 'tasks'
   properties: {
-    messageRetentionInDays: 7
+    messageRetentionInDays: 1
     partitionCount: 1
   }
 }
@@ -41,7 +41,7 @@ resource eventHubStates 'Microsoft.EventHub/namespaces/eventhubs@2021-11-01' = {
   parent: eventHubNamespace
   name: 'states'
   properties: {
-    messageRetentionInDays: 7
+    messageRetentionInDays: 1
     partitionCount: 1
   }
 }
