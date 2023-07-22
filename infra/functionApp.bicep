@@ -5,8 +5,8 @@ param azAppInsightsInstrumentationKey string
 param azAppConfigurationName string
 param azStorageAccountName string
 param azStorageAccountPrimaryAccessKey string
-//param appConfigurationName string
 param functionAppName string
+param eventHubConnectionString string
 
 @description('Name of the staging deployment slot')
 var functionAppStagingSlot = 'staging'
@@ -67,6 +67,7 @@ resource functionSlotConfig 'Microsoft.Web/sites/config@2021-03-01' = {
 module appService_appSettings 'appservice-appsettings-config.bicep' = {
   name: '${deploymentNameId}-appservice-config'
   params: {
+    
     appConfigurationName: azAppConfigurationName
     appConfiguration_appConfigLabel_value_production: 'production'
 //    appConfiguration_appConfigLabel_value_staging: 'staging'
@@ -74,6 +75,7 @@ module appService_appSettings 'appservice-appsettings-config.bicep' = {
     storageAccountName: azStorageAccountName
     storageAccountAccessKey: azStorageAccountPrimaryAccessKey
     functionAppName: azFunctionApp.name
+    eventHubConnectionString: eventHubConnectionString
 //    functionAppStagingSlotName: azFunctionSlotStaging.name
   }
 }

@@ -3,6 +3,7 @@ param storageAccountName string
 param storageAccountAccessKey string
 param appConfigurationName string
 param functionAppName string
+param eventHubConnectionString string
 
 @description('Value of "APP_CONFIGURATION_LABEL" appsetting for production slot')
 param appConfiguration_appConfigLabel_value_production string = 'production'
@@ -21,6 +22,7 @@ var BASE_SLOT_APPSETTINGS = {
   WEBSITE_CONTENTSHARE: toLower(storageAccountName)
   WEBSITE_CONTENTAZUREFILECONNECTIONSTRING: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccountAccessKey}'
   AzureWebJobsFeatureFlags: 'EnableWorkerIndexing'
+  EVENTHUB_CONNECTION_STRING: eventHubConnectionString
 }
 
 /* update production slot with unique settings */

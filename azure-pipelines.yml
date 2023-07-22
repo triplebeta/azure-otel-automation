@@ -16,8 +16,8 @@ variables:
   azureSubscription: 'Triple Beta ARM Service Connection'
 
   # Function app name
-  functionAppNameEventsGBR: 'pma5telemetrypoc'
-  functionAppNameTasks: 'testtasker'
+  functionAppNameEventsGBR: 'pma5poc-eventsgbr-app'
+  functionAppNameTasks: 'pma5poc-tasks-app'
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'

@@ -20,7 +20,6 @@ resource azStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
 }
 var azStorageAccountPrimaryAccessKey = listKeys(azStorageAccount.id, azStorageAccount.apiVersion).keys[0].value
 
-
 // ========================================================
 // Log Analytics & Application Insights
 // ========================================================
@@ -51,6 +50,12 @@ resource azAppInsights 'Microsoft.Insights/components@2020-02-02' = {
     // we ensure that it get created before this resource.
     WorkspaceResourceId: workspace.id
   }
+  tags: {
+    // Needed for in the portal, according to https://markheath.net/post/azure-functions-bicep
+    // circular dependency means we can't reference functionApp directly  /subscriptions/<subscriptionId>/resourceGroups/<rg-name>/providers/Microsoft.Web/sites/<appName>"
+     'hidden-link:/subscriptions/${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.Web/sites/${functionAppEventsGBRName}': 'Resource'
+     'hidden-link:/subscriptions/${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.Web/sites/${functionAppTasksName}': 'Resource'
+  }
 }
 var azAppInsightsInstrumentationKey = azAppInsights.properties.InstrumentationKey
 
@@ -76,11 +81,16 @@ resource azHostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
 // Function Apps & slots
 // ========================================================
 
+// Must be defined separately since they are also used in the hidden tag of the AppInsights to avoid circular references.
+var functionAppEventsGBRName = '${envResourceNamePrefix}-eventsgbr-app'
+var functionAppTasksName = '${envResourceNamePrefix}-tasks-app'
+
+
 // set the app settings on function app's deployment slots
 module functionAppEventsGBR 'functionApp.bicep' = {
   name: '${deploymentNameId}-eventsgbr'
   params: {
-    functionAppName: '${envResourceNamePrefix}-eventsgbr-app'
+    functionAppName: functionAppEventsGBRName
     location: location
     azHostingPlanId: azHostingPlan.id
     deploymentNameId: '${deploymentNameId}-events'
@@ -88,6 +98,7 @@ module functionAppEventsGBR 'functionApp.bicep' = {
     azAppConfigurationName: azAppConfigurationName
     azStorageAccountName: azStorageAccount.name
     azStorageAccountPrimaryAccessKey: azStorageAccountPrimaryAccessKey
+    eventHubConnectionString: 'EntityPath=eventsgbr;${azEventHubConnectionString}'
   }
 }
 
@@ -96,7 +107,7 @@ module functionAppEventsGBR 'functionApp.bicep' = {
 module functionAppTasks 'functionApp.bicep' = {
   name: '${deploymentNameId}-tasks'
   params: {
-    functionAppName: '${envResourceNamePrefix}-tasks-app'
+    functionAppName: functionAppTasksName
     location: location
     azHostingPlanId: azHostingPlan.id
     deploymentNameId: '${deploymentNameId}-tasks'
@@ -104,6 +115,7 @@ module functionAppTasks 'functionApp.bicep' = {
     azAppConfigurationName: azAppConfigurationName
     azStorageAccountName: azStorageAccount.name
     azStorageAccountPrimaryAccessKey: azStorageAccountPrimaryAccessKey
+    eventHubConnectionString: 'EntityPath=tasks;${azEventHubConnectionString}'
   }
 }
 
@@ -128,6 +140,7 @@ resource eventHubNamespace 'Microsoft.EventHub/namespaces@2021-11-01' = {
   }
 }
 
+
 resource eventHubEventsGBR 'Microsoft.EventHub/namespaces/eventhubs@2021-11-01' = {
   parent: eventHubNamespace
   name: 'eventsgbr'
@@ -137,23 +150,18 @@ resource eventHubEventsGBR 'Microsoft.EventHub/namespaces/eventhubs@2021-11-01' 
   }
 }
 
-resource eventHubTasks 'Microsoft.EventHub/namespaces/eventhubs@2021-11-01' = {
-  parent: eventHubNamespace
-  name: 'tasks'
+//Create eventhub authorizationRules
+resource testEventHub_Producer 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-01-01-preview' = {
+  parent: eventHubEventsGBR
+  name: 'Producer'
   properties: {
-    messageRetentionInDays: 1
-    partitionCount: 1
+    rights: [
+      'Send'
+    ]
   }
 }
+var azEventHubConnectionString = listKeys(testEventHub_Producer.id, testEventHub_Producer.apiVersion).primaryConnectionString
 
-resource eventHubStates 'Microsoft.EventHub/namespaces/eventhubs@2021-11-01' = {
-  parent: eventHubNamespace
-  name: 'states'
-  properties: {
-    messageRetentionInDays: 1
-    partitionCount: 1
-  }
-}
 
 /* define outputs */
 output appConfigName string = azAppConfigurationName
