@@ -4,7 +4,7 @@
 		{
 			"type": "func",
 			"label": "func: host start",
-			"command": "host start",
+			"command": "host start --port 5800",
 			"problemMatcher": "$func-python-watch",
 			"isBackground": true,
 			"dependsOn": "pip install (functions)",
@@ -19,7 +19,7 @@
 				"command": "${config:azureFunctions.pythonVenv}/bin/python -m pip install -r requirements.txt"
 			},
 			"windows": {
-				"command": "${config:azureFunctions.pythonVenv}\\Scripts\\python -m pip install -r requirements.txt"
+				"command": "${config:azureFunctions.pythonVenv}\\Scripts\\python -m pip install -r -q requirements.txt"
 			},
 			"linux": {
 				"command": "${config:azureFunctions.pythonVenv}/bin/python -m pip install -r requirements.txt"
