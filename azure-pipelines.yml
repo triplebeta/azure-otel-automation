@@ -103,7 +103,7 @@ stages:
 
 - stage: Deploy
   displayName: Deploy stage
-  dependsOn: BuildEventsGBRFake,BuildTaskerFake
+  dependsOn: [ 'BuildEventsGBRFake', 'BuildTaskerFake']
   condition: succeeded()
 
   jobs:
