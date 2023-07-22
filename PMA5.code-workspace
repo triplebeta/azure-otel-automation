@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "PMA5Tasks"
+		},
+		{
+			"path": "infra"
 		}
 	],
 	"settings": {
