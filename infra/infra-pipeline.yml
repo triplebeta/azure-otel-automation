@@ -12,7 +12,7 @@ name: Deploy Bicep files
 variables:
   vmImageName: 'ubuntu-latest'
 
-  azureServiceConnection: 'Triple Beta Production subscription ARM Service connection'
+  azureServiceConnection: 'Triple Beta ARM Service Connection'
   resourceGroupName: 'newpma5telemetrypoc'
   location: 'westeurope'
   templateFile: './infra/main.bicep'
