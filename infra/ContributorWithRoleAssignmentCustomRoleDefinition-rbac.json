@@ -1,0 +1,23 @@
+{
+  "Name": "Contributor with RoleAssignment Permission",
+  "Id": "1a200ac6-5a49-4198-9403-0af86342bd35",
+  "IsCustom": true,
+  "Description": "Grants full access to manage all resources, allow you to assign roles in Azure RBAC but not delete roles in Azure RBAC manage assignments in Azure Blueprints, or share image galleries.",
+  "Actions": [
+    "*"
+  ],
+  "NotActions": [
+    "Microsoft.Authorization/*/Delete",
+    "Microsoft.Authorization/elevateAccess/Action",
+    "Microsoft.Blueprint/blueprintAssignments/write",
+    "Microsoft.Blueprint/blueprintAssignments/delete",
+    "Microsoft.Compute/galleries/share/action",
+    "Microsoft.Purview/consents/write",
+    "Microsoft.Purview/consents/delete"
+  ],
+  "DataActions": [],
+  "NotDataActions": [],
+  "AssignableScopes": [
+    "/subscriptions/a6faafc0-def0-429a-bd0e-2c2550f163a3"
+  ]
+}

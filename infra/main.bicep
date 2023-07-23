@@ -100,7 +100,7 @@ module azFunctionAppEventsGBR 'functionApp.bicep' = {
     azAppConfigurationName: azAppConfigurationName
     azStorageAccountName: azStorageAccount.name
     azStorageAccountPrimaryAccessKey: azStorageAccountPrimaryAccessKey
-    eventHubConnectionString: 'EntityPath=eventsgbr;${azEventHubConnectionString}'
+    eventHubConnectionString: '${azEventHubConnectionString}'
   }
 }
 
@@ -119,7 +119,7 @@ module azFunctionAppTasks 'functionApp.bicep' = {
     azAppConfigurationName: azAppConfigurationName
     azStorageAccountName: azStorageAccount.name
     azStorageAccountPrimaryAccessKey: azStorageAccountPrimaryAccessKey
-    eventHubConnectionString: 'EntityPath=tasks;${azEventHubConnectionString}'
+    eventHubConnectionString: '${azEventHubConnectionString}'
   }
 }
 
