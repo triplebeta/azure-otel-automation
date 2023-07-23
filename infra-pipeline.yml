@@ -4,9 +4,10 @@ trigger:
     include:
     - main
   paths:
-    include:
-    - infra
-    - infra-pipeline.yml
+    exclude:
+    - PMA5EventsGBR
+    - PMA5Tasks
+    - azure-pipeline.yml
 
 name: Deploy Bicep files
 
