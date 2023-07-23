@@ -58,7 +58,7 @@ resource azAppInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 var azAppInsightsInstrumentationKey = azAppInsights.properties.InstrumentationKey
-
+var azAppInsightsConnectionString = azAppInsights.properties.ConnectionString
 
 // ========================================================
 // AppServicePlan
@@ -87,14 +87,16 @@ var functionAppTasksName = '${envResourceNamePrefix}-tasks-app'
 
 
 // set the app settings on function app's deployment slots
-module functionAppEventsGBR 'functionApp.bicep' = {
+module azFunctionAppEventsGBR 'functionApp.bicep' = {
   name: '${deploymentNameId}-eventsgbr'
   params: {
     functionAppName: functionAppEventsGBRName
     location: location
     azHostingPlanId: azHostingPlan.id
     deploymentNameId: '${deploymentNameId}-events'
-    azAppInsightsInstrumentationKey: azAppInsightsInstrumentationKey
+    appInsightsInstrumentationKey: azAppInsightsInstrumentationKey
+    appInsightsConnectionString: azAppInsightsConnectionString
+    appInsightsName: azAppInsights.name
     azAppConfigurationName: azAppConfigurationName
     azStorageAccountName: azStorageAccount.name
     azStorageAccountPrimaryAccessKey: azStorageAccountPrimaryAccessKey
@@ -104,14 +106,16 @@ module functionAppEventsGBR 'functionApp.bicep' = {
 
 
 // set the app settings on function app's deployment slots
-module functionAppTasks 'functionApp.bicep' = {
+module azFunctionAppTasks 'functionApp.bicep' = {
   name: '${deploymentNameId}-tasks'
   params: {
     functionAppName: functionAppTasksName
     location: location
     azHostingPlanId: azHostingPlan.id
     deploymentNameId: '${deploymentNameId}-tasks'
-    azAppInsightsInstrumentationKey: azAppInsightsInstrumentationKey
+    appInsightsInstrumentationKey: azAppInsightsInstrumentationKey
+    appInsightsConnectionString: azAppInsightsConnectionString
+    appInsightsName: azAppInsights.name
     azAppConfigurationName: azAppConfigurationName
     azStorageAccountName: azStorageAccount.name
     azStorageAccountPrimaryAccessKey: azStorageAccountPrimaryAccessKey
@@ -126,7 +130,7 @@ module functionAppTasks 'functionApp.bicep' = {
 
 var eventHubSku = 'Basic'
 
-resource eventHubNamespace 'Microsoft.EventHub/namespaces@2021-11-01' = {
+resource azEventHubNamespace 'Microsoft.EventHub/namespaces@2021-11-01' = {
   name: '${envResourceNamePrefix}eventhub-ns'
   location: location
   sku: {
@@ -141,8 +145,8 @@ resource eventHubNamespace 'Microsoft.EventHub/namespaces@2021-11-01' = {
 }
 
 
-resource eventHubEventsGBR 'Microsoft.EventHub/namespaces/eventhubs@2021-11-01' = {
-  parent: eventHubNamespace
+resource azEventHubEventsGBR 'Microsoft.EventHub/namespaces/eventhubs@2021-11-01' = {
+  parent: azEventHubNamespace
   name: 'eventsgbr'
   properties: {
     messageRetentionInDays: 1
@@ -150,9 +154,37 @@ resource eventHubEventsGBR 'Microsoft.EventHub/namespaces/eventhubs@2021-11-01' 
   }
 }
 
-//Create eventhub authorizationRules
-resource testEventHub_Producer 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-01-01-preview' = {
-  parent: eventHubEventsGBR
+// Assign the EventsGBR functionApp the Event Hub Data Sender role
+var azureEventHubDataSenderRoleId = '2b629674-e913-4c01-ae53-ef4638d8f975' // Azure Event Hub Data Sender
+
+// set the app settings on function app's deployment slots
+module azAssignEventHubDataSenderRole 'eventHub-roleassignment.bicep' = {
+  name: '${deploymentNameId}-EventsGBRDataSenderRole'
+  params: {
+    eventHubName: azEventHubEventsGBR.name
+    eventHubNamespaceName: azEventHubNamespace.name
+    roleId: azureEventHubDataReceiverRoleId
+    funcAppPrincipalId: azFunctionAppTasks.outputs.functionPrincipalId
+  }
+}
+
+// Assign the Tasks functionApp the Event Hub Data Receiver role
+var azureEventHubDataReceiverRoleId = 'a638d3c7-ab3a-418d-83e6-5f17a39d4fde' // Azure Event Hub Data Receiver
+
+// set the app settings on function app's deployment slots
+module azAssignEventHubDataReceiverRole 'eventHub-roleassignment.bicep' = {
+  name: '${deploymentNameId}-TasksDataReceiverRole'
+  params: {
+    eventHubName: azEventHubEventsGBR.name
+    eventHubNamespaceName: azEventHubNamespace.name
+    roleId: azureEventHubDataSenderRoleId
+    funcAppPrincipalId: azFunctionAppEventsGBR.outputs.functionPrincipalId
+  }
+}
+
+// Create event hub authorizationRules
+resource azTestEventHub_Producer 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-01-01-preview' = {
+  parent: azEventHubEventsGBR
   name: 'Producer'
   properties: {
     rights: [
@@ -160,7 +192,11 @@ resource testEventHub_Producer 'Microsoft.EventHub/namespaces/eventhubs/authoriz
     ]
   }
 }
-var azEventHubConnectionString = listKeys(testEventHub_Producer.id, testEventHub_Producer.apiVersion).primaryConnectionString
+var azEventHubConnectionString = listKeys(azTestEventHub_Producer.id, azTestEventHub_Producer.apiVersion).primaryConnectionString
+
+output eventsGBRFunctionPrincipalId string = azAppConfigurationName
+output tasksFunctionPrincipalId string = azAppConfigurationName
+
 
 
 /* define outputs */

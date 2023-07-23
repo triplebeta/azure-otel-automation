@@ -1,7 +1,9 @@
 param location string
 param azHostingPlanId string
 param deploymentNameId string
-param azAppInsightsInstrumentationKey string
+param appInsightsInstrumentationKey string
+param appInsightsConnectionString string
+param appInsightsName string
 param azAppConfigurationName string
 param azStorageAccountName string
 param azStorageAccountPrimaryAccessKey string
@@ -28,6 +30,13 @@ resource azFunctionApp 'Microsoft.Web/sites@2021-03-01' = {
       alwaysOn: false
       linuxFxVersion: 'python|3.9'
     }
+  }
+  tags: {
+    // Needed for in the portal, according to https://markheath.net/post/azure-functions-bicep
+    // circular dependency means we can't reference functionApp directly  /subscriptions/<subscriptionId>/resourceGroups/<rg-name>/providers/Microsoft.Web/sites/<appName>"
+    'hidden-link: /app-insights-resource-id': '/subscriptions/${subscription().id}/resourceGroups/${resourceGroup().name}/providers/microsoft.insights/components/${appInsightsName}'
+    'hidden-link: /app-insights-instrumentation-key': appInsightsInstrumentationKey
+    'hidden-link: /app-insights-conn-string': appInsightsConnectionString
   }
 }
 
@@ -71,7 +80,7 @@ module appService_appSettings 'appservice-appsettings-config.bicep' = {
     appConfigurationName: azAppConfigurationName
     appConfiguration_appConfigLabel_value_production: 'production'
 //    appConfiguration_appConfigLabel_value_staging: 'staging'
-    applicationInsightsInstrumentationKey: azAppInsightsInstrumentationKey
+    applicationInsightsInstrumentationKey: appInsightsInstrumentationKey
     storageAccountName: azStorageAccountName
     storageAccountAccessKey: azStorageAccountPrimaryAccessKey
     functionAppName: azFunctionApp.name
@@ -81,3 +90,5 @@ module appService_appSettings 'appservice-appsettings-config.bicep' = {
 }
 
 
+/* define outputs */
+output functionPrincipalId string = azFunctionApp.identity.principalId
