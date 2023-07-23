@@ -100,7 +100,7 @@ module azFunctionAppEventsGBR 'functionApp.bicep' = {
     azAppConfigurationName: azAppConfigurationName
     azStorageAccountName: azStorageAccount.name
     azStorageAccountPrimaryAccessKey: azStorageAccountPrimaryAccessKey
-    eventHubConnectionString: '${azEventHubConnectionString}'
+    eventHubConnectionString: azEventHub_Sender_ConnectionString
   }
 }
 
@@ -119,7 +119,7 @@ module azFunctionAppTasks 'functionApp.bicep' = {
     azAppConfigurationName: azAppConfigurationName
     azStorageAccountName: azStorageAccount.name
     azStorageAccountPrimaryAccessKey: azStorageAccountPrimaryAccessKey
-    eventHubConnectionString: '${azEventHubConnectionString}'
+    eventHubConnectionString: azEventHub_Listener_ConnectionString
   }
 }
 
@@ -163,8 +163,8 @@ module azAssignEventHubDataSenderRole 'eventHub-roleassignment.bicep' = {
   params: {
     eventHubName: azEventHubEventsGBR.name
     eventHubNamespaceName: azEventHubNamespace.name
-    roleId: azureEventHubDataReceiverRoleId
-    funcAppPrincipalId: azFunctionAppTasks.outputs.functionPrincipalId
+    roleId: azureEventHubDataSenderRoleId
+    funcAppPrincipalId: azFunctionAppEventsGBR.outputs.functionPrincipalId
   }
 }
 
@@ -177,13 +177,13 @@ module azAssignEventHubDataReceiverRole 'eventHub-roleassignment.bicep' = {
   params: {
     eventHubName: azEventHubEventsGBR.name
     eventHubNamespaceName: azEventHubNamespace.name
-    roleId: azureEventHubDataSenderRoleId
-    funcAppPrincipalId: azFunctionAppEventsGBR.outputs.functionPrincipalId
+    roleId: azureEventHubDataReceiverRoleId
+    funcAppPrincipalId: azFunctionAppTasks.outputs.functionPrincipalId
   }
 }
 
 // Create event hub authorizationRules
-resource azTestEventHub_Producer 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-01-01-preview' = {
+resource azTestEventHub_Sender 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-01-01-preview' = {
   parent: azEventHubEventsGBR
   name: 'Producer'
   properties: {
@@ -192,7 +192,20 @@ resource azTestEventHub_Producer 'Microsoft.EventHub/namespaces/eventhubs/author
     ]
   }
 }
-var azEventHubConnectionString = listKeys(azTestEventHub_Producer.id, azTestEventHub_Producer.apiVersion).primaryConnectionString
+var azEventHub_Sender_ConnectionString = listKeys(azTestEventHub_Sender.id, azTestEventHub_Sender.apiVersion).primaryConnectionString
+
+// Create event hub authorizationRules
+resource azTestEventHub_Listener 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-01-01-preview' = {
+  parent: azEventHubEventsGBR
+  name: 'Consumer'
+  properties: {
+    rights: [
+      'Listen'
+    ]
+  }
+}
+var azEventHub_Listener_ConnectionString = listKeys(azTestEventHub_Listener.id, azTestEventHub_Listener.apiVersion).primaryConnectionString
+
 
 output eventsGBRFunctionPrincipalId string = azAppConfigurationName
 output tasksFunctionPrincipalId string = azAppConfigurationName
