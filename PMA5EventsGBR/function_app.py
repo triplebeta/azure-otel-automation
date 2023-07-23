@@ -1,3 +1,4 @@
+import os
 import datetime
 import logging
 import azure.functions as func
@@ -92,8 +93,9 @@ def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
 #    raise ValueError('Test if this exception show up in AppInsights.')
 
     # Send an event to the Event Hub
+    # This is the admin connection string that gives you full access
     # Example from: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/eventhub/azure-eventhub/samples/sync_samples/send.py
-    EVENT_HUB_CONNECTION_STR = "Endpoint=sb://pma5-poc-hub.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=8aAXPUszLSdOtvfCRNB5PgKCcZmsHVpZS+AEhCB+lOI="
+    EVENT_HUB_CONNECTION_STR = os.environ["EVENTHUB_CONNECTION_STRING"]
     EVENT_HUB_NAME = "eventsgbr"
     producer = EventHubProducerClient.from_connection_string(EVENT_HUB_CONNECTION_STR, eventhub_name=EVENT_HUB_NAME)
     
