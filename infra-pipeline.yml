@@ -2,12 +2,11 @@
 trigger:
   branches:
     include:
-    - main
+    - master
   paths:
-    exclude:
-    - PMA5EventsGBR
-    - PMA5Tasks
-    - azure-pipeline.yml
+    include:
+    - infra
+    - infra-pipeline.yml
 
 name: Deploy Bicep files
 
