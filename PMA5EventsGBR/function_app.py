@@ -87,10 +87,10 @@ def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
         metrics = list(mmap.measure_to_view_map.get_metrics(datetime.datetime.utcnow()))
         print(metrics[0].time_series[0].points[0])
 
-#    logging.info('Test if info shows up in AppInsights.')
-#    logging.warning('Test if a warning shows up in AppInsights');
-#    logging.error('Test if an error shows up in AppInsights')
-#    raise ValueError('Test if this exception show up in AppInsights.')
+    logging.info('Test if info from EventsGBR shows up in AppInsights.')
+    logging.warning('Test if a warning from EventsGBR shows up in AppInsights');
+    logging.error('Test if an error from EventsGBR shows up in AppInsights')
+#    raise ValueError('Test if this exception from EventsGBR show up in AppInsights.')
 
     # Send an event to the Event Hub
     # This is the admin connection string that gives you full access
