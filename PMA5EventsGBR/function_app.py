@@ -9,6 +9,7 @@ from azure.eventhub import EventHubProducerClient
 
 # Configure OpenCensus for the logging to ApplicationInsights
 from opencensus.ext.azure import metrics_exporter
+from opencensus.trace import config_integration
 from opencensus.extension.azure.functions import OpenCensusExtension
 from opencensus.ext.azure.log_exporter import AzureLogHandler
 from opencensus.stats import aggregation as aggregation_module
@@ -16,12 +17,23 @@ from opencensus.stats import measure as measure_module
 from opencensus.stats import stats as stats_module
 from opencensus.stats import view as view_module
 from opencensus.tags import tag_map as tag_map_module
+from opencensus.trace.samplers import AlwaysOnSampler
+from opencensus.trace.tracer import Tracer
 
 # Enable logging to AppInsights using the OpenCensus logger
-logger = logging.getLogger('HttpTriggerLogger')
-logger.addHandler(AzureLogHandler())
+#    logger = logging.getLogger('HttpTriggerLogger')
 OpenCensusExtension.configure()
 
+config_integration.trace_integrations(['logging'])
+logging.basicConfig(format='%(asctime)s traceId=%(traceId)s spanId=%(spanId)s %(message)s')
+tracer = Tracer(sampler=AlwaysOnSampler())
+logger = logging.getLogger(__name__)
+logger.addHandler(AzureLogHandler())
+
+logger.warning('Before the span')
+with tracer.span(name='hello'):
+    logger.warning('In the span')
+    logger.warning('After the span')
 
 # ===============
 # All code in this block is for the sample code that sends metrics to AppInsights
