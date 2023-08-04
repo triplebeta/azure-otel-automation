@@ -205,12 +205,18 @@ resource azTestEventHub_Listener 'Microsoft.EventHub/namespaces/eventhubs/author
 var azEventHub_Listener_ConnectionString = listKeys(azTestEventHub_Listener.id, azTestEventHub_Listener.apiVersion).primaryConnectionString
 
 // Set the diagnostics settings for the event hub
-resource diagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+resource azDiagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
   name: 'Log to ${azEventHubNamespace.name}'
   scope: azEventHubNamespace
   properties: {
     workspaceId: azLogAnalyticsWorkspace.id
     logs: [
+      {
+        category: 'allLogs'
+        enabled: true
+      }
+    ]
+    metrics: [
       {
         category: 'AllMetrics'
         enabled: true
@@ -218,10 +224,6 @@ resource diagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-previe
           days: 30
           enabled: true 
         }
-      }
-      {
-        category: 'allLogs'
-        enabled: true
       }
     ]
   }
