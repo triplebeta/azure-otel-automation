@@ -26,7 +26,7 @@ var azStorageAccountPrimaryAccessKey = listKeys(azStorageAccount.id, azStorageAc
 
 // Create Anlytics Logs Workspaces
 param logAnalyticsSkuName string = 'PerGB2018'    // Defaulting to Free tier
-resource workspace 'Microsoft.OperationalInsights/workspaces@2021-06-01' = {
+resource azLogAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2021-06-01' = {
   name: '${envResourceNamePrefix}-la'
   location: location
   properties: {
@@ -48,7 +48,7 @@ resource azAppInsights 'Microsoft.Insights/components@2020-02-02' = {
     publicNetworkAccessForQuery: 'Enabled'
     // by referencing outputs of workspaces deployment
     // we ensure that it get created before this resource.
-    WorkspaceResourceId: workspace.id
+    WorkspaceResourceId: azLogAnalyticsWorkspace.id
   }
   tags: {
     // Needed for in the portal, according to https://markheath.net/post/azure-functions-bicep
@@ -93,7 +93,6 @@ module azFunctionAppEventsGBR 'functionApp.bicep' = {
     functionAppName: functionAppEventsGBRName
     location: location
     azHostingPlanId: azHostingPlan.id
-    deploymentNameId: '${deploymentNameId}-events'
     appInsightsInstrumentationKey: azAppInsightsInstrumentationKey
     appInsightsConnectionString: azAppInsightsConnectionString
     appInsightsName: azAppInsights.name
@@ -112,7 +111,6 @@ module azFunctionAppTasks 'functionApp.bicep' = {
     functionAppName: functionAppTasksName
     location: location
     azHostingPlanId: azHostingPlan.id
-    deploymentNameId: '${deploymentNameId}-tasks'
     appInsightsInstrumentationKey: azAppInsightsInstrumentationKey
     appInsightsConnectionString: azAppInsightsConnectionString
     appInsightsName: azAppInsights.name
@@ -205,6 +203,29 @@ resource azTestEventHub_Listener 'Microsoft.EventHub/namespaces/eventhubs/author
   }
 }
 var azEventHub_Listener_ConnectionString = listKeys(azTestEventHub_Listener.id, azTestEventHub_Listener.apiVersion).primaryConnectionString
+
+// Set the diagnostics settings for the event hub
+resource diagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'Log to ${azEventHubNamespace.name}'
+  scope: azEventHubNamespace
+  properties: {
+    workspaceId: azLogAnalyticsWorkspace.id
+    logs: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+        retentionPolicy: {
+          days: 30
+          enabled: true 
+        }
+      }
+      {
+        category: 'allLogs'
+        enabled: true
+      }
+    ]
+  }
+}
 
 
 output eventsGBRFunctionPrincipalId string = azAppConfigurationName

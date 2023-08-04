@@ -1,6 +1,5 @@
 param location string
 param azHostingPlanId string
-param deploymentNameId string
 param appInsightsInstrumentationKey string
 param appInsightsConnectionString string
 param appInsightsName string
@@ -10,27 +9,46 @@ param azStorageAccountPrimaryAccessKey string
 param functionAppName string
 param eventHubConnectionString string
 
-@description('Name of the staging deployment slot')
-var functionAppStagingSlot = 'staging'
-
-
 resource azFunctionApp 'Microsoft.Web/sites@2021-03-01' = {
   name: functionAppName
   kind: 'functionapp'
   location: location
-  identity: {
-    type: 'SystemAssigned'
-  }
+  identity: { type: 'SystemAssigned' }
   properties: {
     httpsOnly: true
     serverFarmId: azHostingPlanId
-    // clientAffinityEnabled: true
-    // reserved: false
     siteConfig: {
       alwaysOn: false
       linuxFxVersion: 'python|3.9'
     }
   }
+
+  // Production slot
+  resource appsettings 'config' = {
+    name: 'appsettings'
+    properties: functionAppStickySettings.productionSlot 
+  }
+
+  // Staging slot
+  resource stagingSlot 'slots' = {
+    name: 'staging'
+    location: location
+    identity: { type: 'SystemAssigned' }
+    properties: {
+      enabled: true
+      httpsOnly: true
+    }
+    resource appsettings 'config' = { name: 'appsettings', properties: union(BASE_SLOT_APPSETTINGS, functionAppStickySettings.stagingSlot) }
+  }
+
+  // Define which appSettings are sticky.
+  resource slotsettings 'config' = {
+    name: 'slotConfigNames'
+    properties: {
+      appSettingNames: functionAppStickySettingsKeys
+    }
+  }
+
   tags: {
     // Needed for in the portal, according to https://markheath.net/post/azure-functions-bicep
     // circular dependency means we can't reference functionApp directly  /subscriptions/<subscriptionId>/resourceGroups/<rg-name>/providers/Microsoft.Web/sites/<appName>"
@@ -41,53 +59,33 @@ resource azFunctionApp 'Microsoft.Web/sites@2021-03-01' = {
 }
 
 
-/* ###################################################################### */
-// Create Function App's staging slot for
-//   - NOTE: set app settings later
-/* ###################################################################### */
-resource azFunctionSlotStaging 'Microsoft.Web/sites/slots@2021-03-01' = {
-  name: '${azFunctionApp.name}/${functionAppStagingSlot}'
-  location: location
-  identity: {
-    type: 'SystemAssigned'
+var functionAppStickySettings = {
+  productionSlot: {
+    APP_CONFIGURATION_LABEL: 'production'
+    EVENTHUB_CONNECTION_STRING: eventHubConnectionString
   }
-  properties: {
-    enabled: true
-    httpsOnly: true
+  stagingSlot: {
+    APP_CONFIGURATION_LABEL: 'staging'
   }
 }
 
-/* ###################################################################### */
-// Configure & set app settings on function app's deployment slots
-/* ###################################################################### */
-// set specific app settings to be a slot specific values
-resource functionSlotConfig 'Microsoft.Web/sites/config@2021-03-01' = {
-  name: 'slotConfigNames'
-  parent: azFunctionApp
-  properties: {
-    appSettingNames: [
-      'APP_CONFIGURATION_LABEL'
-    ]
-  }
-}
+var functionAppStickySettingsKeys = [for setting in items(union(functionAppStickySettings.productionSlot, functionAppStickySettings.stagingSlot)): setting.key]
 
 
-// set the app settings on function app's deployment slots
-module appService_appSettings 'appservice-appsettings-config.bicep' = {
-  name: '${deploymentNameId}-appservice-config'
-  params: {
-    
-    appConfigurationName: azAppConfigurationName
-    appConfiguration_appConfigLabel_value_production: 'production'
-//    appConfiguration_appConfigLabel_value_staging: 'staging'
-    applicationInsightsInstrumentationKey: appInsightsInstrumentationKey
-    storageAccountName: azStorageAccountName
-    storageAccountAccessKey: azStorageAccountPrimaryAccessKey
-    functionAppName: azFunctionApp.name
-    eventHubConnectionString: eventHubConnectionString
-//    functionAppStagingSlotName: azFunctionSlotStaging.name
-  }
+/* base app settings for all accounts */
+var BASE_SLOT_APPSETTINGS = {
+  APP_CONFIGURATION_NAME: azAppConfigurationName
+  APPINSIGHTS_INSTRUMENTATIONKEY: appInsightsInstrumentationKey
+  APPLICATIONINSIGHTS_CONNECTION_STRING: 'InstrumentationKey=${appInsightsInstrumentationKey}'
+  AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${azStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${azStorageAccountPrimaryAccessKey}'
+  FUNCTIONS_EXTENSION_VERSION: '~4'
+  FUNCTIONS_WORKER_RUNTIME: 'python'
+  WEBSITE_CONTENTSHARE: toLower(azStorageAccountName)
+  WEBSITE_CONTENTAZUREFILECONNECTIONSTRING: 'DefaultEndpointsProtocol=https;AccountName=${azStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${azStorageAccountPrimaryAccessKey}'
+  AzureWebJobsFeatureFlags: 'EnableWorkerIndexing'
 }
+
+// =============
 
 
 /* define outputs */
