@@ -26,7 +26,7 @@ resource azFunctionApp 'Microsoft.Web/sites@2021-03-01' = {
   // Production slot
   resource appsettings 'config' = {
     name: 'appsettings'
-    properties: functionAppStickySettings.productionSlot 
+    properties: union(BASE_SLOT_APPSETTINGS, functionAppStickySettings.productionSlot)
   }
 
   // Staging slot
@@ -70,7 +70,6 @@ var functionAppStickySettings = {
 }
 
 var functionAppStickySettingsKeys = [for setting in items(union(functionAppStickySettings.productionSlot, functionAppStickySettings.stagingSlot)): setting.key]
-
 
 /* base app settings for all accounts */
 var BASE_SLOT_APPSETTINGS = {
