@@ -75,9 +75,10 @@ var functionAppStickySettingsKeys = [for setting in items(union(functionAppStick
 var BASE_SLOT_APPSETTINGS = {
   APP_CONFIGURATION_NAME: azAppConfigurationName
   APPINSIGHTS_INSTRUMENTATIONKEY: appInsightsInstrumentationKey
-  APPLICATIONINSIGHTS_CONNECTION_STRING: 'InstrumentationKey=${appInsightsInstrumentationKey}'
+  APPLICATIONINSIGHTS_CONNECTION_STRING: appInsightsConnectionString
   AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${azStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${azStorageAccountPrimaryAccessKey}'
   FUNCTIONS_EXTENSION_VERSION: '~4'
+  PYTHON_ENABLE_WORKER_EXTENSIONS: '1'
   FUNCTIONS_WORKER_RUNTIME: 'python'
   WEBSITE_CONTENTSHARE: toLower(azStorageAccountName)
   WEBSITE_CONTENTAZUREFILECONNECTIONSTRING: 'DefaultEndpointsProtocol=https;AccountName=${azStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${azStorageAccountPrimaryAccessKey}'
