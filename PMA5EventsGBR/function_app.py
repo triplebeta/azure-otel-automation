@@ -5,73 +5,21 @@ import azure.functions as func
 
 # For using the event hub
 from azure.eventhub import EventData
-from azure.eventhub import EventHubProducerClient
+from azure.eventhub import EventHubProducerClient# For using the event hub
+from azure.eventhub import EventData
+from azure.eventhub import EventHubConsumerClient
 
-# Configure OpenCensus for the logging to ApplicationInsights
-from opencensus.trace import config_integration
-from opencensus.trace.samplers import AlwaysOnSampler
-from opencensus.trace.tracer import Tracer
-from opencensus.extension.azure.functions import OpenCensusExtension
-from opencensus.ext.azure.trace_exporter import AzureExporter
-from opencensus.ext.azure import metrics_exporter
-from opencensus.ext.azure.log_exporter import AzureLogHandler
-from opencensus.ext.azure.log_exporter import AzureEventHandler
-from opencensus.stats import aggregation as aggregation_module
-from opencensus.stats import measure as measure_module
-from opencensus.stats import stats as stats_module
-from opencensus.stats import view as view_module
-from opencensus.tags import tag_map as tag_map_module
+from azure.monitor.opentelemetry import configure_azure_monitor
+from opentelemetry import trace
+from opentelemetry import metrics
 
-# Enable logging to AppInsights using the OpenCensus logger
-#    logger = logging.getLogger('HttpTriggerLogger')
-OpenCensusExtension.configure()
-
-# Set the name of this component in the Application Map
-def callback_function_for_telemetryRoleName(envelope):
-   envelope.tags['cloud_RoleName'] = 'GBR Events'
-
-# Enable requests and logging integratioon
-config_integration.trace_integrations(['logging'])
-config_integration.trace_integrations(['requests'])
-
-azureExporter=AzureExporter()
-azureExporter.add_telemetry_processor(callback_function_for_telemetryRoleName)
-tracer = Tracer(exporter=azureExporter, sampler=AlwaysOnSampler())
-
-logging.basicConfig(format='%(asctime)s traceId=%(traceId)s spanId=%(spanId)s %(message)s')
-logger = logging.getLogger(__name__)
-
-# AzureLogHandler
-azureLogHandler = AzureLogHandler()
-azureLogHandler.add_telemetry_processor(callback_function_for_telemetryRoleName)
-logger.addHandler(azureLogHandler)
-
-# logger.warning('Before the span')
-# with tracer.span(name='hello'):
-#     logger.warning('In the span')
-#     logger.warning('After the span')
-
-# ===============
-# All code in this block is for the sample code that sends metrics to AppInsights
-stats = stats_module.stats
-view_manager = stats.view_manager
-stats_recorder = stats.stats_recorder
-
-prompt_measure = measure_module.MeasureInt("prompts", "number of prompts", "prompts")
-prompt_view = view_module.View("prompt view", "number of prompts", [], prompt_measure, aggregation_module.CountAggregation())
-view_manager.register_view(prompt_view)
-mmap = stats_recorder.new_measurement_map()
-tmap = tag_map_module.TagMap()
-
-metricsExporter = metrics_exporter.new_metrics_exporter()
-view_manager.register_exporter(metricsExporter)
-
-# ===============
+configure_azure_monitor()
+tracer = trace.get_tracer(__name__)
 
 app = func.FunctionApp()
 
 @app.route(route="EventsGBRFake", auth_level=func.AuthLevel.ANONYMOUS)
-def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
+def EventsGBRFake(req: func.HttpRequest) -> func.HttpResponse:
     """ For logging in Python Function Apps, see:
         https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python?tabs=asgi%2Capplication-level&pivots=python-mode-decorators
 
@@ -83,27 +31,27 @@ def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
     """
 
     # You must use context.tracer to create spans
-    with context.tracer.span("just the initialization"):
-        logger.debug('Starting the EventsGBRFake function')
+    with tracer.start_as_current_span("just the initialization") as span:
+        logging.debug('Starting the EventsGBRFake function')
 
     # See also: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opencensus-python
     # Use properties in exception logs
-    with context.tracer.span("catch exception and some logging"):
-        properties = {'custom_dimensions': {'key_1': 'value_1', 'key_2': 'value_2'}}
+    with tracer.start_as_current_span("catch exception and some logging"):
+#        properties = {'custom_dimensions': {'key_1': 'value_1', 'key_2': 'value_2'}}
         try:
             result = 1 / 0  # generate a ZeroDivisionError
         except Exception:
-            logger.exception('Captured an exception.', extra=properties)
+            logging.exception('Captured an exception.', extra={'key_1': 'value_1', 'key_2': 'value_2'})
 
         # Nested span to send some metrics
-        with context.tracer.span("sending some metrics"):
-            for _ in range(4):
-                mmap.measure_int_put(prompt_measure, 1)
-                mmap.record(tmap)
+        # with context.tracer.span("sending some metrics"):
+        #     for _ in range(4):
+        #         mmap.measure_int_put(prompt_measure, 1)
+        #         mmap.record(tmap)
 
-                # I expect the next 2 lines are just to show the metrics also in the console, not needed for AppInsights
-                metrics = list(mmap.measure_to_view_map.get_metrics(datetime.datetime.utcnow()))
-                print(metrics[0].time_series[0].points[0])
+        #         # I expect the next 2 lines are just to show the metrics also in the console, not needed for AppInsights
+        #         metrics = list(mmap.measure_to_view_map.get_metrics(datetime.datetime.utcnow()))
+        #         print(metrics[0].time_series[0].points[0])
 
     # Send a customEvent. This requires that the AzureHandler is installed.
     # logger.info('Hello World Custom Event!')
@@ -115,7 +63,7 @@ def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
     # Send an event to the Event Hub
     # This is the admin connection string that gives you full access
     # Example from: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/eventhub/azure-eventhub/samples/sync_samples/send.py
-    with context.tracer.span("sending message to Event Hub"):
+    with tracer.start_as_current_span("sending message to Event Hub"):
         EVENT_HUB_CONNECTION_STR = os.environ["EVENTHUB_CONNECTION_STRING"]
         EVENT_HUB_NAME = "eventsgbr"
         producer = EventHubProducerClient.from_connection_string(EVENT_HUB_CONNECTION_STR, eventhub_name=EVENT_HUB_NAME)

@@ -1,3 +1,4 @@
+import os
 import datetime
 import logging
 import azure.functions as func
@@ -6,25 +7,17 @@ import azure.functions as func
 from azure.eventhub import EventData
 from azure.eventhub import EventHubConsumerClient
 
-# Configure OpenCensus for the logging to ApplicationInsights
-from opencensus.trace import config_integration
-from opencensus.ext.azure import metrics_exporter
-from opencensus.extension.azure.functions import OpenCensusExtension
-from opencensus.ext.azure.log_exporter import AzureLogHandler
-from opencensus.stats import aggregation as aggregation_module
-from opencensus.stats import measure as measure_module
-from opencensus.stats import stats as stats_module
-from opencensus.stats import view as view_module
-from opencensus.tags import tag_map as tag_map_module
+from azure.monitor.opentelemetry import configure_azure_monitor
+from opentelemetry import trace
+from opentelemetry import metrics
+
+configure_azure_monitor()
+tracer = trace.get_tracer(__name__)
 
 # Enable logging to AppInsights using the OpenCensus logger
-logger = logging.getLogger('HttpTriggerLogger')
-logger.addHandler(AzureLogHandler())
-OpenCensusExtension.configure()
+#logger = logging.getLogger('HttpTriggerLogger')
 
 # Enable requests and logging integratioon
-config_integration.trace_integrations(['logging'])
-config_integration.trace_integrations(['requests'])
 app = func.FunctionApp()
 
 # for logging in Python Function Apps, see:
@@ -34,9 +27,16 @@ app = func.FunctionApp()
 @app.function_name(name="TaskerFake")
 @app.event_hub_message_trigger(arg_name="myEventHub", event_hub_name="eventsgbr", connection="EVENTHUB_CONNECTION_STRING") 
 
-def TaskerFake(myEventHub: func.EventHubEvent, context):
+def TaskerFake(myEventHub: func.EventHubEvent):
      
-     with context.tracer.span("receiving event and creating tasks"):
-          logging.info('Python EventHub trigger processed an event: %s', myEventHub.get_body().decode('utf-8'))
-    
+     # Exception events
+     try:
+          with tracer.start_as_current_span("catch fake exception") as span:
+               # This exception will be automatically recorded
+               raise Exception("Custom exception message.")
+     except Exception:
+          print("Exception raised")
 
+     with tracer.start_as_current_span("receiving event and creating tasks"):
+          # Log info with some extra information in key-valye pairs
+          logging.info('Python EventHub trigger processed an event: %s', myEventHub.get_body().decode('utf-8'), extra={"extraField":"Value1"})

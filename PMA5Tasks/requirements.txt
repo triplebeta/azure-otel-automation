@@ -4,4 +4,5 @@
 
 azure-functions
 azure-eventhub
-opencensus-extension-azure-functions
+azure-monitor-opentelemetry
+#opencensus-extension-azure-functions
