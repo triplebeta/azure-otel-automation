@@ -7,6 +7,7 @@ from azure.eventhub import EventData
 from azure.eventhub import EventHubConsumerClient
 
 # Configure OpenCensus for the logging to ApplicationInsights
+from opencensus.trace import config_integration
 from opencensus.ext.azure import metrics_exporter
 from opencensus.extension.azure.functions import OpenCensusExtension
 from opencensus.ext.azure.log_exporter import AzureLogHandler
@@ -21,7 +22,9 @@ logger = logging.getLogger('HttpTriggerLogger')
 logger.addHandler(AzureLogHandler())
 OpenCensusExtension.configure()
 
-
+# Enable requests and logging integratioon
+config_integration.trace_integrations(['logging'])
+config_integration.trace_integrations(['requests'])
 app = func.FunctionApp()
 
 # for logging in Python Function Apps, see:
@@ -31,11 +34,9 @@ app = func.FunctionApp()
 @app.function_name(name="TaskerFake")
 @app.event_hub_message_trigger(arg_name="myEventHub", event_hub_name="eventsgbr", connection="EVENTHUB_CONNECTION_STRING") 
 
-def TaskerFake(myEventHub: func.EventHubEvent):
-     logging.info('Python EventHub trigger processed an event: %s',
-                  myEventHub.get_body().decode('utf-8'))
+def TaskerFake(myEventHub: func.EventHubEvent, context):
      
-    # You must use context.tracer to create spans
-    # with context.tracer.span("parent"):
-    #     logger.info('Hello from the Tasks.')
+     with context.tracer.span("receiving event and creating tasks"):
+          logging.info('Python EventHub trigger processed an event: %s', myEventHub.get_body().decode('utf-8'))
+    
 

@@ -28,7 +28,7 @@ OpenCensusExtension.configure()
 
 # Set the name of this component in the Application Map
 def callback_function_for_telemetryRoleName(envelope):
-   envelope.tags['ai.cloud.role'] = 'GBR Events'
+   envelope.tags['cloud_RoleName'] = 'GBR Events'
 
 # Enable requests and logging integratioon
 config_integration.trace_integrations(['logging'])
