@@ -29,11 +29,9 @@ app = func.FunctionApp()
 
 # Tasks: Simulate creating tasks when events sends a trigger.
 @app.function_name(name="TaskerFake")
-@app.event_hub_message_trigger(arg_name="myEventHub",
-                               event_hub_name="gbrevents",
-                               connection="EVENTHUB_CONNECTION_STRING") 
+@app.event_hub_message_trigger(arg_name="myEventHub", event_hub_name="eventsgbr", connection="EVENTHUB_CONNECTION_STRING") 
 
-def PMA5TaskerFake(myEventHub: func.EventHubEvent):
+def TaskerFake(myEventHub: func.EventHubEvent):
      logging.info('Python EventHub trigger processed an event: %s',
                   myEventHub.get_body().decode('utf-8'))
      
