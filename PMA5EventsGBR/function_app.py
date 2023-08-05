@@ -8,10 +8,12 @@ from azure.eventhub import EventData
 from azure.eventhub import EventHubProducerClient
 
 # Configure OpenCensus for the logging to ApplicationInsights
-from opencensus.ext.azure import metrics_exporter
 from opencensus.trace import config_integration
+from opencensus.trace.samplers import AlwaysOnSampler
+from opencensus.trace.tracer import Tracer
 from opencensus.extension.azure.functions import OpenCensusExtension
 from opencensus.ext.azure.trace_exporter import AzureExporter
+from opencensus.ext.azure import metrics_exporter
 from opencensus.ext.azure.log_exporter import AzureLogHandler
 from opencensus.ext.azure.log_exporter import AzureEventHandler
 from opencensus.stats import aggregation as aggregation_module
@@ -19,8 +21,6 @@ from opencensus.stats import measure as measure_module
 from opencensus.stats import stats as stats_module
 from opencensus.stats import view as view_module
 from opencensus.tags import tag_map as tag_map_module
-from opencensus.trace.samplers import AlwaysOnSampler
-from opencensus.trace.tracer import Tracer
 
 # Enable logging to AppInsights using the OpenCensus logger
 #    logger = logging.getLogger('HttpTriggerLogger')
@@ -34,7 +34,7 @@ def callback_function_for_telemetryRoleName(envelope):
 config_integration.trace_integrations(['logging'])
 config_integration.trace_integrations(['requests'])
 
-azureExporter=AzureExporter(os.environ["APPLICATIONINSIGHTS_CONNECTION_STRING"])
+azureExporter=AzureExporter()
 azureExporter.add_telemetry_processor(callback_function_for_telemetryRoleName)
 tracer = Tracer(exporter=azureExporter, sampler=AlwaysOnSampler())
 
@@ -42,7 +42,7 @@ logging.basicConfig(format='%(asctime)s traceId=%(traceId)s spanId=%(spanId)s %(
 logger = logging.getLogger(__name__)
 
 # AzureLogHandler
-azureLogHandler = AzureLogHandler(os.environ["APPLICATIONINSIGHTS_CONNECTION_STRING"])
+azureLogHandler = AzureLogHandler()
 azureLogHandler.add_telemetry_processor(callback_function_for_telemetryRoleName)
 logger.addHandler(azureLogHandler)
 
@@ -110,7 +110,7 @@ def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
     # logging.info('Test if info from EventsGBR shows up in AppInsights.')
     # logging.warning('Test if a warning from EventsGBR shows up in AppInsights');
     # logging.error('Test if an error from EventsGBR shows up in AppInsights')
-#    raise ValueError('Test if this exception from EventsGBR show up in AppInsights.')
+    # raise ValueError('Test if this exception from EventsGBR show up in AppInsights.')
 
     # Send an event to the Event Hub
     # This is the admin connection string that gives you full access
