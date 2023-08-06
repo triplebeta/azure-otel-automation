@@ -64,10 +64,12 @@ var functionAppStickySettings = {
   productionSlot: {
     APP_CONFIGURATION_LABEL: 'production'
     EVENTHUB_CONNECTION_STRING: eventHub_PROD_ConnectionString
+    OTEL_SERVICE_NAME: '${serviceNameAppName} (prod)'
   }
   stagingSlot: {
     APP_CONFIGURATION_LABEL: 'staging'
     EVENTHUB_CONNECTION_STRING: eventHub_STAGING_ConnectionString
+    OTEL_SERVICE_NAME: '${serviceNameAppName} (staging)'
   }
 }
 
@@ -75,7 +77,6 @@ var functionAppStickySettingsKeys = [for setting in items(union(functionAppStick
 
 /* base app settings for all accounts */
 var BASE_SLOT_APPSETTINGS = {
-  OTEL_SERVICE_NAME: serviceNameAppName
   APPINSIGHTS_INSTRUMENTATIONKEY: appInsightsInstrumentationKey
   APPLICATIONINSIGHTS_CONNECTION_STRING: appInsightsConnectionString
   AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${azStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${azStorageAccountPrimaryAccessKey}'
@@ -86,9 +87,6 @@ var BASE_SLOT_APPSETTINGS = {
   WEBSITE_CONTENTAZUREFILECONNECTIONSTRING: 'DefaultEndpointsProtocol=https;AccountName=${azStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${azStorageAccountPrimaryAccessKey}'
   AzureWebJobsFeatureFlags: 'EnableWorkerIndexing'
 }
-
-// =============
-
 
 /* define outputs */
 output functionPrincipalId string = azFunctionApp.identity.principalId
