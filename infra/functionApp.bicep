@@ -7,7 +7,8 @@ param azStorageAccountName string
 param azStorageAccountPrimaryAccessKey string
 param functionAppName string
 param serviceNameAppName string
-param eventHubConnectionString string
+param eventHub_PROD_ConnectionString string
+param eventHub_STAGING_ConnectionString string
 
 resource azFunctionApp 'Microsoft.Web/sites@2021-03-01' = {
   name: functionAppName
@@ -62,10 +63,11 @@ resource azFunctionApp 'Microsoft.Web/sites@2021-03-01' = {
 var functionAppStickySettings = {
   productionSlot: {
     APP_CONFIGURATION_LABEL: 'production'
-    EVENTHUB_CONNECTION_STRING: eventHubConnectionString
+    EVENTHUB_CONNECTION_STRING: eventHub_PROD_ConnectionString
   }
   stagingSlot: {
     APP_CONFIGURATION_LABEL: 'staging'
+    EVENTHUB_CONNECTION_STRING: eventHub_STAGING_ConnectionString
   }
 }
 

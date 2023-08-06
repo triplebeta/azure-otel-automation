@@ -99,7 +99,8 @@ module azFunctionAppEventsGBR 'functionApp.bicep' = {
     appInsightsName: azAppInsights.name
     azStorageAccountName: azStorageAccount.name
     azStorageAccountPrimaryAccessKey: azStorageAccountPrimaryAccessKey
-    eventHubConnectionString: azEventHub_Sender_ConnectionString
+    eventHub_PROD_ConnectionString: azEventHubEventsGBR_Sender_ConnectionString
+    eventHub_STAGING_ConnectionString: azEventHubEventsGBRStaging_Sender_ConnectionString
   }
 }
 
@@ -117,7 +118,8 @@ module azFunctionAppTasks 'functionApp.bicep' = {
     appInsightsName: azAppInsights.name
     azStorageAccountName: azStorageAccount.name
     azStorageAccountPrimaryAccessKey: azStorageAccountPrimaryAccessKey
-    eventHubConnectionString: azEventHub_Listener_ConnectionString
+    eventHub_PROD_ConnectionString: azEventHubEventsGBR_Listener_ConnectionString
+    eventHub_STAGING_ConnectionString: azEventHubEventsGBRStaging_Listener_ConnectionString
   }
 }
 
@@ -173,8 +175,12 @@ resource azDiagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-prev
 
 
 // ========================================================
-// Event Hub Namespace
+// Create the Event Hub for production: eventgbr
 // ========================================================
+
+// Define the well-known GUIDs for the roles.
+var azureEventHubDataSenderRoleId = '2b629674-e913-4c01-ae53-ef4638d8f975'   // Azure Event Hub Data Sender
+var azureEventHubDataReceiverRoleId = 'a638d3c7-ab3a-418d-83e6-5f17a39d4fde' // Azure Event Hub Data Receiver
 
 resource azEventHubEventsGBR 'Microsoft.EventHub/namespaces/eventhubs@2021-11-01' = {
   parent: azEventHubNamespace
@@ -185,9 +191,70 @@ resource azEventHubEventsGBR 'Microsoft.EventHub/namespaces/eventhubs@2021-11-01
   }
 }
 
-// Assign the SP of the EventsGBR functionApp the Event Hub Data Sender role
-var azureEventHubDataSenderRoleId = '2b629674-e913-4c01-ae53-ef4638d8f975' // Azure Event Hub Data Sender
+// Create event hub authorizationRule for the Sender and the Listener
+resource azEventHubEventsGBR_Sender 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-01-01-preview' = {
+  parent: azEventHubEventsGBR
+  name: 'Producer'
+  properties: {
+    rights: [
+      'Send'
+    ]
+  }
+}
+resource azEventHubEventsGBR_Listener 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-01-01-preview' = {
+  parent: azEventHubEventsGBR
+  name: 'Consumer'
+  properties: {
+    rights: [
+      'Listen'
+    ]
+  }
+}
+var azEventHubEventsGBR_Sender_ConnectionString = listKeys(azEventHubEventsGBR_Sender.id, azEventHubEventsGBR_Sender.apiVersion).primaryConnectionString
+var azEventHubEventsGBR_Listener_ConnectionString = listKeys(azEventHubEventsGBR_Listener.id, azEventHubEventsGBR_Listener.apiVersion).primaryConnectionString
 
+
+// ========================================================
+// Create the Event Hub for STAGING: eventgbr-staging
+// ========================================================
+
+resource azEventHubEventsGBRStaging 'Microsoft.EventHub/namespaces/eventhubs@2021-11-01' = {
+  parent: azEventHubNamespace
+  name: 'eventsgbr-staging'
+  properties: {
+    messageRetentionInDays: 1
+    partitionCount: 1
+  }
+}
+
+
+// Create event hub authorizationRule for the Sender and the Listener
+resource azEventHubEventsGBRStaging_Sender 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-01-01-preview' = {
+  parent: azEventHubEventsGBRStaging
+  name: 'Producer'
+  properties: {
+    rights: [
+      'Send'
+    ]
+  }
+}
+resource azEventHubEventsGBRStaging_Listener 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-01-01-preview' = {
+  parent: azEventHubEventsGBRStaging
+  name: 'Consumer'
+  properties: {
+    rights: [
+      'Listen'
+    ]
+  }
+}
+var azEventHubEventsGBRStaging_Sender_ConnectionString = listKeys(azEventHubEventsGBRStaging_Sender.id, azEventHubEventsGBRStaging_Sender.apiVersion).primaryConnectionString
+var azEventHubEventsGBRStaging_Listener_ConnectionString = listKeys(azEventHubEventsGBRStaging_Listener.id, azEventHubEventsGBRStaging_Listener.apiVersion).primaryConnectionString
+
+// =================================================================================
+// Assign the Sender and Listener roles to the Service Principals of the functions
+// =================================================================================
+
+// Assign the SP of the EventsGBR functionApp the Event Hub Data Sender role
 module azAssignEventHubDataSenderRole 'eventHub-roleassignment.bicep' = {
   name: '${deploymentNameId}-EventsGBRDataSenderRole'
   params: {
@@ -199,8 +266,6 @@ module azAssignEventHubDataSenderRole 'eventHub-roleassignment.bicep' = {
 }
 
 // Assign the SP of the Tasks functionApp the Event Hub Data Receiver role
-var azureEventHubDataReceiverRoleId = 'a638d3c7-ab3a-418d-83e6-5f17a39d4fde' // Azure Event Hub Data Receiver
-
 module azAssignEventHubDataReceiverRole 'eventHub-roleassignment.bicep' = {
   name: '${deploymentNameId}-TasksDataReceiverRole'
   params: {
@@ -210,30 +275,6 @@ module azAssignEventHubDataReceiverRole 'eventHub-roleassignment.bicep' = {
     funcAppPrincipalId: azFunctionAppTasks.outputs.functionPrincipalId
   }
 }
-
-// Create event hub authorizationRules
-resource azTestEventHub_Sender 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-01-01-preview' = {
-  parent: azEventHubEventsGBR
-  name: 'Producer'
-  properties: {
-    rights: [
-      'Send'
-    ]
-  }
-}
-var azEventHub_Sender_ConnectionString = listKeys(azTestEventHub_Sender.id, azTestEventHub_Sender.apiVersion).primaryConnectionString
-
-// Create event hub authorizationRules
-resource azTestEventHub_Listener 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-01-01-preview' = {
-  parent: azEventHubEventsGBR
-  name: 'Consumer'
-  properties: {
-    rights: [
-      'Listen'
-    ]
-  }
-}
-var azEventHub_Listener_ConnectionString = listKeys(azTestEventHub_Listener.id, azTestEventHub_Listener.apiVersion).primaryConnectionString
 
 
 
