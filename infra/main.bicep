@@ -123,7 +123,7 @@ module azFunctionAppTasks 'functionApp.bicep' = {
 
 
 // ========================================================
-// Event Hub
+// Event Hub Namespace
 // ========================================================
 
 var eventHubSku = 'Basic'
@@ -142,6 +142,39 @@ resource azEventHubNamespace 'Microsoft.EventHub/namespaces@2021-11-01' = {
   }
 }
 
+// Set the diagnostics settings for the event hub
+resource azDiagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'Log to ${azEventHubNamespace.name}'
+  scope: azEventHubNamespace
+  properties: {
+    workspaceId: azLogAnalyticsWorkspace.id
+    logs: [
+      {
+        categoryGroup: 'allLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 0
+          enabled: false
+        }
+      }
+    ]
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+        retentionPolicy: {
+          days: 0
+          enabled: false
+        }
+      }
+    ]
+  }
+}
+
+
+// ========================================================
+// Event Hub Namespace
+// ========================================================
 
 resource azEventHubEventsGBR 'Microsoft.EventHub/namespaces/eventhubs@2021-11-01' = {
   parent: azEventHubNamespace
@@ -152,10 +185,9 @@ resource azEventHubEventsGBR 'Microsoft.EventHub/namespaces/eventhubs@2021-11-01
   }
 }
 
-// Assign the EventsGBR functionApp the Event Hub Data Sender role
+// Assign the SP of the EventsGBR functionApp the Event Hub Data Sender role
 var azureEventHubDataSenderRoleId = '2b629674-e913-4c01-ae53-ef4638d8f975' // Azure Event Hub Data Sender
 
-// set the app settings on function app's deployment slots
 module azAssignEventHubDataSenderRole 'eventHub-roleassignment.bicep' = {
   name: '${deploymentNameId}-EventsGBRDataSenderRole'
   params: {
@@ -166,10 +198,9 @@ module azAssignEventHubDataSenderRole 'eventHub-roleassignment.bicep' = {
   }
 }
 
-// Assign the Tasks functionApp the Event Hub Data Receiver role
+// Assign the SP of the Tasks functionApp the Event Hub Data Receiver role
 var azureEventHubDataReceiverRoleId = 'a638d3c7-ab3a-418d-83e6-5f17a39d4fde' // Azure Event Hub Data Receiver
 
-// set the app settings on function app's deployment slots
 module azAssignEventHubDataReceiverRole 'eventHub-roleassignment.bicep' = {
   name: '${deploymentNameId}-TasksDataReceiverRole'
   params: {
@@ -204,34 +235,6 @@ resource azTestEventHub_Listener 'Microsoft.EventHub/namespaces/eventhubs/author
 }
 var azEventHub_Listener_ConnectionString = listKeys(azTestEventHub_Listener.id, azTestEventHub_Listener.apiVersion).primaryConnectionString
 
-// Set the diagnostics settings for the event hub
-resource azDiagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: 'Log to ${azEventHubNamespace.name}'
-  scope: azEventHubNamespace
-  properties: {
-    workspaceId: azLogAnalyticsWorkspace.id
-    logs: [
-      {
-        categoryGroup: 'allLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 0
-          enabled: false
-        }
-      }
-    ]
-    metrics: [
-      {
-        category: 'AllMetrics'
-        enabled: true
-        retentionPolicy: {
-          days: 0
-          enabled: false
-        }
-      }
-    ]
-  }
-}
 
 
 output eventsGBRFunctionPrincipalId string = azAppConfigurationName
