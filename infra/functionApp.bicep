@@ -3,10 +3,10 @@ param azHostingPlanId string
 param appInsightsInstrumentationKey string
 param appInsightsConnectionString string
 param appInsightsName string
-param azAppConfigurationName string
 param azStorageAccountName string
 param azStorageAccountPrimaryAccessKey string
 param functionAppName string
+param serviceNameAppName string
 param eventHubConnectionString string
 
 resource azFunctionApp 'Microsoft.Web/sites@2021-03-01' = {
@@ -73,7 +73,7 @@ var functionAppStickySettingsKeys = [for setting in items(union(functionAppStick
 
 /* base app settings for all accounts */
 var BASE_SLOT_APPSETTINGS = {
-  APP_CONFIGURATION_NAME: azAppConfigurationName
+  OTEL_SERVICE_NAME: serviceNameAppName
   APPINSIGHTS_INSTRUMENTATIONKEY: appInsightsInstrumentationKey
   APPLICATIONINSIGHTS_CONNECTION_STRING: appInsightsConnectionString
   AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${azStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${azStorageAccountPrimaryAccessKey}'
