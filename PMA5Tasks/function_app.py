@@ -1,5 +1,5 @@
+from typing import List
 import os
-import datetime
 import logging
 import azure.functions as func
 
@@ -18,15 +18,21 @@ from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapProp
 configure_azure_monitor()
 tracer = trace.get_tracer(__name__)
 
+# Compose the name of the event hub to use for this environment
+if os.environ['APP_CONFIGURATION_LABEL'] == 'staging' or os.environ['APP_CONFIGURATION_LABEL'] == 'local':
+     ehName = 'eventsgbr-staging'
+else:
+     ehName = 'eventsgbr'  # production
+
 app = func.FunctionApp()
 
 # Tasks: Simulate creating tasks when events sends a trigger.
 # Cardinality can be set to "many" or to "one".
 # It will log more metrics when using "many" 
 @app.function_name(name="TaskerFake")
-@app.event_hub_message_trigger(arg_name="myEventHub", event_hub_name="eventsgbr",cardinality="many", connection="EVENTHUB_CONNECTION_STRING") 
+@app.event_hub_message_trigger(arg_name="myEvents", event_hub_name=ehName ,cardinality="one", connection="EVENTHUB_CONNECTION_STRING") 
 
-def TaskerFake(myEventHub: func.EventHubEvent, context):
+def TaskerFake(myEvents: List[func.EventHubEvent], context):
      # Workaround (part 2/3)
      functions_current_context = {
           "traceparent": context.trace_context.Traceparent,
@@ -36,7 +42,6 @@ def TaskerFake(myEventHub: func.EventHubEvent, context):
           carrier=functions_current_context
      )
      token = attach(parent_context)
-     
 
      # Exception events
      try:
@@ -48,7 +53,8 @@ def TaskerFake(myEventHub: func.EventHubEvent, context):
 
      with tracer.start_as_current_span("receiving event and creating tasks"):
           # Log info with some extra information in key-valye pairs
-          logging.info('Python EventHub trigger processed an event: %s', myEventHub.get_body().decode('utf-8'), extra={"extraField":"Value1"})
+          for msg in myEvents:
+               logging.info('Python EventHub trigger processed an event: %s', msg.get_body().decode('utf-8'), extra={"extraField":"Value1"})
 
      # Workaround (part 3/3)
      token = detach(token)
