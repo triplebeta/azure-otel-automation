@@ -20,6 +20,12 @@ from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapProp
 configure_azure_monitor()
 tracer = trace.get_tracer(__name__)
 
+# Compose the name of the event hub to use for this environment
+if os.environ['APP_CONFIGURATION_LABEL'] == 'staging' or os.environ['APP_CONFIGURATION_LABEL'] == 'local':
+     ehName = 'eventsgbr-staging'
+else:
+     ehName = 'eventsgbr'  # production
+
 app = func.FunctionApp()
 
 @app.route(route="EventsGBRFake", auth_level=func.AuthLevel.ANONYMOUS)
