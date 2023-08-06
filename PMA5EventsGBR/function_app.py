@@ -93,11 +93,12 @@ def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
         with producer:
             producer.send_batch(event_data_batch)
 
+    # Workaround (part 3/3)
+    token = detach(token)
+
     # Just send some response
     return func.HttpResponse("Hello from GBR Events function!", status_code=200)
 
-    # Workaround (part 3/3)
-    token = detach(token)
 
 # Time-triggered function, just for some testing.
 # @app.schedule(schedule="0 0 */1 * * *", arg_name="myTimer", run_on_startup=True,
