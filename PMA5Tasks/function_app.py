@@ -30,9 +30,9 @@ app = func.FunctionApp()
 # Cardinality can be set to "many" or to "one".
 # It will log more metrics when using "many" 
 @app.function_name(name="TaskerFake")
-@app.event_hub_message_trigger(arg_name="myEvents", event_hub_name=ehName ,cardinality="one", connection="EVENTHUB_CONNECTION_STRING") 
+@app.event_hub_message_trigger(arg_name="myEvents", event_hub_name=ehName, cardinality="one", connection="EVENTHUB_CONNECTION_STRING") 
 
-def TaskerFake(myEvents: List[func.EventHubEvent], context):
+def TaskerFake(myEvents: func.EventHubEvent, context):
      # Workaround (part 2/3)
      functions_current_context = {
           "traceparent": context.trace_context.Traceparent,
@@ -53,8 +53,7 @@ def TaskerFake(myEvents: List[func.EventHubEvent], context):
 
      with tracer.start_as_current_span("receiving event and creating tasks"):
           # Log info with some extra information in key-valye pairs
-          for msg in myEvents:
-               logging.info('Python EventHub trigger processed an event: %s', msg.get_body().decode('utf-8'), extra={"extraField":"Value1"})
+          logging.info(f'Function triggered to process a message: {myEvents.get_body().decode("utf-8")} with SequenceNumber = {msg.sequence_number} and Offset = {msg.offset}', extra={"extraField":"Value1"})
 
      # Workaround (part 3/3)
      token = detach(token)
