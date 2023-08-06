@@ -20,12 +20,6 @@ from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapProp
 configure_azure_monitor()
 tracer = trace.get_tracer(__name__)
 
-# Compose the name of the event hub to use for this environment
-if os.environ['APP_CONFIGURATION_LABEL'] == 'staging' or os.environ['APP_CONFIGURATION_LABEL'] == 'local':
-     ehName = 'eventsgbr-staging'
-else:
-     ehName = 'eventsgbr'  # production
-
 app = func.FunctionApp()
 
 @app.route(route="EventsGBRFake", auth_level=func.AuthLevel.ANONYMOUS)
@@ -84,8 +78,13 @@ def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
     # This is the admin connection string that gives you full access
     # Example from: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/eventhub/azure-eventhub/samples/sync_samples/send.py
     with tracer.start_as_current_span("sending message to Event Hub"):
+        # Compose the name of the event hub to use for this environment
+        if os.environ['APP_CONFIGURATION_LABEL'] == 'production':
+            EVENT_HUB_NAME = 'eventsgbr'  # production
+        else:
+            EVENT_HUB_NAME = 'eventsgbr-staging'
+
         EVENT_HUB_CONNECTION_STR = os.environ["EVENTHUB_CONNECTION_STRING"]
-        EVENT_HUB_NAME = "eventsgbr"
         producer = EventHubProducerClient.from_connection_string(EVENT_HUB_CONNECTION_STR, eventhub_name=EVENT_HUB_NAME)
         
         # event_data = "this is the first message"

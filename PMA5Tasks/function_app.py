@@ -19,10 +19,10 @@ configure_azure_monitor()
 tracer = trace.get_tracer(__name__)
 
 # Compose the name of the event hub to use for this environment
-if os.environ['APP_CONFIGURATION_LABEL'] == 'staging' or os.environ['APP_CONFIGURATION_LABEL'] == 'local':
-     ehName = 'eventsgbr-staging'
-else:
+if os.environ['APP_CONFIGURATION_LABEL'] == 'production':
      ehName = 'eventsgbr'  # production
+else:
+     ehName = 'eventsgbr-staging'
 
 app = func.FunctionApp()
 
