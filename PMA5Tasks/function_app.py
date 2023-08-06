@@ -38,22 +38,21 @@ def TaskerFake(myEvents: func.EventHubEvent, context):
           "traceparent": context.trace_context.Traceparent,
           "tracestate": context.trace_context.Tracestate
      }
-     parent_context = TraceContextTextMapPropagator().extract(
-          carrier=functions_current_context
-     )
+     parent_context = TraceContextTextMapPropagator().extract(carrier=functions_current_context)
      token = attach(parent_context)
 
-     # Exception events
      try:
-          with tracer.start_as_current_span("catch fake exception") as span:
-               # This exception will be automatically recorded
-               raise Exception("Custom exception message.")
-     except Exception:
-          print("Exception raised")
+          # Exception events
+          try:
+               with tracer.start_as_current_span("catch fake exception") as span:
+                    # This exception will be automatically recorded
+                    raise Exception("Custom exception message.")
+          except Exception:
+               print("Exception raised")
 
-     with tracer.start_as_current_span("receiving event and creating tasks"):
-          # Log info with some extra information in key-valye pairs
-          logging.info(f'Function triggered to process a message: {myEvents.get_body().decode("utf-8")} with SequenceNumber = {myEvents.sequence_number} and Offset = {myEvents.offset}', extra={"extraField":"Value1"})
-
-     # Workaround (part 3/3)
-     token = detach(token)
+          with tracer.start_as_current_span("receiving event and creating tasks"):
+               # Log info with some extra information in key-valye pairs
+               logging.info(f'Function triggered to process a message: {myEvents.get_body().decode("utf-8")} with SequenceNumber = {myEvents.sequence_number} and Offset = {myEvents.offset}', extra={"extraField":"Value1"})
+     finally:
+          # Workaround (part 3/3)
+          token = detach(token)

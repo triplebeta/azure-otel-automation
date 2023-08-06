@@ -1,12 +1,15 @@
+import json
 import os
 import datetime
 import logging
+import random
+from time import sleep
 import azure.functions as func
 
 # For using the event hub
 from azure.eventhub import EventData
-from azure.eventhub import EventHubProducerClient# For using the event hub
-from azure.eventhub import EventData
+from azure.eventhub.aio import EventHubProducerClient
+#from azure.eventhub import EventHubProducerClient# For using the event hub
 from azure.eventhub import EventHubConsumerClient
 
 from azure.monitor.opentelemetry import configure_azure_monitor
@@ -23,7 +26,7 @@ tracer = trace.get_tracer(__name__)
 app = func.FunctionApp()
 
 @app.route(route="EventsGBRFake", auth_level=func.AuthLevel.ANONYMOUS)
-def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
+async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
     """ For logging in Python Function Apps, see:
         https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python?tabs=asgi%2Capplication-level&pivots=python-mode-decorators
 
@@ -39,65 +42,103 @@ def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
         "traceparent": context.trace_context.Traceparent,
         "tracestate": context.trace_context.Tracestate
     }
-    parent_context = TraceContextTextMapPropagator().extract(
-        carrier=functions_current_context
-    )
+    parent_context = TraceContextTextMapPropagator().extract(carrier=functions_current_context)
     token = attach(parent_context)
 
-    # You must use context.tracer to create spans
-    with tracer.start_as_current_span("just the initialization") as span:
-        logging.debug('Starting the EventsGBRFake function')
-
-    # See also: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opencensus-python
-    # Use properties in exception logs
-    with tracer.start_as_current_span("catch exception and some logging"):
-#        properties = {'custom_dimensions': {'key_1': 'value_1', 'key_2': 'value_2'}}
+    # Extract the machinenr from the POST request
+    # Read json to get the parameter values
+    with tracer.start_as_current_span("step 1. extract parameters from request") as span:
+        if req.method != "POST": return func.HttpResponse("Must send a POST request.", status_code=400)
         try:
-            result = 1 / 0  # generate a ZeroDivisionError
-        except Exception:
-            logging.exception('Captured an exception.', extra={'key_1': 'value_1', 'key_2': 'value_2'})
-
-        # Nested span to send some metrics
-        # with context.tracer.span("sending some metrics"):
-        #     for _ in range(4):
-        #         mmap.measure_int_put(prompt_measure, 1)
-        #         mmap.record(tmap)
-
-        #         # I expect the next 2 lines are just to show the metrics also in the console, not needed for AppInsights
-        #         metrics = list(mmap.measure_to_view_map.get_metrics(datetime.datetime.utcnow()))
-        #         print(metrics[0].time_series[0].points[0])
-
-    # Send a customEvent. This requires that the AzureHandler is installed.
-    # logger.info('Hello World Custom Event!')
-    # logging.info('Test if info from EventsGBR shows up in AppInsights.')
-    # logging.warning('Test if a warning from EventsGBR shows up in AppInsights');
-    # logging.error('Test if an error from EventsGBR shows up in AppInsights')
-    # raise ValueError('Test if this exception from EventsGBR show up in AppInsights.')
-
-    # Send an event to the Event Hub
-    # This is the admin connection string that gives you full access
-    # Example from: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/eventhub/azure-eventhub/samples/sync_samples/send.py
-    with tracer.start_as_current_span("sending message to Event Hub"):
-        # Compose the name of the event hub to use for this environment
-        if os.environ['APP_CONFIGURATION_LABEL'] == 'production':
-            EVENT_HUB_NAME = 'eventsgbr'  # production
+#            myBody = json.loads(str(req.content, "utf-8"))
+            req_body = req.get_json()
+        except ValueError:
+            pass
         else:
-            EVENT_HUB_NAME = 'eventsgbr-staging'
+            machinenr = req_body.get('machinenr')
+            numberOfEvents = int(req_body.get('numberOfEvents'))
+            packageName = req_body.get('packageName')
 
-        EVENT_HUB_CONNECTION_STR = os.environ["EVENTHUB_CONNECTION_STRING"]
-        producer = EventHubProducerClient.from_connection_string(EVENT_HUB_CONNECTION_STR, eventhub_name=EVENT_HUB_NAME)
-        
-        # event_data = "this is the first message"
-        event_data_batch = producer.create_batch()
-        event_data_batch.add(EventData('Single message from GBR Events'))
-        with producer:
-            producer.send_batch(event_data_batch)
+        if not machinenr or not numberOfEvents or not packageName:
+            return func.HttpResponse("Body must contain machinenr, numberOfEvents and packageName.", status_code=400)
 
-    # Workaround (part 3/3)
-    token = detach(token)
+        span.set_attribute("machinenr",machinenr) # Support finding the span by the machinenr
+        logging.info(f"Processing {numberOfEvents} events for machine '{machinenr}' from package {packageName}.")
+    
+    try:
+        with tracer.start_as_current_span("step 2. process the events", attributes={"machinenr":machinenr}):
+            if numberOfEvents == -1: 
+                raise Exception("Injected error -1: Less than 100 events received.")
 
-    # Just send some response
-    return func.HttpResponse("Hello from GBR Events function!", status_code=200)
+            if numberOfEvents == -2:
+                logging.warning("Injected warning -2: Some suspicious data found.")
+
+
+        # Proceed with normal handling of the events
+        # Wait for some seconds, based on the numberOfEvents.
+        # Waiting time is always a number of seconds.
+        # Example:
+        #   200 events --> 2 tot 4 seconden
+        #   900 events --> 9 tot 18 seconden
+        lowDuration = numberOfEvents // 100
+        processingDuration = random.randrange(lowDuration, lowDuration*2)
+        logging.info(f"GBR Event processing started (duration: {processingDuration}).")
+#        sleep(processingDuration)
+        logging.info("GBR Event processing completed.")
+
+        # Send an event to the Event Hub
+        with tracer.start_as_current_span("send trigger for tasks to Event Hub"):
+            # Compose the name of the event hub to use for this environment
+            if os.environ['APP_CONFIGURATION_LABEL'] == 'production':
+                EVENT_HUB_NAME = 'eventsgbr'  # production
+            else:
+                EVENT_HUB_NAME = 'eventsgbr-staging'
+
+            EVENT_HUB_CONNECTION_STR = os.environ["EVENTHUB_CONNECTION_STRING"]
+            producer = EventHubProducerClient.from_connection_string(EVENT_HUB_CONNECTION_STR, eventhub_name=EVENT_HUB_NAME)
+            
+            async with producer:
+                # event_data = "this is the first message"
+                event_data_batch =  await producer.create_batch()
+
+                # Create the message for the Tasker.
+                # Some other samples:  'uv': random.random(), 'humidity': random.randint(70, 100)
+                taskerCmd = {'machinenr': machinenr, 'timestamp': str(datetime.datetime.utcnow()), 'numberOfEvents': numberOfEvents}
+                jsonTaskerCmd = json.dumps(taskerCmd) # Convert the reading into a JSON string.
+
+                # Send the command to the tasker
+                event_data_batch.add(EventData(jsonTaskerCmd))
+                producer.send_batch(event_data_batch)
+
+
+        with tracer.start_as_current_span("compose metrics"):
+            # Increase the machines_processed counter
+            meter = metrics.get_meter_provider().get_meter(__name__)
+            counter = meter.create_counter(name="MachinesProcessed",description="Count of batches processed for a machine.")
+            counter.add(1.0, {"machinenr": machinenr})  # Each Http Trigger is for 1 machine
+
+            # Total number of events created for this machine
+            counter = meter.create_counter(name="EventsCreated", description="Total number of events created for this machine.")
+            counter.add(numberOfEvents, {"machinenr": machinenr, "duration": processingDuration})
+
+            # Total duration for creating the events for this machine.
+            counter = meter.create_counter(name="EventCreationDuration", description="Total duration for creating the events for this machine.")
+            counter.add(processingDuration, {"machinenr": machinenr})
+
+        # Send a customEvent. This requires that the AzureHandler is installed.
+        # logger.info('Hello World Custom Event!')
+        # logging.info('Test if info from EventsGBR shows up in AppInsights.')
+        # logging.warning('Test if a warning from EventsGBR shows up in AppInsights');
+        # logging.error('Test if an error from EventsGBR shows up in AppInsights')
+        # raise ValueError('Test if this exception from EventsGBR show up in AppInsights.')
+
+        # Just send some response
+        return func.HttpResponse(f"Completed processing events for machine {machinenr}", status_code=200)
+    
+    finally:
+        # Workaround (part 3/3)
+        token = detach(token)
+
 
 
 # Time-triggered function, just for some testing.
