@@ -11,24 +11,33 @@ from azure.monitor.opentelemetry import configure_azure_monitor
 from opentelemetry import trace
 from opentelemetry import metrics
 
+# Workaround (part 1/3) for Azure Functions, according to: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-python-opencensus-migrate
+from opentelemetry.context import attach, detach
+from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+
 configure_azure_monitor()
 tracer = trace.get_tracer(__name__)
 
-# Enable logging to AppInsights using the OpenCensus logger
-#logger = logging.getLogger('HttpTriggerLogger')
-
-# Enable requests and logging integratioon
 app = func.FunctionApp()
 
-# for logging in Python Function Apps, see:
-#  https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python?tabs=asgi%2Capplication-level&pivots=python-mode-decorators
-
 # Tasks: Simulate creating tasks when events sends a trigger.
+# Cardinality can be set to "many" or to "one".
+# It will log more metrics when using "many" 
 @app.function_name(name="TaskerFake")
-@app.event_hub_message_trigger(arg_name="myEventHub", event_hub_name="eventsgbr", connection="EVENTHUB_CONNECTION_STRING") 
+@app.event_hub_message_trigger(arg_name="myEventHub", event_hub_name="eventsgbr",cardinality="many", connection="EVENTHUB_CONNECTION_STRING") 
 
-def TaskerFake(myEventHub: func.EventHubEvent):
+def TaskerFake(myEventHub: func.EventHubEvent, context):
+     # Workaround (part 2/3)
+     functions_current_context = {
+          "traceparent": context.trace_context.Traceparent,
+          "tracestate": context.trace_context.Tracestate
+     }
+     parent_context = TraceContextTextMapPropagator().extract(
+          carrier=functions_current_context
+     )
+     token = attach(parent_context)
      
+
      # Exception events
      try:
           with tracer.start_as_current_span("catch fake exception") as span:
@@ -40,3 +49,6 @@ def TaskerFake(myEventHub: func.EventHubEvent):
      with tracer.start_as_current_span("receiving event and creating tasks"):
           # Log info with some extra information in key-valye pairs
           logging.info('Python EventHub trigger processed an event: %s', myEventHub.get_body().decode('utf-8'), extra={"extraField":"Value1"})
+
+     # Workaround (part 3/3)
+     token = detach(token)

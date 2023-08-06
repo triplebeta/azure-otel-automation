@@ -13,13 +13,17 @@ from azure.monitor.opentelemetry import configure_azure_monitor
 from opentelemetry import trace
 from opentelemetry import metrics
 
+# Workaround (part 1/3) for Azure Functions, according to: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-python-opencensus-migrate
+from opentelemetry.context import attach, detach
+from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+
 configure_azure_monitor()
 tracer = trace.get_tracer(__name__)
 
 app = func.FunctionApp()
 
 @app.route(route="EventsGBRFake", auth_level=func.AuthLevel.ANONYMOUS)
-def EventsGBRFake(req: func.HttpRequest) -> func.HttpResponse:
+def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
     """ For logging in Python Function Apps, see:
         https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python?tabs=asgi%2Capplication-level&pivots=python-mode-decorators
 
@@ -29,6 +33,16 @@ def EventsGBRFake(req: func.HttpRequest) -> func.HttpResponse:
         - number of events
         - package name
     """
+
+    # Workaround (part 2/3)
+    functions_current_context = {
+        "traceparent": context.trace_context.Traceparent,
+        "tracestate": context.trace_context.Tracestate
+    }
+    parent_context = TraceContextTextMapPropagator().extract(
+        carrier=functions_current_context
+    )
+    token = attach(parent_context)
 
     # You must use context.tracer to create spans
     with tracer.start_as_current_span("just the initialization") as span:
@@ -77,6 +91,8 @@ def EventsGBRFake(req: func.HttpRequest) -> func.HttpResponse:
     # Just send some response
     return func.HttpResponse("Hello from GBR Events function!", status_code=200)
 
+    # Workaround (part 3/3)
+    token = detach(token)
 
 # Time-triggered function, just for some testing.
 # @app.schedule(schedule="0 0 */1 * * *", arg_name="myTimer", run_on_startup=True,

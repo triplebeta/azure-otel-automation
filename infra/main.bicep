@@ -90,13 +90,13 @@ var functionAppTasksName = '${envResourceNamePrefix}-tasks-app'
 module azFunctionAppEventsGBR 'functionApp.bicep' = {
   name: '${deploymentNameId}-eventsgbr'
   params: {
+    serviceNameAppName: 'GBR Events'
     functionAppName: functionAppEventsGBRName
     location: location
     azHostingPlanId: azHostingPlan.id
     appInsightsInstrumentationKey: azAppInsightsInstrumentationKey
     appInsightsConnectionString: azAppInsightsConnectionString
     appInsightsName: azAppInsights.name
-    azAppConfigurationName: azAppConfigurationName
     azStorageAccountName: azStorageAccount.name
     azStorageAccountPrimaryAccessKey: azStorageAccountPrimaryAccessKey
     eventHubConnectionString: azEventHub_Sender_ConnectionString
@@ -108,13 +108,13 @@ module azFunctionAppEventsGBR 'functionApp.bicep' = {
 module azFunctionAppTasks 'functionApp.bicep' = {
   name: '${deploymentNameId}-tasks'
   params: {
+    serviceNameAppName: 'Tasker'
     functionAppName: functionAppTasksName
     location: location
     azHostingPlanId: azHostingPlan.id
     appInsightsInstrumentationKey: azAppInsightsInstrumentationKey
     appInsightsConnectionString: azAppInsightsConnectionString
     appInsightsName: azAppInsights.name
-    azAppConfigurationName: azAppConfigurationName
     azStorageAccountName: azStorageAccount.name
     azStorageAccountPrimaryAccessKey: azStorageAccountPrimaryAccessKey
     eventHubConnectionString: azEventHub_Listener_ConnectionString
