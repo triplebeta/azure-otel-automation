@@ -31,7 +31,6 @@ app = func.FunctionApp()
 # It will log more metrics when using "many" 
 @app.function_name(name="TaskerFake")
 @app.event_hub_message_trigger(arg_name="myEvents", event_hub_name=ehName, cardinality="one", connection="EVENTHUB_CONNECTION_STRING") 
-
 def TaskerFake(myEvents: func.EventHubEvent, context):
      # Workaround (part 2/3)
      functions_current_context = {

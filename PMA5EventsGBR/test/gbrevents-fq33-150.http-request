@@ -5,9 +5,9 @@
     "fileSize": false
   },
   "headers": {
-    "content-type": "application/json"
+    "content-type": "application/json; charset=utf-8"
   },
   "method": "POST",
   "title": "Events GBR - process batch of 150 events for FQ33",
-  "url": "http://localhost:7071/api/EventsGBRFake"
+  "url": "http://localhost:5800/api/EventsGBRFake"
 }
