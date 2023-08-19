@@ -55,11 +55,10 @@ def TaskerFake(myEvents: func.EventHubEvent, context):
           # Extract info from the event hub message
           msgFromEventsGBR = myEvents.get_body().decode("utf-8")
           msgObj = json.loads(msgFromEventsGBR)
-          machinenr = int(msgObj.machinenr)
 
           with tracer.start_as_current_span("receiving event and creating tasks"):
                # Log info with some extra information in key-valye pairs
-               logging.info(f'Function triggered to process for machine {machinenr}: {myEvents.get_body().decode("utf-8")} with SequenceNumber = {myEvents.sequence_number} and Offset = {myEvents.offset}', extra={"extraField":"Value1"})
+               logging.info(f'Function triggered to process for machine {msgObj["machinenr"]}: {myEvents.get_body().decode("utf-8")} with SequenceNumber = {myEvents.sequence_number} and Offset = {myEvents.offset}', extra={"extraField":"Value1"})
      finally:
           # Workaround (part 3/3)
           token = detach(token)
