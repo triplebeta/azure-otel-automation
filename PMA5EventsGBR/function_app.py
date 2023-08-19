@@ -7,14 +7,12 @@ from time import sleep
 import azure.functions as func
 
 # For using the event hub
-from azure.eventhub import EventData
+from azure.eventhub import EventData, TransportType
 from azure.eventhub.aio import EventHubProducerClient
-#from azure.eventhub import EventHubProducerClient# For using the event hub
-from azure.eventhub import EventHubConsumerClient
 
+# Open Telemetry
 from azure.monitor.opentelemetry import configure_azure_monitor
-from opentelemetry import trace
-from opentelemetry import metrics
+from opentelemetry import trace, metrics
 
 # Workaround (part 1/3) for Azure Functions, according to: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-python-opencensus-migrate
 from opentelemetry.context import attach, detach
@@ -22,6 +20,13 @@ from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapProp
 
 configure_azure_monitor()
 tracer = trace.get_tracer(__name__)
+
+# Create metrics
+meter = metrics.get_meter_provider().get_meter(__name__)
+counterMachinesProcessed = meter.create_counter(name="MachinesProcessed",description="Count of batches processed for a machine.")
+counterEventsCreated = meter.create_counter(name="EventsCreated", description="Total number of events created for this machine.")
+counterEventCreationDuration = meter.create_counter(name="EventCreationDuration", description="Total duration for creating the events for this machine.")
+
 
 app = func.FunctionApp()
 
@@ -83,8 +88,6 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
         lowDuration = numberOfEvents // 100
         processingDuration = random.randrange(lowDuration, lowDuration*2)
         logging.info(f"GBR Event processing started (duration: {processingDuration}).")
-#        sleep(processingDuration)
-        logging.info("GBR Event processing completed.")
 
         # Send an event to the Event Hub
         with tracer.start_as_current_span("send trigger for tasks to Event Hub"):
@@ -93,13 +96,15 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
                 EVENT_HUB_NAME = 'eventsgbr'  # production
             else:
                 EVENT_HUB_NAME = 'eventsgbr-staging'
-
+            
             EVENT_HUB_CONNECTION_STR = os.environ["EVENTHUB_CONNECTION_STRING"]
-            producer = EventHubProducerClient.from_connection_string(EVENT_HUB_CONNECTION_STR, eventhub_name=EVENT_HUB_NAME)
+            logging.info("Using event hub {EVENT_HUB_NAME}.")
+            producer = EventHubProducerClient.from_connection_string(EVENT_HUB_CONNECTION_STR, eventhub_name=EVENT_HUB_NAME) # , transport_type=TransportType.AmqpOverWebsocket
             
             async with producer:
                 # event_data = "this is the first message"
-                event_data_batch =  await producer.create_batch()
+                event_data_batch = await producer.create_batch()
+                logging.debug("Event batch created.")
 
                 # Create the message for the Tasker.
                 # Some other samples:  'uv': random.random(), 'humidity': random.randint(70, 100)
@@ -108,36 +113,33 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
 
                 # Send the command to the tasker
                 event_data_batch.add(EventData(jsonTaskerCmd))
-                producer.send_batch(event_data_batch)
-
+                logging.debug("Sending batch to event hub...")
+                await producer.send_batch(event_data_batch)
+                logging.info('Successfully delivered batch to event hub for machine {machinenr}.')
 
         with tracer.start_as_current_span("compose metrics"):
+            logging.debug("Creating metrics...")
+
             # Increase the machines_processed counter
-            meter = metrics.get_meter_provider().get_meter(__name__)
-            counter = meter.create_counter(name="MachinesProcessed",description="Count of batches processed for a machine.")
-            counter.add(1.0, {"machinenr": machinenr})  # Each Http Trigger is for 1 machine
+            counterMachinesProcessed.add(1.0, {"machinenr": machinenr})  # Each Http Trigger is for 1 machine
+            logging.debug("Created metric: MachinesProcessed")
 
             # Total number of events created for this machine
-            counter = meter.create_counter(name="EventsCreated", description="Total number of events created for this machine.")
-            counter.add(numberOfEvents, {"machinenr": machinenr, "duration": processingDuration})
+            counterEventsCreated.add(numberOfEvents, {"machinenr": machinenr, "duration": processingDuration})
+            logging.debug("Created metric: EventsCreated")
 
             # Total duration for creating the events for this machine.
-            counter = meter.create_counter(name="EventCreationDuration", description="Total duration for creating the events for this machine.")
-            counter.add(processingDuration, {"machinenr": machinenr})
-
-        # Send a customEvent. This requires that the AzureHandler is installed.
-        # logger.info('Hello World Custom Event!')
-        # logging.info('Test if info from EventsGBR shows up in AppInsights.')
-        # logging.warning('Test if a warning from EventsGBR shows up in AppInsights');
-        # logging.error('Test if an error from EventsGBR shows up in AppInsights')
-        # raise ValueError('Test if this exception from EventsGBR show up in AppInsights.')
+            counterEventCreationDuration.add(processingDuration, {"machinenr": machinenr})
+            logging.debug("Created metric: EventCreationDuration")
 
         # Just send some response
         return func.HttpResponse(f"Completed processing events for machine {machinenr}", status_code=200)
     
     finally:
         # Workaround (part 3/3)
+        logging.debug("Detaching token...")
         token = detach(token)
+        logging.debug("Detached token.")
 
 
 

@@ -5,4 +5,3 @@
 azure-functions
 azure-eventhub
 azure-monitor-opentelemetry
-#opencensus-extension-azure-functions
