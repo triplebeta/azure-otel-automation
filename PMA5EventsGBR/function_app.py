@@ -55,7 +55,6 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
     with tracer.start_as_current_span("step 1. extract parameters from request") as span:
         if req.method != "POST": return func.HttpResponse("Must send a POST request.", status_code=400)
         try:
-#            myBody = json.loads(str(req.content, "utf-8"))
             req_body = req.get_json()
         except ValueError:
             pass
@@ -93,12 +92,11 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
         with tracer.start_as_current_span("send trigger for tasks to Event Hub"):
             # Compose the name of the event hub to use for this environment
             if os.environ['APP_CONFIGURATION_LABEL'] == 'production':
-                EVENT_HUB_NAME = 'eventsgbr'  # production
+                EVENT_HUB_NAME = 'eventsgbr'         # for production
             else:
-                EVENT_HUB_NAME = 'eventsgbr-staging'
+                EVENT_HUB_NAME = 'eventsgbr-staging' # for testing
             
             EVENT_HUB_CONNECTION_STR = os.environ["EVENTHUB_CONNECTION_STRING"]
-            logging.info("Using event hub {EVENT_HUB_NAME}.")
             producer = EventHubProducerClient.from_connection_string(EVENT_HUB_CONNECTION_STR, eventhub_name=EVENT_HUB_NAME) # , transport_type=TransportType.AmqpOverWebsocket
             
             async with producer:
@@ -113,9 +111,9 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
 
                 # Send the command to the tasker
                 event_data_batch.add(EventData(jsonTaskerCmd))
-                logging.debug("Sending batch to event hub...")
+                logging.debug(f"Sending batch to event hub {EVENT_HUB_NAME}...")
                 await producer.send_batch(event_data_batch)
-                logging.info('Successfully delivered batch to event hub for machine {machinenr}.')
+                logging.info(f'Successfully delivered batch to event hub for machine {machinenr}.')
 
         with tracer.start_as_current_span("compose metrics"):
             logging.debug("Creating metrics...")
