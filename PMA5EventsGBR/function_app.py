@@ -13,6 +13,7 @@ from azure.eventhub.aio import EventHubProducerClient
 # Open Telemetry
 from azure.monitor.opentelemetry import configure_azure_monitor
 from opentelemetry import trace, metrics
+from  applicationinsights  import  TelemetryClient
 
 # Workaround (part 1/3) for Azure Functions, according to: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-python-opencensus-migrate
 from opentelemetry.context import attach, detach
@@ -20,6 +21,10 @@ from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapProp
 
 configure_azure_monitor()
 tracer = trace.get_tracer(__name__)
+
+# Added to enable manual registration of dependencies to complete the Application Map of AppInsights
+instrumentation_key = '1363bf29-376b-438f-b89b-52894213dd2a'
+tc = TelemetryClient(instrumentation_key)
 
 # Create metrics
 meter = metrics.get_meter_provider().get_meter(__name__)
@@ -41,6 +46,10 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
         - number of events
         - package name
     """
+
+    # Register that this FunctionApp has a dependency on the AppService
+    tc.track_dependency(name="pma5poc-eventsgbr-app", data="https://pma5poc-eventsgbr-app.azurewebsites.net", type="FunctionApp trigger", target="GBR Events (prod)", success=True,  duration=None)
+    tc.flush()
 
     # Workaround (part 2/3)
     functions_current_context = {

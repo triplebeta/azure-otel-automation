@@ -9,6 +9,7 @@
       "Host.Aggregator": "Trace"
     },
     "applicationInsights": {
+      "enableDependencyTracking": true,
       "samplingSettings": {
         "isEnabled": false,
         "excludedTypes": "Request;Exception"
