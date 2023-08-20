@@ -47,10 +47,6 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
         - package name
     """
 
-    # Register that this FunctionApp has a dependency on the AppService
-    tc.track_dependency(name="pma5poc-eventsgbr-app", data="https://pma5poc-eventsgbr-app.azurewebsites.net", type="FunctionApp trigger", target="GBR Events (prod)", success=True,  duration=None)
-    tc.flush()
-
     # Workaround (part 2/3)
     functions_current_context = {
         "traceparent": context.trace_context.Traceparent,
@@ -58,6 +54,10 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
     }
     parent_context = TraceContextTextMapPropagator().extract(carrier=functions_current_context)
     token = attach(parent_context)
+
+    # Register that this FunctionApp has a dependency on the AppService
+    tc.track_dependency(name="EventsGBRFake", data="https://pma5poc-eventsgbr-app.azurewebsites.net", type="FunctionApp trigger", target="pma5poc-eventsgbr-app", success=True, result_code=0)
+    tc.flush()
 
     # Extract the machinenr from the POST request
     # Read json to get the parameter values
