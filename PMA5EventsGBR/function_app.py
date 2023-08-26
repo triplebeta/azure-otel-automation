@@ -56,8 +56,9 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
     token = attach(parent_context)
 
     # Register that this FunctionApp has a dependency on the AppService
-    tc.track_dependency(name="EventsGBRFake", data="https://pma5poc-eventsgbr-app.azurewebsites.net", type="FunctionApp trigger", target="pma5poc-eventsgbr-app", success=True, result_code=0)
-    tc.flush()
+    with tracer.start_as_current_span("register dependency from appService on FunctionApp") as span:
+        tc.track_dependency(name="Events GBR (prod)", type="function_app", data=context.function_name, target="pma5poc-eventsgbr-app.azurewebsites.net", success=True, result_code=0)
+        tc.flush()
 
     # Extract the machinenr from the POST request
     # Read json to get the parameter values
