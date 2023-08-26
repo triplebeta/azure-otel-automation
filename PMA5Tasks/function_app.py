@@ -44,22 +44,17 @@ def TaskerFake(myEvents: func.EventHubEvent, context):
      token = attach(parent_context)
 
      try:
-          # Exception events
-          # try:
-          #      with tracer.start_as_current_span("catch fake exception") as span:
-          #           # This exception will be automatically recorded
-          #           raise Exception("Custom exception message.")
-          # except Exception:
-          #      print("Exception raised")
-
           # Extract info from the event hub message
           msgFromEventsGBR = myEvents.get_body().decode("utf-8")
           msgObj = json.loads(msgFromEventsGBR)
 
           # Collect the info from the message
           machinenr=msgObj["machinenr"]
-          numberOfEvents=msgObj["numberOfEvents"]
+          numberOfEvents=int(msgObj["numberOfEvents"])
           timestamp=msgObj["timestamp"]
+
+          if numberOfEvents == 330:
+               raise Exception("Injected error 330: Tasker crashed.")
 
           with tracer.start_as_current_span("receiving event and creating tasks") as span:
                # Log info with some extra information in key-valye pairs

@@ -62,7 +62,7 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
 
     # Extract the machinenr from the POST request
     # Read json to get the parameter values
-    with tracer.start_as_current_span("step 1. extract parameters from request") as span:
+    with tracer.start_as_current_span("extract parameters from request") as span:
         if req.method != "POST": return func.HttpResponse("Must send a POST request.", status_code=400)
         try:
             req_body = req.get_json()
@@ -76,15 +76,17 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
         if not machinenr or not numberOfEvents or not packageName:
             return func.HttpResponse("Body must contain machinenr, numberOfEvents and packageName.", status_code=400)
 
+        # machinenr value wasn't known yet at the start of the span, so set it now
         span.set_attribute("machinenr",machinenr) # Support finding the span by the machinenr
         logging.info(f"Processing {numberOfEvents} events for machine '{machinenr}' from package {packageName}.")
     
     try:
+        # Immediately pass additional info like machinenr to the span
         with tracer.start_as_current_span("step 2. process the events", attributes={"machinenr":machinenr}):
             if numberOfEvents == -1: 
                 raise Exception("Injected error -1: Less than 100 events received.")
 
-            if numberOfEvents == -2:
+            if numberOfEvents == 200:
                 logging.warning("Injected warning -2: Some suspicious data found.")
 
 
