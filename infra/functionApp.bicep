@@ -8,7 +8,7 @@ param azStorageAccountPrimaryAccessKey string
 param functionAppName string
 param serviceNameAppName string
 param eventHub_PROD_ConnectionString string
-param eventHub_STAGING_ConnectionString string
+//param eventHub_STAGING_ConnectionString string
 
 resource azFunctionApp 'Microsoft.Web/sites@2021-03-01' = {
   name: functionAppName
@@ -31,6 +31,7 @@ resource azFunctionApp 'Microsoft.Web/sites@2021-03-01' = {
   }
 
   // Staging slot
+  /* // No longer use staging
   resource stagingSlot 'slots' = {
     name: 'staging'
     location: location
@@ -41,6 +42,7 @@ resource azFunctionApp 'Microsoft.Web/sites@2021-03-01' = {
     }
     resource appsettings 'config' = { name: 'appsettings', properties: union(BASE_SLOT_APPSETTINGS, functionAppStickySettings.stagingSlot) }
   }
+  */
 
   // Define which appSettings are sticky.
   resource slotsettings 'config' = {
@@ -63,12 +65,12 @@ resource azFunctionApp 'Microsoft.Web/sites@2021-03-01' = {
 var functionAppStickySettings = {
   productionSlot: {
     APP_CONFIGURATION_LABEL: 'production'
-    EVENTHUB_CONNECTION_STRING: eventHub_PROD_ConnectionString
+//    EVENTHUB_CONNECTION_STRING: eventHub_PROD_ConnectionString
     OTEL_SERVICE_NAME: '${serviceNameAppName} (prod)'
   }
   stagingSlot: {
     APP_CONFIGURATION_LABEL: 'staging'
-    EVENTHUB_CONNECTION_STRING: eventHub_STAGING_ConnectionString
+//    EVENTHUB_CONNECTION_STRING: eventHub_STAGING_ConnectionString
     OTEL_SERVICE_NAME: '${serviceNameAppName} (staging)'
   }
 }
@@ -82,6 +84,7 @@ var BASE_SLOT_APPSETTINGS = {
   AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${azStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${azStorageAccountPrimaryAccessKey}'
   FUNCTIONS_EXTENSION_VERSION: '~4'
   PYTHON_ENABLE_WORKER_EXTENSIONS: '1'
+  EVENTHUB_CONNECTION_STRING: eventHub_PROD_ConnectionString
   FUNCTIONS_WORKER_RUNTIME: 'python'
   WEBSITE_CONTENTSHARE: toLower(azStorageAccountName)
   WEBSITE_CONTENTAZUREFILECONNECTIONSTRING: 'DefaultEndpointsProtocol=https;AccountName=${azStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${azStorageAccountPrimaryAccessKey}'

@@ -100,7 +100,7 @@ module azFunctionAppEventsGBR 'functionApp.bicep' = {
     azStorageAccountName: azStorageAccount.name
     azStorageAccountPrimaryAccessKey: azStorageAccountPrimaryAccessKey
     eventHub_PROD_ConnectionString: azEventHubEventsGBR_Sender_ConnectionString
-    eventHub_STAGING_ConnectionString: azEventHubEventsGBRStaging_Sender_ConnectionString
+//    eventHub_STAGING_ConnectionString: azEventHubEventsGBRStaging_Sender_ConnectionString  // No Longer use staging
   }
 }
 
@@ -119,7 +119,7 @@ module azFunctionAppTasks 'functionApp.bicep' = {
     azStorageAccountName: azStorageAccount.name
     azStorageAccountPrimaryAccessKey: azStorageAccountPrimaryAccessKey
     eventHub_PROD_ConnectionString: azEventHubEventsGBR_Listener_ConnectionString
-    eventHub_STAGING_ConnectionString: azEventHubEventsGBRStaging_Listener_ConnectionString
+//    eventHub_STAGING_ConnectionString: azEventHubEventsGBRStaging_Listener_ConnectionString  // No Longer use staging
   }
 }
 
@@ -217,7 +217,8 @@ var azEventHubEventsGBR_Listener_ConnectionString = listKeys(azEventHubEventsGBR
 // ========================================================
 // Create the Event Hub for STAGING: eventgbr-staging
 // ========================================================
-
+// No longer use a staging environment
+/*
 resource azEventHubEventsGBRStaging 'Microsoft.EventHub/namespaces/eventhubs@2021-11-01' = {
   parent: azEventHubNamespace
   name: 'eventsgbr-staging'
@@ -249,6 +250,7 @@ resource azEventHubEventsGBRStaging_Listener 'Microsoft.EventHub/namespaces/even
 }
 var azEventHubEventsGBRStaging_Sender_ConnectionString = listKeys(azEventHubEventsGBRStaging_Sender.id, azEventHubEventsGBRStaging_Sender.apiVersion).primaryConnectionString
 var azEventHubEventsGBRStaging_Listener_ConnectionString = listKeys(azEventHubEventsGBRStaging_Listener.id, azEventHubEventsGBRStaging_Listener.apiVersion).primaryConnectionString
+*/
 
 // =================================================================================
 // Assign the Sender and Listener roles to the Service Principals of the functions
