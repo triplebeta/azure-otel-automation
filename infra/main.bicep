@@ -100,6 +100,7 @@ module azFunctionAppEventsGBR 'functionApp.bicep' = {
     azStorageAccountName: azStorageAccount.name
     azStorageAccountPrimaryAccessKey: azStorageAccountPrimaryAccessKey
     eventHub_PROD_ConnectionString: azEventHubEventsGBR_Sender_ConnectionString
+    azLogAnalyticsWorkspaceId: azLogAnalyticsWorkspace.id
 //    eventHub_STAGING_ConnectionString: azEventHubEventsGBRStaging_Sender_ConnectionString  // No Longer use staging
   }
 }
@@ -119,6 +120,7 @@ module azFunctionAppTasks 'functionApp.bicep' = {
     azStorageAccountName: azStorageAccount.name
     azStorageAccountPrimaryAccessKey: azStorageAccountPrimaryAccessKey
     eventHub_PROD_ConnectionString: azEventHubEventsGBR_Listener_ConnectionString
+    azLogAnalyticsWorkspaceId: azLogAnalyticsWorkspace.id
 //    eventHub_STAGING_ConnectionString: azEventHubEventsGBRStaging_Listener_ConnectionString  // No Longer use staging
   }
 }

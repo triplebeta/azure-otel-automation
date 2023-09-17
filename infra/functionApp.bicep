@@ -8,6 +8,7 @@ param azStorageAccountPrimaryAccessKey string
 param functionAppName string
 param serviceNameAppName string
 param eventHub_PROD_ConnectionString string
+param azLogAnalyticsWorkspaceId string
 //param eventHub_STAGING_ConnectionString string
 
 resource azFunctionApp 'Microsoft.Web/sites@2021-03-01' = {
@@ -58,6 +59,26 @@ resource azFunctionApp 'Microsoft.Web/sites@2021-03-01' = {
     'hidden-link: /app-insights-resource-id': '/subscriptions/${subscription().id}/resourceGroups/${resourceGroup().name}/providers/microsoft.insights/components/${appInsightsName}'
     'hidden-link: /app-insights-instrumentation-key': appInsightsInstrumentationKey
     'hidden-link: /app-insights-conn-string': appInsightsConnectionString
+  }
+}
+
+
+// Set the diagnostics settings for the event hub
+resource azDiagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'Log to Log Analytics}'
+  scope: azFunctionApp
+  properties: {
+    workspaceId: azLogAnalyticsWorkspaceId
+    logs: [
+      {
+        categoryGroup: 'allLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 0
+          enabled: false
+        }
+      }
+    ]
   }
 }
 
