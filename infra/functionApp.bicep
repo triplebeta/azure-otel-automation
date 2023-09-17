@@ -71,7 +71,7 @@ resource azDiagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-prev
     workspaceId: azLogAnalyticsWorkspaceId
     logs: [
       {
-        categoryGroup: 'allLogs'
+        categoryGroup: 'FunctionAppLogs'
         enabled: true
         retentionPolicy: {
           days: 0
