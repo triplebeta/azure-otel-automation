@@ -70,6 +70,7 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
     # Extract the machinenr from the POST request
     # Read json to get the parameter values
     with tracer.start_as_current_span("extract parameters from request") as span:
+        logging.info(f"Extracting parameters from request...", extra={"machinenr":machinenr})
         if req.method != "POST": return func.HttpResponse("Must send a POST request.", status_code=400)
         try:
             req_body = req.get_json()
@@ -83,19 +84,20 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
         if not machinenr or not numberOfLines or not eventFilename:
             return func.HttpResponse("Body must contain machinenr, numberOfEvents and eventFilename.", status_code=400)
 
-        # machinenr value wasn't known yet at the start of the span, so set it now
-        span.set_attribute("machinenr",machinenr) # Support finding the span by the machinenr
-        logging.info(f"Parsing {numberOfLines} lines of  file {eventFilename} for machine '{machinenr}'.")
-    
-        try:
-            # Immediately pass additional info like machinenr to the span
-            with tracer.start_as_current_span("step 2. process the events", attributes={"machinenr":machinenr}):
-                if numberOfLines == -1: 
-                    raise Exception("Injected error -1: Less than 100 events received.")
+    # machinenr value wasn't known yet at the start of the span, so set it now
+    span.set_attribute("machinenr",machinenr) # Support finding the span by the machinenr
 
-                if numberOfLines == 200:
-                    logging.warning("Injected warning -2: Some suspicious data found.")
 
+    # Assume processing will be successful
+    completedSuccessfully = True
+    try:
+        # Immediately pass additional info like machinenr to the span
+        with tracer.start_as_current_span("Processing of the events", attributes={"machinenr":machinenr}):
+            logging.info(f"Processing GBR Events {numberOfLines} lines of file {eventFilename} for machine '{machinenr}...", extra={"machinenr":machinenr})
+
+            # Introducte artifical errors or warnings.
+            if numberOfLines == -1:  raise Exception("Injected error -1: Less than 100 events received. (numberOfLines == -1)")
+            if numberOfLines == 200: logging.warning("Injected warning -2: Some suspicious data found. (numberOfLines == 200)")
 
             # Total number of events created for this machine
             # For testing we assume that for machine FQ99 1% of the events is invalid. All other eventfiles ar 100% ok.
@@ -106,49 +108,51 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
                 validEventsCount = numberOfLines
                 invalidEventsCount = 0
 
-            # Proceed with normal handling of the events
-            # Fake how long it takes to parse the events
-            lowDuration = numberOfLines // 100
-            processingDuration = random.randrange(lowDuration, lowDuration*2)
-            logging.info(f"GBR Event processing started.")
+            # Number of valid and invalid events
+            validEventCounter.add(validEventsCount, {"machinenr": machinenr, "eventFilename": eventFilename})
+            invalidEventCounter.add(invalidEventsCount, {"machinenr": machinenr, "eventFilename": eventFilename})
 
-            # Send an event to the Event Hub
-            with tracer.start_as_current_span("Send trigger for tasks to Event Hub", attributes={"machinenr":machinenr}):
-                EVENT_HUB_CONNECTION_STR = os.environ["EVENTHUB_CONNECTION_STRING"]
-                producer = EventHubProducerClient.from_connection_string(EVENT_HUB_CONNECTION_STR, eventhub_name='eventsgbr') # , transport_type=TransportType.AmqpOverWebsocket
-                
-                async with producer:
-                    # Create the message for the Tasker with number of valid events.
-                    # In the metrics we track how many were valid / invalid.
-                    taskerCmd = {'machinenr': machinenr, 'timestamp': str(datetime.datetime.utcnow()), 'numberOfEvents': validEventsCount}
-                    jsonTaskerCmd = json.dumps(taskerCmd) # Convert the reading into a JSON string.
+            logging.info(f"Processing GBR Event completed.", extra={"machinenr":machinenr})
 
-                    # Send trigger to the tasker via Event Hub
-                    event_data_batch = await producer.create_batch()
-                    event_data_batch.add(EventData(jsonTaskerCmd))
-                    await producer.send_batch(event_data_batch)
-                    logging.info(f'Successfully delivered trigger for tasker to event hub for machine {machinenr}.')
+        # Proceed with normal handling of the events
+        # Fake how long it takes to parse the events
+        lowDuration = numberOfLines // 100
+        processingDuration = random.randrange(lowDuration, lowDuration*2)
 
+        # Send an event to the Event Hub
+        with tracer.start_as_current_span("Send trigger for tasks to Event Hub", attributes={"machinenr":machinenr}):
+            logging.info(f'Sending trigger from Events GBR to Tasker for machine {machinenr}', extra={"machinenr":machinenr})
+            EVENT_HUB_CONNECTION_STR = os.environ["EVENTHUB_CONNECTION_STRING"]
+            producer = EventHubProducerClient.from_connection_string(EVENT_HUB_CONNECTION_STR, eventhub_name='eventsgbr') # , transport_type=TransportType.AmqpOverWebsocket
+            
+            async with producer:
+                # Create the message for the Tasker with number of valid events.
+                # In the metrics we track how many were valid / invalid.
+                taskerCmd = {'machinenr': machinenr, 'timestamp': str(datetime.datetime.utcnow()), 'numberOfEvents': validEventsCount}
+                jsonTaskerCmd = json.dumps(taskerCmd) # Convert the reading into a JSON string.
 
-                logging.info(f'Creating events GBR metrics for machine {machinenr}.')
-                # Increase the machines_processed counter. Each Http Trigger processes 1 file of a machine.
-                eventFilesProcessedCounter.add(1.0, {"machinenr": machinenr, "eventFilename": eventFilename, "numberOfLines": numberOfLines})
+                # Send trigger to the tasker via Event Hub
+                event_data_batch = await producer.create_batch()
+                event_data_batch.add(EventData(jsonTaskerCmd))
+                await producer.send_batch(event_data_batch)
+                logging.info(f'Sent trigger from Events GBR to Tasker for machine {machinenr}.', extra={"machinenr":machinenr})
 
-                # Total duration for processsing this file. Assuming each event is 1 line. Count lines of successful and failed processed events.
-                processingTimeCounter.add(processingDuration, {"machinenr": machinenr, "eventFilename": eventFilename, "numberOfLines": numberOfLines})
+        # Done with all of it
+        logging.info(f"Events GBR ending successfully.", extra={"machinenr":machinenr})
+        return func.HttpResponse(f"Completed processing events for machine {machinenr}", status_code=200)
+    
+    except:
+        completedSuccessfully = False
+        logging.info(f"Events GBR ending unsuccessfully.", extra={"machinenr":machinenr})
+    finally:
+        # Workaround (part 3/3)
+        token = detach(token)
 
-                # Number of valid and invalid events
-                validEventCounter.add(validEventsCount, {"machinenr": machinenr, "eventFilename": eventFilename})
-                invalidEventCounter.add(invalidEventsCount, {"machinenr": machinenr, "eventFilename": eventFilename})
+        # Increase the machines_processed counter. Each Http Trigger processes 1 file of a machine.
+        eventFilesProcessedCounter.add(1.0, {"machinenr": machinenr, "eventFilename": eventFilename, "numberOfLines": numberOfLines, "isSuccessful": completedSuccessfully})
 
-            # Done with all of it
-            logging.info(f"GBR Event processing started (duration: {processingDuration}).")
-            return func.HttpResponse(f"Completed processing events for machine {machinenr}", status_code=200)
-        
-        finally:
-            # Workaround (part 3/3)
-            token = detach(token)
-
+        # Total duration for processsing this file. Assuming each event is 1 line. Count lines of successful and failed processed events.
+        processingTimeCounter.add(processingDuration, {"machinenr": machinenr, "eventFilename": eventFilename, "numberOfLines": numberOfLines})
 
 
 # Event day coverage may go up or down. Use a callback function for Async version.
