@@ -49,6 +49,7 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
         - number of lines
         - event filename
     """
+    global machinenr
 
     # Workaround (part 2/3) to on context information.
     functions_current_context = {
@@ -70,7 +71,7 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
     # Extract the machinenr from the POST request
     # Read json to get the parameter values
     with tracer.start_as_current_span("extract parameters from request") as span:
-        logging.info(f"Extracting parameters from request...", extra={"machinenr":machinenr})
+        logging.info(f"Extracting parameters from request...")
         if req.method != "POST": return func.HttpResponse("Must send a POST request.", status_code=400)
         try:
             req_body = req.get_json()
@@ -114,11 +115,6 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
 
             logging.info(f"Processing GBR Event completed.", extra={"machinenr":machinenr})
 
-        # Proceed with normal handling of the events
-        # Fake how long it takes to parse the events
-        lowDuration = numberOfLines // 100
-        processingDuration = random.randrange(lowDuration, lowDuration*2)
-
         # Send an event to the Event Hub
         with tracer.start_as_current_span("Send trigger for tasks to Event Hub", attributes={"machinenr":machinenr}):
             logging.info(f'Sending trigger from Events GBR to Tasker for machine {machinenr}', extra={"machinenr":machinenr})
@@ -152,6 +148,8 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
         eventFilesProcessedCounter.add(1.0, {"machinenr": machinenr, "eventFilename": eventFilename, "numberOfLines": numberOfLines, "isSuccessful": completedSuccessfully})
 
         # Total duration for processsing this file. Assuming each event is 1 line. Count lines of successful and failed processed events.
+        lowDuration = numberOfLines // 100
+        processingDuration = random.randrange(lowDuration, lowDuration*2)  # Fake how long it takes to parse the events
         processingTimeCounter.add(processingDuration, {"machinenr": machinenr, "eventFilename": eventFilename, "numberOfLines": numberOfLines})
 
 
@@ -159,6 +157,7 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
 def observable_up_down_counter_func():
     # This reports the current value, which will be converted to a delta internally
     # Get the coverage for this machine
+    global machinenr
 
     #TODO Get the event file coverage here. Difficulty is that we can only compute this once everything is done.
     return (33, {"machinenr": machinenr})
