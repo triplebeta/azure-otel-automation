@@ -5,4 +5,4 @@
 azure-functions
 azure-eventhub
 azure-monitor-opentelemetry
-applicationinsights
+#applicationinsights
