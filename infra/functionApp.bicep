@@ -65,13 +65,13 @@ resource azFunctionApp 'Microsoft.Web/sites@2021-03-01' = {
 
 // Set the diagnostics settings for the event hub
 resource azDiagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: 'Log to Log Analytics}'
+  name: 'Log for ${functionAppName}'
   scope: azFunctionApp
   properties: {
     workspaceId: azLogAnalyticsWorkspaceId
     logs: [
       {
-        categoryGroup: 'FunctionAppLogs'
+        categoryGroup: 'allLogs'
         enabled: true
         retentionPolicy: {
           days: 0

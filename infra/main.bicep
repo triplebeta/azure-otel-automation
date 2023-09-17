@@ -18,6 +18,9 @@ resource azStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
     name: 'Standard_LRS'
   }
 }
+
+// TODO Find a better way than using listKeys
+#disable-next-line use-resource-symbol-reference
 var azStorageAccountPrimaryAccessKey = listKeys(azStorageAccount.id, azStorageAccount.apiVersion).keys[0].value
 
 // ========================================================
@@ -212,7 +215,11 @@ resource azEventHubEventsGBR_Listener 'Microsoft.EventHub/namespaces/eventhubs/a
     ]
   }
 }
+
+#disable-next-line use-resource-symbol-reference // TODO Find a better way than using listKeys
 var azEventHubEventsGBR_Sender_ConnectionString = listKeys(azEventHubEventsGBR_Sender.id, azEventHubEventsGBR_Sender.apiVersion).primaryConnectionString
+
+#disable-next-line use-resource-symbol-reference // TODO Find a better way than using listKeys
 var azEventHubEventsGBR_Listener_ConnectionString = listKeys(azEventHubEventsGBR_Listener.id, azEventHubEventsGBR_Listener.apiVersion).primaryConnectionString
 
 
