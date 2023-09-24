@@ -1,4 +1,5 @@
 import json
+import uuid
 import os
 import datetime
 import logging
@@ -67,6 +68,9 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
     #     tc.track_dependency(name="Events GBR (prod)", type="function_app", data=context.function_name, target="pma5poc-eventsgbr-app.azurewebsites.net", success=True, result_code=0)
     #     tc.flush()
 
+    # Generate an it do use for correlation in all steps.
+    # Ideally we can just use a value from the Trace context but I haven't looked into that yet.
+    eventCorrelationId = uuid.uuid4().hex
 
     # Extract the machinenr from the POST request
     # Read json to get the parameter values
@@ -109,9 +113,9 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
                 validEventsCount = numberOfLines
                 invalidEventsCount = 0
 
-            # Number of valid and invalid events
-            validEventCounter.add(validEventsCount, {"machinenr": machinenr, "eventFilename": eventFilename})
-            invalidEventCounter.add(invalidEventsCount, {"machinenr": machinenr, "eventFilename": eventFilename})
+            # Number of valid and invalid events added to the GBR Events
+            validEventCounter.add(validEventsCount, {"machinenr": machinenr, "eventFilename": eventFilename, "eventCorrelationId": eventCorrelationId})
+            invalidEventCounter.add(invalidEventsCount, {"machinenr": machinenr, "eventFilename": eventFilename, "eventCorrelationId": eventCorrelationId})
 
             logging.info(f"Processing GBR Event completed.", extra={"machinenr":machinenr})
 
@@ -124,7 +128,7 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
             async with producer:
                 # Create the message for the Tasker with number of valid events.
                 # In the metrics we track how many were valid / invalid.
-                taskerCmd = {'machinenr': machinenr, 'timestamp': str(datetime.datetime.utcnow()), 'numberOfEvents': validEventsCount}
+                taskerCmd = {'machinenr': machinenr, 'timestamp': str(datetime.datetime.utcnow()), 'numberOfEvents': validEventsCount, 'eventCorrelationId': eventCorrelationId}
                 jsonTaskerCmd = json.dumps(taskerCmd) # Convert the reading into a JSON string.
 
                 # Send trigger to the tasker via Event Hub
@@ -145,12 +149,12 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
         token = detach(token)
 
         # Increase the machines_processed counter. Each Http Trigger processes 1 file of a machine.
-        eventFilesProcessedCounter.add(1.0, {"machinenr": machinenr, "eventFilename": eventFilename, "numberOfLines": numberOfLines, "isSuccessful": completedSuccessfully})
+        eventFilesProcessedCounter.add(1.0, {"machinenr": machinenr, "eventFilename": eventFilename, "eventCorrelationId": eventCorrelationId, "numberOfLines": numberOfLines, "isSuccessful": completedSuccessfully})
 
         # Total duration for processsing this file. Assuming each event is 1 line. Count lines of successful and failed processed events.
         lowDuration = numberOfLines // 100
         processingDuration = random.randrange(lowDuration, lowDuration*2)  # Fake how long it takes to parse the events
-        processingTimeCounter.add(processingDuration, {"machinenr": machinenr, "eventFilename": eventFilename, "numberOfLines": numberOfLines})
+        processingTimeCounter.add(processingDuration, {"machinenr": machinenr, "eventFilename": eventFilename, "eventCorrelationId": eventCorrelationId, "numberOfLines": numberOfLines})
 
 
 # Event day coverage may go up or down. Use a callback function for Async version.

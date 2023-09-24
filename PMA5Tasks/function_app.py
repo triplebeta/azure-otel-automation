@@ -49,6 +49,7 @@ def TaskerFake(myEvents: func.EventHubEvent, context):
           machinenr=msgObj["machinenr"]
           numberOfEvents=int(msgObj["numberOfEvents"])  # The number of valid
           timestamp=msgObj["timestamp"]
+          eventCorrelationId=msgObj["eventCorrelationId"]
 
           # Any tasker job with 330 valid events in it, will FAIL.
           if numberOfEvents == 330:
@@ -59,7 +60,7 @@ def TaskerFake(myEvents: func.EventHubEvent, context):
           lowDuration = numberOfTasks // 100
           processingDurationInSeconds = random.randrange(lowDuration, lowDuration*2)
 
-          with tracer.start_as_current_span("receiving event and creating tasks") as span:
+          with tracer.start_as_current_span("Receiving event and creating tasks") as span:
                # Support finding the span by the machinenr
                span.set_attribute("machinenr",machinenr)
 
@@ -68,11 +69,11 @@ def TaskerFake(myEvents: func.EventHubEvent, context):
 
 
           logging.info(f'Creating tasker metrics for machine {machinenr}.')
-          taskerTriggersProcessedSuccessfulCounter.add(1.0, {"machinenr": machinenr, "numberOfTasks": numberOfTasks})
+          taskerTriggersProcessedSuccessfulCounter.add(1.0, {"machinenr": machinenr, "numberOfTasks": numberOfTasks, "eventCorrelationId": eventCorrelationId})
 
-          tasksProducedCounter.add(numberOfTasks, {"machinenr": machinenr})
+          tasksProducedCounter.add(numberOfTasks, {"machinenr": machinenr, "eventCorrelationId": eventCorrelationId})
           # Total duration for processsing this file. Assuming each event is 1 line. Count lines of successful and failed processed events.
-          processingTimeCounter.add(processingDurationInSeconds, {"machinenr": machinenr, "numberOfTasks": numberOfTasks})
+          processingTimeCounter.add(processingDurationInSeconds, {"machinenr": machinenr, "numberOfTasks": numberOfTasks, "eventCorrelationId": eventCorrelationId})
 
      finally:        
           # Workaround (part 3/3)
