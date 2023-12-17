@@ -62,37 +62,44 @@ async def FakeLogGenerator(req: func.HttpRequest, context) -> func.HttpResponse:
     span.set_attribute("machinenr",machinenr) # Support finding the span by the machinenr
 
     # Generate an it do use for correlation in all steps.
-    if (not batchId): batchId = 'batch-' + uuid.uuid4().hex
+    if (batchId=="" or batchId is None): batchId = 'batch-' + uuid.uuid4().hex
     runId = 'run-'+uuid.uuid4().hex
 
     # Return the generated IDs so they can be used in subsequent Postman requests.
     # This is just useful to make the requests more realistic.
-    response={"machinenr":machinenr,"batchId":batchId, "runId":runId}
+    logMetadata={"machinenr":machinenr, "batchId":batchId, "runId":runId, "runNr":runNr}
+    if (isManualRun): logMetadata["isManualRun"]=isManualRun  # Only add this if it's a manual run 
 
-    try:
-        # Immediately pass additional info like machinenr to the span
-        with tracer.start_as_current_span("Generating fake logs", attributes={"machinenr":machinenr}):
-
-            logMetadata={"runId":runId, "machinenr":machinenr, "batch":batchId, "isManualRun":isManualRun, "runNr":runNr}
-            if (runNr==0): logging.info(f'Start {processName}) batch {batchId} with run {runId}.', extra=logMetadata)
-            if (runNr>0): logging.info(f'Start retry {processName}) batch {batchId}.', extra=logMetadata)
+    # For now: simply use the same structure to return in the HTTP Response
+    httpResponse=logMetadata 
+    # Immediately pass additional info like machinenr to the span
+    with tracer.start_as_current_span("Fake process logic", attributes=logMetadata):
+        try:
+            # Show the information also in the log text, as well as in the dimensions
+            if (runNr==1):
+                # Log start of the batch (which can consist of this one and possible retry runs)
+                logging.info(f'{processName} started batch {batchId}', extra=logMetadata)
+                logging.info(f'{processName} started run ({runNr}) {runId}', extra=logMetadata)
+            else:
+                logging.info(f'{processName} start retry ({runNr}) for batch {batchId} with run {runId}', extra=logMetadata)
 
             # Simulate processing time
             time.sleep(jobDuration)
 
-            successResult = logMetadata
-            successResult["jobDuration"]=jobDuration
-            if (isSuccessful): logging.info(f'Completed {processName} successful.',extra=successResult)
+            # Also report the duration
+            if (isSuccessful):
+                logging.info(f'{processName} run completed successfully',extra=logMetadata)
             else:
+                # Simulate that something aborts the process
                 raise Exception(f'Some fake exception for {processName}')
 
-        # Done with all of it
-        return func.HttpResponse(json.dumps(response), mimetype="application/json", status_code=200)
-    
-    except Exception as error:
-        # Log the exception and register that the run failed
-        logging.exception(error,extra=logMetadata)
-        logging.error(f'Completed {processName} with failure.',extra=logMetadata)
+            # Done with all of it, return 200 (OK)
+            return func.HttpResponse(json.dumps(httpResponse), mimetype="application/json", status_code=200)
+        
+        except Exception as error:
+            # Log the exception and register that the run failed
+            logging.exception(error, extra=logMetadata)
+            logging.error(f'{processName} run failed.',extra=logMetadata)
 
-        # return error
-        return func.HttpResponse(json.dumps(response), status_code=500)
+            # Indicate it failed, return 500 (Server error)
+            return func.HttpResponse(json.dumps(httpResponse), mimetype="application/json", status_code=500)
