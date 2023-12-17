@@ -1,0 +1,206 @@
+{
+	"info": {
+		"_postman_id": "90b31e73-d36f-472b-8630-5af29337483b",
+		"name": "PMA5 PoC - Events GBR - Production",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "772929"
+	},
+	"item": [
+		{
+			"name": "FQ30 - 300",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"machinenr\": \"FQ30\",\r\n    \"numberOfLines\": \"300\",\r\n    \"eventFilename\": \"fq30_20230201_7763\"\r\n}"
+				},
+				"url": {
+					"raw": "{{pma5url}}/api/EventsGBRFake",
+					"host": [
+						"{{pma5url}}"
+					],
+					"path": [
+						"api",
+						"EventsGBRFake"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "FQ55 - 500",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"machinenr\": \"FQ55\",\r\n    \"numberOfLines\": \"500\",\r\n    \"eventFilename\": \"fq55_20230201_7763\"\r\n}"
+				},
+				"url": {
+					"raw": "{{pma5url}}/api/EventsGBRFake",
+					"host": [
+						"{{pma5url}}"
+					],
+					"path": [
+						"api",
+						"EventsGBRFake"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "FQ800 - 800",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"machinenr\": \"FQ800\",\r\n    \"numberOfLines\": \"800\",\r\n    \"eventFilename\": \"fq800_20230201_7763\"\r\n}"
+				},
+				"url": {
+					"raw": "{{pma5url}}/api/EventsGBRFake",
+					"host": [
+						"{{pma5url}}"
+					],
+					"path": [
+						"api",
+						"EventsGBRFake"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "FQ99 - 900 - 10% invalid events",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"machinenr\": \"FQ99\",\r\n    \"numberOfLines\": \"900\",\r\n    \"eventFilename\": \"fq99_20230201_7763\"\r\n}"
+				},
+				"url": {
+					"raw": "{{pma5url}}/api/EventsGBRFake",
+					"host": [
+						"{{pma5url}}"
+					],
+					"path": [
+						"api",
+						"EventsGBRFake"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "FQ11 - error in  events",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"machinenr\": \"FQ11\",\r\n    \"numberOfLines\": \"-1\",\r\n    \"eventFilename\": \"fq11_20230201_7763\"\r\n}"
+				},
+				"url": {
+					"raw": "{{pma5url}}/api/EventsGBRFake",
+					"host": [
+						"{{pma5url}}"
+					],
+					"path": [
+						"api",
+						"EventsGBRFake"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "FQ11 - 1100",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"machinenr\": \"FQ11\",\r\n    \"numberOfLines\": \"1100\",\r\n    \"eventFilename\": \"fq11_20230202_0233\"\r\n}"
+				},
+				"url": {
+					"raw": "{{pma5url}}/api/EventsGBRFake",
+					"host": [
+						"{{pma5url}}"
+					],
+					"path": [
+						"api",
+						"EventsGBRFake"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "FQ33 - error in tasker",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"machinenr\": \"FQ33\",\r\n    \"numberOfLines\": \"330\",\r\n    \"eventFilename\": \"fq33_20230201_7763\"\r\n}"
+				},
+				"url": {
+					"raw": "{{pma5url}}/api/EventsGBRFake",
+					"host": [
+						"{{pma5url}}"
+					],
+					"path": [
+						"api",
+						"EventsGBRFake"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

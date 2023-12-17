@@ -8,6 +8,9 @@
 		},
 		{
 			"path": "infra"
+		},
+		{
+			"path": "PMA5FakeLogGenerator"
 		}
 	],
 	"settings": {

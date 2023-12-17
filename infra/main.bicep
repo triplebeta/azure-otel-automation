@@ -81,12 +81,13 @@ resource azHostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
 
 
 // ========================================================
-// Function Apps & slots
+// Function Apps
 // ========================================================
 
 // Must be defined separately since they are also used in the hidden tag of the AppInsights to avoid circular references.
 var functionAppEventsGBRName = '${envResourceNamePrefix}-eventsgbr-app'
 var functionAppTasksName = '${envResourceNamePrefix}-tasks-app'
+var functionAppLogGeneratorName = '${envResourceNamePrefix}-loggen-app'
 
 
 // set the app settings on function app's deployment slots
@@ -125,6 +126,25 @@ module azFunctionAppTasks 'functionApp.bicep' = {
     eventHub_PROD_ConnectionString: azEventHubEventsGBR_Listener_ConnectionString
     azLogAnalyticsWorkspaceId: azLogAnalyticsWorkspace.id
 //    eventHub_STAGING_ConnectionString: azEventHubEventsGBRStaging_Listener_ConnectionString  // No Longer use staging
+  }
+}
+
+
+// set the app settings on function app's deployment slots
+module azFunctionAppLogGenerator 'functionApp.bicep' = {
+  name: '${deploymentNameId}-loggen'
+  params: {
+    serviceNameAppName: 'Fake Log Generator'
+    functionAppName: functionAppLogGeneratorName
+    location: location
+    azHostingPlanId: azHostingPlan.id
+    appInsightsInstrumentationKey: azAppInsightsInstrumentationKey
+    appInsightsConnectionString: azAppInsightsConnectionString
+    appInsightsName: azAppInsights.name
+    azStorageAccountName: azStorageAccount.name
+    azStorageAccountPrimaryAccessKey: azStorageAccountPrimaryAccessKey
+    eventHub_PROD_ConnectionString: azEventHubEventsGBR_Sender_ConnectionString
+    azLogAnalyticsWorkspaceId: azLogAnalyticsWorkspace.id
   }
 }
 
@@ -288,10 +308,9 @@ module azAssignEventHubDataReceiverRole 'eventHub-roleassignment.bicep' = {
 }
 
 
-
-output eventsGBRFunctionPrincipalId string = azAppConfigurationName
-output tasksFunctionPrincipalId string = azAppConfigurationName
-
+/* Service Principals for the function apps */
+output eventsGBRFunctionPrincipalId string = azFunctionAppEventsGBR.outputs.functionPrincipalId
+output tasksFunctionPrincipalId string = azFunctionAppTasks.outputs.functionPrincipalId
 
 
 /* define outputs */
