@@ -40,7 +40,7 @@ machinenr = "Unknown"  # Must be read from the request.
 app = func.FunctionApp()
 
 @app.route(route="EventsGBRFake", auth_level=func.AuthLevel.ANONYMOUS)
-async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
+def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
     """ For logging in Python Function Apps, see:
         https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python?tabs=asgi%2Capplication-level&pivots=python-mode-decorators
 
