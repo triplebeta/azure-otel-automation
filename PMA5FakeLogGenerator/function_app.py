@@ -54,7 +54,7 @@ runDuration = meter.create_observable_gauge("RunDuration", callbacks=[observable
 #aiClient = TelemetryClient(os.environ["APPLICATIONINSIGHTS_CONNECTION_STRING"])
 
 @app.route(route="FakeLogGenerator", auth_level=func.AuthLevel.ANONYMOUS)
-def FakeLogGenerator(req: func.HttpRequest, context) -> func.HttpResponse:
+async def FakeLogGenerator(req: func.HttpRequest, context) -> func.HttpResponse:
     """
         Generates fake log and telemetry entries.
     """
