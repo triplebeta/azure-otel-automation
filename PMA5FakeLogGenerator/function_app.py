@@ -5,11 +5,13 @@ import os
 import datetime
 import logging
 import random
+from typing import Iterable
 import azure.functions as func
 
 # Open Telemetry
 from azure.monitor.opentelemetry import configure_azure_monitor
 from opentelemetry import trace, metrics
+from opentelemetry.metrics import CallbackOptions, Observation
 
 # Workaround (part 1/3) specifically for Azure Functions, according to: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-python-opencensus-migrate
 from opentelemetry.context import attach, detach
@@ -23,14 +25,14 @@ app = func.FunctionApp()
 global machinenr, runDuration
 
 # Event day coverage may go up or down. Use a callback function for Async version.
-def observable_gauge_runDuration_func(options):
+def observable_gauge_runDuration_func(options: CallbackOptions) -> Iterable[Observation]:
     # This reports the current value, which will be converted to a delta internally
     # Get the coverage for this machine
     global machinenr, runDuration
 
     # Compute the duration
     logging.info(f'observable gauge: run for {machinenr} has a duration of {runDuration} seconds.')
-    return (runDuration, {"machinenr": machinenr})
+    yield Observation(runDuration, {"machinenr": machinenr})
 
 
 # Create metrics. unit must be one of the values from the UCUM, see: https://ucum.org/ucum
@@ -92,65 +94,67 @@ async def FakeLogGenerator(req: func.HttpRequest, context) -> func.HttpResponse:
         if not machinenr or not processName or not runDuration:
             return func.HttpResponse("Body must contain machinenr, runDuration, isSuccessful, isManualRun, batchId, runNr and processName.", status_code=400)
 
-    # machinenr value wasn't known yet at the start of the span, so set it now
-    span.set_attribute("machinenr",machinenr) # Support finding the span by the machinenr
 
-    # Generate an it do use for correlating all runs.
-    isNewBatch=(batchId=="" or batchId is None)
-    if (isNewBatch): batchId = 'batch-' + uuid.uuid4().hex
+    with tracer.start_as_current_span("Tasker execution") as span:
+        # You can also set an attribute for a span after its creation
+        span.set_attribute("machinenr",machinenr) # Support finding the span by the machinenr
 
-    # Unique identifier for each run
-    runId = 'run-'+uuid.uuid4().hex
+        # Generate an it do use for correlating all runs.
+        isNewBatch=(batchId=="" or batchId is None)
+        if (isNewBatch): batchId = 'batch-' + uuid.uuid4().hex
 
-    # Return the generated IDs so they can be used in subsequent Postman requests.
-    # This is just useful to make the requests more realistic.
-    logMetadata={"machinenr":machinenr, "batchId":batchId, "runId":runId, "runNr":runNr}
-    if (isManualRun):
-        logMetadata["isManualRun"]=isManualRun  # Only add this if it's a manual run 
-        manualRunCounter.add(1,{"machinenr":machinenr,"batchId":batchId})
+        # Unique identifier for each run
+        runId = 'run-'+uuid.uuid4().hex
 
-    # For now: simply use the same structure to return in the HTTP Response
-    httpResponse=logMetadata 
-    # Immediately pass additional info like machinenr to the span
-    with tracer.start_as_current_span("Fake process logic", record_exception=False, attributes=logMetadata):
-        try:
-            # Log start of the batch (which can consist of this one and possible retry runs)
-            if (isNewBatch):
-                logging.info(f'{processName} started batch', extra=logMetadata)
-                successfulBatchCounter.add(1,{"machinenr":machinenr,"batchId":batchId})
+        # Return the generated IDs so they can be used in subsequent Postman requests.
+        # This is just useful to make the requests more realistic.
+        logMetadata={"machinenr":machinenr, "batchId":batchId, "runId":runId, "runNr":runNr}
+        if (isManualRun):
+            logMetadata["isManualRun"]=isManualRun  # Only add this if it's a manual run 
+            manualRunCounter.add(1,{"machinenr":machinenr,"batchId":batchId})
 
-            # Show the information also in the log text, as well as in the dimensions
-            if (runNr==1):
-                logging.info(f'{processName} started run ({runNr})', extra=logMetadata)
-                runCounter.add(1,{"machinenr":machinenr,"batchId":batchId, "runId":runId})
-            else:
-                logging.info(f'{processName} start retry ({runNr})', extra=logMetadata)
-                retriedRunCounter.add(1,{"machinenr":machinenr,"batchId":batchId, "runId":runId})
+        # For now: simply use the same structure to return in the HTTP Response
+        httpResponse=logMetadata 
+        # Immediately pass additional info like machinenr to the span
+        with tracer.start_as_current_span("Fake process logic", record_exception=False, attributes=logMetadata):
+            try:
+                # Log start of the batch (which can consist of this one and possible retry runs)
+                if (isNewBatch):
+                    logging.info(f'{processName} started batch', extra=logMetadata)
+                    successfulBatchCounter.add(1,{"machinenr":machinenr,"batchId":batchId})
 
-            # Simulate processing time
-            time.sleep(runDuration)
-
-            # Also report the duration
-            if (isSuccessful):
-                completedRunCounter.add(1,{"machinenr":machinenr,"batchId":batchId, "runId":runId})
-                if (isManualRun):
-                    logging.info(f'{processName} completed run (manual)',extra=logMetadata)
+                # Show the information also in the log text, as well as in the dimensions
+                if (runNr==1):
+                    logging.info(f'{processName} started run ({runNr})', extra=logMetadata)
+                    runCounter.add(1,{"machinenr":machinenr,"batchId":batchId, "runId":runId})
                 else:
-                    logging.info(f'{processName} completed run ({runNr})',extra=logMetadata)
-            else:
-                # Simulate that something aborts the process
-                raise Exception(f'Some fake exception for {processName}')
+                    logging.info(f'{processName} start retry ({runNr})', extra=logMetadata)
+                    retriedRunCounter.add(1,{"machinenr":machinenr,"batchId":batchId, "runId":runId})
 
-            # Done with all of it, return 200 (OK)
-            return func.HttpResponse(json.dumps(httpResponse), mimetype="application/json", status_code=200)
-        
-        except Exception as error:
-            # Log the exception and register that the run failed
-#            logging.exception(error, extra=logMetadata)
-            logging.error(f'{processName} failed run ({runNr})',extra=logMetadata)
-            failedRunCounter.add(1,{"machinenr":machinenr,"batchId":batchId, "runId":runId})
+                # Simulate processing time
+                time.sleep(runDuration)
 
-            # Indicate it failed, return 500 (Server error)
-            return func.HttpResponse(json.dumps(httpResponse), mimetype="application/json", status_code=500)
+                # Also report the duration
+                if (isSuccessful):
+                    completedRunCounter.add(1,{"machinenr":machinenr,"batchId":batchId, "runId":runId})
+                    if (isManualRun):
+                        logging.info(f'{processName} completed run (manual)',extra=logMetadata)
+                    else:
+                        logging.info(f'{processName} completed run ({runNr})',extra=logMetadata)
+                else:
+                    # Simulate that something aborts the process
+                    raise Exception(f'Some fake exception for {processName}')
+
+                # Done with all of it, return 200 (OK)
+                return func.HttpResponse(json.dumps(httpResponse), mimetype="application/json", status_code=200)
+            
+            except Exception as error:
+                # Log the exception and register that the run failed
+    #            logging.exception(error, extra=logMetadata)
+                logging.error(f'{processName} failed run ({runNr})',extra=logMetadata)
+                failedRunCounter.add(1,{"machinenr":machinenr,"batchId":batchId, "runId":runId})
+
+                # Indicate it failed, return 500 (Server error)
+                return func.HttpResponse(json.dumps(httpResponse), mimetype="application/json", status_code=500)
 
 
