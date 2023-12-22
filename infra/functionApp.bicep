@@ -89,11 +89,11 @@ var functionAppStickySettings = {
 //    EVENTHUB_CONNECTION_STRING: eventHub_PROD_ConnectionString
     OTEL_SERVICE_NAME: '${serviceNameAppName} (prod)'
   }
-//   stagingSlot: {
-//     APP_CONFIGURATION_LABEL: 'staging'
-// //    EVENTHUB_CONNECTION_STRING: eventHub_STAGING_ConnectionString
-//     OTEL_SERVICE_NAME: '${serviceNameAppName} (staging)'
-//   }
+  stagingSlot: {
+    APP_CONFIGURATION_LABEL: 'staging'
+//    EVENTHUB_CONNECTION_STRING: eventHub_STAGING_ConnectionString
+    OTEL_SERVICE_NAME: '${serviceNameAppName} (staging)'
+  }
 }
 
 var functionAppStickySettingsKeys = [for setting in items(union(functionAppStickySettings.productionSlot, functionAppStickySettings.stagingSlot)): setting.key]
