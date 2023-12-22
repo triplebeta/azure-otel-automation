@@ -89,18 +89,17 @@ var functionAppStickySettings = {
 //    EVENTHUB_CONNECTION_STRING: eventHub_PROD_ConnectionString
     OTEL_SERVICE_NAME: '${serviceNameAppName} (prod)'
   }
-  stagingSlot: {
-    APP_CONFIGURATION_LABEL: 'staging'
-//    EVENTHUB_CONNECTION_STRING: eventHub_STAGING_ConnectionString
-    OTEL_SERVICE_NAME: '${serviceNameAppName} (staging)'
-  }
+//   stagingSlot: {
+//     APP_CONFIGURATION_LABEL: 'staging'
+// //    EVENTHUB_CONNECTION_STRING: eventHub_STAGING_ConnectionString
+//     OTEL_SERVICE_NAME: '${serviceNameAppName} (staging)'
+//   }
 }
 
 var functionAppStickySettingsKeys = [for setting in items(union(functionAppStickySettings.productionSlot, functionAppStickySettings.stagingSlot)): setting.key]
 
 /* base app settings for all accounts */
 var BASE_SLOT_APPSETTINGS = {
-  APPINSIGHTS_INSTRUMENTATIONKEY: appInsightsInstrumentationKey
   APPLICATIONINSIGHTS_CONNECTION_STRING: appInsightsConnectionString
   AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${azStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${azStorageAccountPrimaryAccessKey}'
   FUNCTIONS_EXTENSION_VERSION: '~4'
