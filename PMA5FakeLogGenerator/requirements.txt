@@ -1,7 +1,21 @@
 # DO NOT include azure-functions-worker in this file
 # The Python Worker is managed by Azure Functions platform
 # Manually managing azure-functions-worker may cause unexpected issues
-
+#aiohttp
+psutil
 azure-functions
-azure-eventhub
-azure-monitor-opentelemetry
+
+# IMPORTANT: a later version of the Azure Monitor OpenTelemetry package will use a higer version of
+# the opentelemetry libraries. As of the next version, they introduce the concept of a Resource Detector
+# to find characteristics of resource. However, this throws on this statement:
+#     from azure.monitor.opentelemetry import configure_azure_monitor
+# the error is: 
+#  File "/home/site/wwwroot/.python_packages/lib/site-packages/opentelemetry/sdk/resources/__init__.py", line 125, in <module>
+#    PROCESS_PARENT_PID = ResourceAttributes.PROCESS_PARENT_PID
+#        AttributeError: type object 'ResourceAttributes' has no attribute 'PROCESS_PARENT_PID'
+# This happens in the library itself, which seems to already use this (still Experimental) feature.
+# There is a package that implements those detectors for Azure, but that package is only version 0.1.0 and
+# supports Azure Apps but apparently not yet Azure Functions. 
+azure-monitor-opentelemetry==1.0.0b15
+opentelemetry-sdk==1.19.0
+opentelemetry-api==1.19.0

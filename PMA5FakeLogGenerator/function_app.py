@@ -1,10 +1,9 @@
+# Safeguard against errors while loading the imports
+# This will ensure we get at least some troubleshooting info about it.
 import json
 import uuid
 import time
-import os
-import datetime
 import logging
-import random
 from typing import Iterable
 import azure.functions as func
 
@@ -19,20 +18,20 @@ from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapProp
 
 configure_azure_monitor()
 tracer = trace.get_tracer(__name__)
-app = func.FunctionApp()
+
 
 # Used to pass context info to the observable counter (async)
-global machinenr, runDuration
+# global machinenr, runDuration
 
 # Event day coverage may go up or down. Use a callback function for Async version.
-def observable_gauge_runDuration_func(options: CallbackOptions) -> Iterable[Observation]:
-    # This reports the current value, which will be converted to a delta internally
-    # Get the coverage for this machine
-    global machinenr, runDuration
+# def observable_gauge_runDuration_func(options: CallbackOptions) -> Iterable[Observation]:
+#     # This reports the current value, which will be converted to a delta internally
+#     # Get the coverage for this machine
+#     global machinenr, runDuration
 
-    # Compute the duration
-    logging.info(f'observable gauge: run for {machinenr} has a duration of {runDuration} seconds.')
-    yield Observation(runDuration, {"machinenr": machinenr})
+#     # Compute the duration
+#     logging.info(f'observable gauge: run for {machinenr} has a duration of {runDuration} seconds.')
+#     yield Observation(runDuration, {"machinenr": machinenr})
 
 
 # Create metrics. unit must be one of the values from the UCUM, see: https://ucum.org/ucum
@@ -47,20 +46,23 @@ retriedRunCounter = meter.create_counter(name="RetriedRuns", description="Count 
 failedRunCounter = meter.create_counter(name="FailedRuns", description="Count failed runs for a machine.")
 completedRunCounter = meter.create_counter(name="CompletedRuns", description="Count successfully completed runs for a machine.")
 manualRunCounter = meter.create_counter(name="ManualRuns", description="Count manual runs for a machine.")
-runDuration = meter.create_observable_gauge("RunDuration", callbacks=[observable_gauge_runDuration_func], description="")
+# runDurationCounter = meter.create_observable_gauge("RunDuration", callbacks=[observable_gauge_runDuration_func], description="")
 
-# ApplicationInsights client. An alternative way to post telemetry data.
-#from  applicationinsights  import  TelemetryClient
-#aiClient = TelemetryClient(os.environ["APPLICATIONINSIGHTS_CONNECTION_STRING"])
 
+app = func.FunctionApp()
+@app.function_name(name="pma5poc-loggen-app")
 @app.route(route="FakeLogGenerator", auth_level=func.AuthLevel.ANONYMOUS)
-async def FakeLogGenerator(req: func.HttpRequest, context) -> func.HttpResponse:
+def FakeLogGenerator(req: func.HttpRequest, context) -> func.HttpResponse:
     """
         Generates fake log and telemetry entries.
     """
 
     # Use the global machinenr
-    global machinenr, runDuration
+    # global machinenr, runDuration
+
+    # # Initialize, otherwise the callback for the gauge will fail.
+    # machinenr=''
+    # runDuration=0
 
     # Workaround (part 2/3) to on context information.
     functions_current_context = {
@@ -156,5 +158,3 @@ async def FakeLogGenerator(req: func.HttpRequest, context) -> func.HttpResponse:
 
                 # Indicate it failed, return 500 (Server error)
                 return func.HttpResponse(json.dumps(httpResponse), mimetype="application/json", status_code=500)
-
-

@@ -15,6 +15,7 @@
 	],
 	"settings": {
 		"debug.internalConsoleOptions": "neverOpen",
-		"azurite.location": "c:\\temp\\azurite"
+		"azurite.location": "c:\\temp\\azurite",
+		"azureAutomation.directory.basePath": "C:\\Users\\jeroe"
 	}
 }

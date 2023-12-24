@@ -11,6 +11,7 @@ from azure.eventhub import EventHubConsumerClient
 from azure.monitor.opentelemetry import configure_azure_monitor
 from opentelemetry import trace, metrics
 
+
 # Workaround (part 1/3) for Azure Functions, according to: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-python-opencensus-migrate
 from opentelemetry.context import attach, detach
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
