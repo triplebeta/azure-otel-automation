@@ -152,7 +152,7 @@ def FakeLogGenerator(req: func.HttpRequest, context) -> func.HttpResponse:
             
             except Exception as error:
                 # Log the exception and register that the run failed
-    #            logging.exception(error, extra=logMetadata)
+                logging.exception(error, extra=logMetadata)
                 logging.error(f'{processName} failed run ({runNr})',extra=logMetadata)
                 failedRunCounter.add(1,{"machinenr":machinenr,"batchId":batchId, "runId":runId})
 
