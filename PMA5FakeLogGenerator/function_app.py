@@ -91,7 +91,6 @@ parallelRunsTracker=ParallelRunsTracker()
 # The "observable" metrics are asynchronous. Important difference: they should NOT report delta values but absolute values. The framework will convert then them to deltas.
 # Counter: delta's, only increasing
 # Gauge: data you would not want to sum but might want to avg or use max.
-# NOTE: The name of the count can be MAX 16 characters. It might include a dot or hyphen.
 meter = metrics.get_meter_provider().get_meter(__name__)
 successfulBatchCounter = meter.create_counter(name="tasks.batches", description="Count of batches processed for a machine.")
 runCounter = meter.create_counter(name="tasks.runs", description="Count all runs for a machine, incl. retries.")
@@ -169,7 +168,7 @@ def FakeLogGenerator(req: func.HttpRequest, context) -> func.HttpResponse:
 
                 # Show the information also in the log text, as well as in the dimensions
                 if (activeRun.is_retry):
-                    logging.info(f'{processName} start retry ({activeRun.runLabel})', extra=activeRun.logMetadata)
+                    logging.info(f'{processName} started retry ({activeRun.runLabel})', extra=activeRun.logMetadata)
                     retriedRunCounter.add(1,attributes=activeRun.logMetadata)
                 else:
                     logging.info(f'{processName} started run ({activeRun.runLabel})', extra=activeRun.logMetadata)
