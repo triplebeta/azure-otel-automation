@@ -66,30 +66,30 @@ def FakeLogGenerator(req: func.HttpRequest, context) -> func.HttpResponse:
                 logging.info(f'Tasker started batch', extra=run.metadata)
                 metric_batch.add(1,attributes=run.metadata)
 
+            # Consider: shouldn't we use the "Tasker started retry" for retries? More expressive but counting runs will have to count both. 
+            logging.info(f'Tasker started run', extra=run.metadata)
+
             # Show the information also in the log text, as well as in the dimensions
             if (run.iteration>1):
-                # Consider: shouldn't we use the "Tasker started run" also for retries? Simpler for queries, more consistent. 
-                logging.info(f'Tasker started retry ({run.label})', extra=run.metadata)
                 metric_retried_run.add(1,attributes=run.metadata)
             else:
-                logging.info(f'Tasker started run', extra=run.metadata)
                 metric_run.add(1,attributes=run.metadata)
 
-            # Simulate processing time
+            # Simulate processing and how many tasks were created
             time.sleep(run.duration)
+            tasks_created_count = random.randrange(30,200)
 
-            # Simulate that something aborts the process
+            # If an error was specified: abort the run with that error
             if (run.error is not None):
                 raise Exception(run.error)
 
-            # Define how many tasks were created
-            tasks_created_count = random.randrange(30,200)
-
-            # Run completed successfully. Also add # of 
-            run.metadata["tasks_created"] = tasks_created_count 
+            # When successful, update metrics and logs
             metric_tasks_count.add(tasks_created_count,attributes=run.metadata)
             metric_completed_run.add(1,attributes=run.metadata)
-            logging.info(f'Tasker completed run ({run.label})',extra=run.metadata)
+
+            # Add the tasks_created in the meta data so we can report on it
+            run.metadata["tasks_created"] = tasks_created_count
+            logging.info(f'Tasker completed run',extra=run.metadata)
 
             # Done with all of it, return 200 (OK)
             return func.HttpResponse(json.dumps(run.metadata), mimetype="application/json", status_code=200)
@@ -100,7 +100,7 @@ def FakeLogGenerator(req: func.HttpRequest, context) -> func.HttpResponse:
             logging.exception(f'Tasker error handled!',exc_info=error, extra=run.metadata)
 
             # And log a more simple error message
-            logging.error(f'Tasker failed run ({run.label})',extra=run.metadata)
+            logging.error(f'Tasker failed run',extra=run.metadata)
             metric_failed_run.add(1,attributes=run.metadata)
 
             # Indicate it failed, return 500 (Server error)

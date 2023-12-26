@@ -58,7 +58,4 @@ class Run:
         # Include is_manual_run only if it's a manual run
         self.metadata={"machine":self.machine_nr, "batch_id":self.batch_id, "run_id":self.run_id, "iteration":self.iteration}
         if (self.is_manual_run):
-            self.label = "manual" 
             self.metadata["manual"]=self.is_manual_run  # Only add this if it's a manual run 
-        else:
-            self.label = str(self.iteration)
