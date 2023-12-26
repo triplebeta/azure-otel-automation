@@ -1,34 +1,64 @@
 import uuid
-from typing import Union
+import random
 
-# Entity to capture details of a run 
+# Entity to capture details of a run
+# Most values are optional, only the "machine" is required
+# Defaults
+#   batch:          <newly generated>
+#   duration:       value between 2 and 6 seconds
+#   iteration:      1      (if not specified, assume it's the first run of the batch) 
+#   manual:         false  (set to true for runs that were started manually) 
+#   error:          None   (successful run)
 class Run:
-    def __init__(self, processName:str, machinenr: str, batchId: Union[int , type(None)], runNr: int, runDuration: int, isSuccessful:Union[bool, type(None)], isManualRun: Union[bool, type(None)]):
-        # Unique identifier for each run
-        self.processName = processName
-        self.runId = 'run-'+uuid.uuid4().hex
-        self.machinenr = machinenr
-        self.runDuration = runDuration
-        self.runNr = runNr
-        self.runLabel = str(runNr)
-        self.is_retry = (self.runNr>1)
-        self.is_manual_run = (isManualRun is not None and isManualRun)
-        self.is_successful = (isSuccessful is not None and isSuccessful)
+    # Factory method
+    @staticmethod
+    def create(json: str):
+        machine_nr = json.get('machine')                  # For which machine to run
+        if (machine_nr is None): raise ValueError('Body must contain JSON with at least a value for machine.')
 
-        # Generate an it do use for correlating all runs.
-        self.batchId=batchId
-        if (self.batchId=="" or self.batchId is None):
-            self.is_new_batch=True
-            self.batchId = 'batch-' + uuid.uuid4().hex
+        if (json.get('duration') is not None):
+            run_duration = int(json.get('duration'))      # Time to wait (seconds)
+        else: run_duration = random.randrange(2,6,1)      # default
+
+        error_text = json.get('error')                    # If set, the run will fail with that error, otherwise it will succeed
+
+        if (json.get('manual') is not None):
+            is_manual_run = bool(json.get('manual'))      # true for manual runs 
+        else: is_manual_run=False  # default
+
+        if (json.get('iteration') is not None):
+            iteration = int(json.get('iteration'))          # 1 for first run, 2 for first retry etc..
+        else: iteration = 1  # default
+
+        # Check that batch and iteration are consistent
+        if (iteration==1):
+            batch_id = 'batch-' + uuid.uuid4().hex
         else:
-            self.is_new_batch=False
+            if (json.get('batch') is not None):
+                batch_id = json.get('batch')                 # Optional, only for retries: Id of the batch 
+            else:
+                raise ValueError('If iteration is 1, you cannot specify a value for "batch" since it will be generated.')
+
+        # Create a new run
+        return Run(machine_nr, batch_id, iteration, run_duration, error_text, is_manual_run)
+
+
+    def __init__(self, machinenr: str, batch_id: int, iteration: int, run_duration: int, error_text:str, is_manual_run):
+         # Unique identifier for each run
+        self.run_id = 'run-'+uuid.uuid4().hex
+
+        self.machine_nr = machinenr
+        self.duration = run_duration
+        self.iteration = iteration
+        self.is_manual_run = is_manual_run
+        self.error = error_text
+        self.batch_id = batch_id
 
         # For convenience, define a list of all the attributes to add as dimensions for a trace or metric.
-        self.logMetadata={"machinenr":self.machinenr, "batchId":self.batchId, "runId":self.runId, "runNr":self.runNr}
+        # Include is_manual_run only if it's a manual run
+        self.metadata={"machine":self.machine_nr, "batch_id":self.batch_id, "run_id":self.run_id, "iteration":self.iteration}
         if (self.is_manual_run):
-            self.runLabel = "manual" 
-            self.logMetadata["isManualRun"]=self.is_manual_run  # Only add this if it's a manual run 
-
-    def is_valid(self) -> bool:
-        missing_fields = not self.machinenr or not self.processName or not self.runDuration
-        return not missing_fields
+            self.label = "manual" 
+            self.metadata["manual"]=self.is_manual_run  # Only add this if it's a manual run 
+        else:
+            self.label = str(self.iteration)

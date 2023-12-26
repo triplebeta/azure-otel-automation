@@ -26,12 +26,12 @@ class ParallelRunsTracker:
 
 # Not the best example of a gauge but it helps to show how to implement an observable metric
 # TODO Instead of 1 value, return an array with the number of parallel runs per machine
-def create_parallel_runs_observable_updown_counter(parallelRunsTracker: ParallelRunsTracker) -> ObservableUpDownCounter:
+def create_parallel_runs_observable_updown_counter(parallel_runs_tracker: ParallelRunsTracker) -> ObservableUpDownCounter:
     """ Create an async UpDown counter """
     def observable_updown_counter_func(options: CallbackOptions) -> Iterable[Observation]:
-        activeRunCount = parallelRunsTracker.get_active_run_count()
-        logging.info(f'Observable UpDown Counter: currently {activeRunCount} runs going on.')
-        yield Observation(activeRunCount,{})
+        active_run_count = parallel_runs_tracker.get_active_run_count()
+        logging.info(f'Observable UpDown Counter: currently {active_run_count} runs going on.')
+        yield Observation(active_run_count,{})
 
     return meter.create_observable_up_down_counter("tasks.runs.parallel", [observable_updown_counter_func],description="Number of parallel runs going on.")
 
@@ -43,8 +43,12 @@ def create_parallel_runs_observable_updown_counter(parallelRunsTracker: Parallel
 # Gauge: data you would not want to sum but might want to avg or use max.
 meter = metrics.get_meter_provider().get_meter(__name__)
 metric_batch = meter.create_counter(name="tasks.batches", description="Count of batches processed for a machine.")
+
+# Metrics for the runs
 metric_run = meter.create_counter(name="tasks.runs", description="Count all runs for a machine, incl. retries.")
 metric_retried_run = meter.create_counter(name="tasks.runs.retried", description="Count only of retry-runs for a machine.")
 metric_failed_run = meter.create_counter(name="tasks.runs.failed", description="Count failed runs for a machine.")
 metric_completed_run = meter.create_counter(name="tasks.runs.completed", description="Count successfully completed runs for a machine.")
-metric_manual_run = meter.create_counter(name="tasks.runs.manual", description="Count manual runs for a machine.")
+
+# Metrics for the tasks
+metric_tasks_count = meter.create_counter(name="tasks.count", description="Count of successfully created tasks.")
