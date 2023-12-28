@@ -4,7 +4,13 @@
 # https://aka.ms/yaml
 
 trigger:
-- master
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - healthqueries
+    - appInsightsFunctions.yml
 
 pool:
   vmImage: ubuntu-latest
@@ -20,7 +26,7 @@ steps:
   inputs:
     provider: 'azurerm'
     command: 'init'
-    workingDirectory: 'infra/healthqueries'
+    workingDirectory: 'healthqueries'
     commandOptions: '-out main.tfplan'
     backendServiceArm: 'My Azure Resource manager for Prod subscription'
     backendAzureRmResourceGroupName: 'pma5-poc'
@@ -34,6 +40,7 @@ steps:
   inputs:
     provider: 'azurerm'
     command: 'plan'
+    workingDirectory: 'healthqueries'
     commandOptions: '-out main.tfplan'
     environmentServiceNameAzureRM: 'My Azure Resource manager for Prod subscription'
 
@@ -44,7 +51,7 @@ steps:
   inputs:
     provider: 'azurerm'
     command: 'apply'
-    workingDirectory: 'infra/healthqueries'
+    workingDirectory: 'healthqueries'
     commandOptions: 'main.tfplan'
     environmentServiceNameAzureRM: 'My Azure Resource manager for Prod subscription'
 
