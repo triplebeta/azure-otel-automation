@@ -34,6 +34,26 @@ steps:
     backendAzureRmKey: 'tf/terraform.tfstate'
 
 - task: TerraformTaskV4@4
+  name: terraformImport
+  displayName: Import the resource group
+  inputs:
+    provider: 'azurerm'
+    command: 'import'
+    workingDirectory: 'healthqueries'
+    commandOptions: 'azurerm_resource_group.parent_group /subscriptions/a6faafc0-def0-429a-bd0e-2c2550f163a3/resourceGroups/pma5-poc'
+    environmentServiceNameAzureRM: 'My Azure Resource manager for Prod subscription'
+
+- task: TerraformTaskV4@4
+  name: terraformImport
+  displayName: Import the ApplicationInsights instance
+  inputs:
+    provider: 'azurerm'
+    command: 'import'
+    workingDirectory: 'healthqueries'
+    commandOptions: 'azurerm_application_insights.myAi /subscriptions/a6faafc0-def0-429a-bd0e-2c2550f163a3/resourceGroups/pma5-poc/providers/microsoft.insights/components/pma5poc-ai'
+    environmentServiceNameAzureRM: 'My Azure Resource manager for Prod subscription'
+
+- task: TerraformTaskV4@4
   name: terraformPlan
   displayName: Create Terraform Plan
   inputs:
