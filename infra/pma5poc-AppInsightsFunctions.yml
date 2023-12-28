@@ -10,21 +10,37 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- task: TerraformTaskV1@0 
+- task: TerraformTaskV4@4
+  name: terraformInit
+  displayName: Initialize Terraform
   inputs:
-      provider: 'azurerm'
-      command: 'init'
-      workingDirectory: 'StorageAccount-Terraform'
-      backendServiceArm: 'your_subscription'
-      backendAzureRmResourceGroupName: 'your_resource_group_name'
-      backendAzureRmStorageAccountName: 'your_storage_account_name'
-      backendAzureRmContainerName: 'your_container_name'
-      backendAzureRmKey: 'tf/terraform.tfstate'
+    provider: 'azurerm'
+    command: 'init'
+    workingDirectory: 'infra/healthqueries'
+    commandOptions: '-out main.tfplan'
+    backendServiceArm: 'My Azure Resource manager for Prod subscription'
+    backendAzureRmResourceGroupName: 'pma5-poc'
+    backendAzureRmStorageAccountName: 'pma5pocstorage'
+    backendAzureRmContainerName: 'tfstate'
+    backendAzureRmKey: 'tf/terraform.tfstate'
 
-  task: Terraform
-  TaskV1@0 
+- task: TerraformTaskV4@4
+  name: terraformPlan
+  displayName: Create Terraform Plan
   inputs:
-      provider: 'azurerm'
-      command: 'apply'
-      workingDirectory: 'StorageAccount-Terraform'
-      environmentServiceNameAzureRM: 'your_subscription'
+    provider: 'azurerm'
+    command: 'plan'
+    commandOptions: '-out main.tfplan'
+    environmentServiceNameAzureRM: 'your-environment-service-connection'
+
+# Only runs if the 'terraformPlan' task has detected changes the in state. 
+- task: TerraformTaskV4@4
+  displayName: Apply Terraform Plan
+  condition: eq(variables['terraformPlan.changesPresent'], 'true')
+  inputs:
+    provider: 'azurerm'
+    command: 'apply'
+    workingDirectory: 'infra/healthqueries'
+    commandOptions: 'main.tfplan'
+    environmentServiceNameAzureRM: 'My Azure Resource manager for Prod subscription'
+
