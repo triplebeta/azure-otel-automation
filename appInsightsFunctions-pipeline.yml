@@ -27,7 +27,6 @@ steps:
     provider: 'azurerm'
     command: 'init'
     workingDirectory: 'healthqueries'
-    commandOptions: '-out main.tfplan'
     backendServiceArm: 'My Azure Resource manager for Prod subscription'
     backendAzureRmResourceGroupName: 'pma5-poc'
     backendAzureRmStorageAccountName: 'pma5pocstorage'
