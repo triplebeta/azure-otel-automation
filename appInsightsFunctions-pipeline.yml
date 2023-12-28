@@ -34,7 +34,7 @@ steps:
     backendAzureRmKey: 'tf/terraform.tfstate'
 
 - task: TerraformTaskV4@4
-  name: terraformImport
+  name: terraformImportGroup
   displayName: Import the resource group
   inputs:
     provider: 'azurerm'
@@ -44,7 +44,7 @@ steps:
     environmentServiceNameAzureRM: 'My Azure Resource manager for Prod subscription'
 
 - task: TerraformTaskV4@4
-  name: terraformImport
+  name: terraformImportAI
   displayName: Import the ApplicationInsights instance
   inputs:
     provider: 'azurerm'
