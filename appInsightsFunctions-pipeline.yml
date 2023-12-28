@@ -10,7 +10,7 @@ trigger:
   paths:
     include:
     - healthqueries
-    - appInsightsFunctions.yml
+    - appInsightsFunctions-pipeline.yml 
 
 pool:
   vmImage: ubuntu-latest
