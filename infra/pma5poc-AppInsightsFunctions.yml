@@ -1,0 +1,50 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: TerraformInstaller@1
+  inputs:
+    terraformVersion: 'latest'
+
+- task: TerraformTaskV4@4
+  name: terraformInit
+  displayName: Initialize Terraform
+  inputs:
+    provider: 'azurerm'
+    command: 'init'
+    workingDirectory: 'infra/healthqueries'
+    commandOptions: '-out main.tfplan'
+    backendServiceArm: 'My Azure Resource manager for Prod subscription'
+    backendAzureRmResourceGroupName: 'pma5-poc'
+    backendAzureRmStorageAccountName: 'pma5pocstorage'
+    backendAzureRmContainerName: 'tfstate'
+    backendAzureRmKey: 'tf/terraform.tfstate'
+
+- task: TerraformTaskV4@4
+  name: terraformPlan
+  displayName: Create Terraform Plan
+  inputs:
+    provider: 'azurerm'
+    command: 'plan'
+    commandOptions: '-out main.tfplan'
+    environmentServiceNameAzureRM: 'My Azure Resource manager for Prod subscription'
+
+# Only runs if the 'terraformPlan' task has detected changes the in state. 
+- task: TerraformTaskV4@4
+  displayName: Apply Terraform Plan
+  condition: eq(variables['terraformPlan.changesPresent'], 'true')
+  inputs:
+    provider: 'azurerm'
+    command: 'apply'
+    workingDirectory: 'infra/healthqueries'
+    commandOptions: 'main.tfplan'
+    environmentServiceNameAzureRM: 'My Azure Resource manager for Prod subscription'
+
