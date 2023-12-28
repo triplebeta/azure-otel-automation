@@ -31,7 +31,7 @@ steps:
     provider: 'azurerm'
     command: 'plan'
     commandOptions: '-out main.tfplan'
-    environmentServiceNameAzureRM: 'your-environment-service-connection'
+    environmentServiceNameAzureRM: 'My Azure Resource manager for Prod subscription'
 
 # Only runs if the 'terraformPlan' task has detected changes the in state. 
 - task: TerraformTaskV4@4
