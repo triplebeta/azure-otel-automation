@@ -1,5 +1,9 @@
-# Safeguard against errors while loading the imports
-# This will ensure we get at least some troubleshooting info about it.
+#
+# Proof of Concept to generate log information in ApplicationInsights
+# Azure Functions have its own logging as well. That's disabled in the host.json:
+#     "logLevel": {
+#      "default": "None",    <-- This line
+#
 import json
 import random
 import time
@@ -75,7 +79,7 @@ def FakeLogGenerator(req: func.HttpRequest, context) -> func.HttpResponse:
             else:
                 metric_run.add(1,attributes=run.metadata)
 
-            # Simulate processing and how many tasks were created
+            # Simulate processing (to make the timestamps more realistic) and how many tasks were created
             time.sleep(run.duration)
             tasks_created_count = random.randrange(30,200)
 
@@ -87,8 +91,9 @@ def FakeLogGenerator(req: func.HttpRequest, context) -> func.HttpResponse:
             metric_tasks_count.add(tasks_created_count,attributes=run.metadata)
             metric_completed_run.add(1,attributes=run.metadata)
 
-            # Add the tasks_created in the meta data so we can report on it
+            # Add the tasks_created and duration in the meta data so we can report on it
             run.metadata["tasks_created"] = tasks_created_count
+            run.metadata["duration"] = run.duration
             logging.info(f'Tasker completed run',extra=run.metadata)
 
             # Done with all of it, return 200 (OK)

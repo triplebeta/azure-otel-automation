@@ -11,6 +11,9 @@
 		},
 		{
 			"path": "PMA5FakeLogGenerator"
+		},
+		{
+			"path": "healthqueries"
 		}
 	],
 	"settings": {
