@@ -1,7 +1,5 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+# Azure Devops pipeline to deploy ApplicationInsights functions.
+# This cannot be done using Bicep because of a bug in the Bicep templates.
 
 trigger:
   branches:
@@ -9,8 +7,8 @@ trigger:
     - master
   paths:
     include:
-    - healthqueries
-    - appInsightsFunctions-pipeline.yml 
+    - appInsights
+    - appInsights-pipeline.yml 
 
 pool:
   vmImage: ubuntu-latest
@@ -32,26 +30,6 @@ steps:
     backendAzureRmStorageAccountName: 'pma5pocstorage'
     backendAzureRmContainerName: 'tfstate'
     backendAzureRmKey: 'tf/terraform.tfstate'
-
-- task: TerraformTaskV4@4
-  name: terraformImportGroup
-  displayName: Import the resource group
-  inputs:
-    provider: 'azurerm'
-    command: 'import'
-    workingDirectory: 'healthqueries'
-    commandOptions: 'azurerm_resource_group.parent_group /subscriptions/a6faafc0-def0-429a-bd0e-2c2550f163a3/resourceGroups/pma5-poc'
-    environmentServiceNameAzureRM: 'My Azure Resource manager for Prod subscription'
-
-- task: TerraformTaskV4@4
-  name: terraformImportAI
-  displayName: Import the ApplicationInsights instance
-  inputs:
-    provider: 'azurerm'
-    command: 'import'
-    workingDirectory: 'healthqueries'
-    commandOptions: 'azurerm_application_insights.myAi /subscriptions/a6faafc0-def0-429a-bd0e-2c2550f163a3/resourceGroups/pma5-poc/providers/microsoft.insights/components/pma5poc-ai'
-    environmentServiceNameAzureRM: 'My Azure Resource manager for Prod subscription'
 
 - task: TerraformTaskV4@4
   name: terraformPlan

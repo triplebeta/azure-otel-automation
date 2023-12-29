@@ -13,7 +13,7 @@
 			"path": "PMA5FakeLogGenerator"
 		},
 		{
-			"path": "healthqueries"
+			"path": "appInsights"
 		}
 	],
 	"settings": {

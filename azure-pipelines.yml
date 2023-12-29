@@ -8,11 +8,11 @@ trigger:
     include:
     - master
   paths:
-    exclude:
-      - infra
-      - healthqueries
-      - infra-pipeline.yml
-      - appInsightsFunctions-pipeline.yml
+    include:
+      - PMA5EventsGBR
+      - PMA5Tasks
+      - PMA5FakeLogGenerator
+      - azure-pipelines.yaml
 
 variables:
   # Azure Resource Manager connection created during pipeline creation

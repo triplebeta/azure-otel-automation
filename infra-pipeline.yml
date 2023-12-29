@@ -31,4 +31,4 @@ steps:
     templateLocation: 'Linked artifact'
     csmFile: '$(templateFile)'
     deploymentMode: 'Incremental'
-    deploymentName: 'PMA5-POC-Deployment'
+    deploymentName: 'pma5poc-infra'
