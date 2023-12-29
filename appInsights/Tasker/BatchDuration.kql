@@ -1,4 +1,4 @@
-// Duration of batch
+// Duration of batches
 // Get timestamp of start batch, join it with completed run on batchid
 (traces
 | where cloud_RoleName == 'Fake Log Generator (prod)'
