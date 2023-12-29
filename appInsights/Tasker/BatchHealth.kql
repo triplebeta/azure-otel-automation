@@ -1,4 +1,0 @@
-// Fake function
-let TrimOnes = (s:string) { trim("1", s) };
- range x from 10 to 35 step 1 
-| extend result = TrimOnes(tostring(x))

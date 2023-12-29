@@ -10,7 +10,7 @@ resource healthQuery1 'Microsoft.OperationalInsights/queryPacks/queries@2019-09-
   name: 'b402c7ed-0c50-4c07-91c4-e975694fdd30'
   parent: healthQueryPack
   properties: {
-    body: loadTextContent('./Tasker/BatchDuration.kql')
+    body: loadTextContent('./Tasker/Queries/BatchDuration.kql')
     description: 'How much time did the batch take.'
     displayName: 'Tasker Batch Duration'
     properties: {}
