@@ -24,7 +24,7 @@ steps:
   inputs:
     provider: 'azurerm'
     command: 'init'
-    workingDirectory: 'healthqueries'
+    workingDirectory: 'appInsights'
     backendServiceArm: 'My Azure Resource manager for Prod subscription'
     backendAzureRmResourceGroupName: 'pma5-poc'
     backendAzureRmStorageAccountName: 'pma5pocstorage'
@@ -37,7 +37,7 @@ steps:
   inputs:
     provider: 'azurerm'
     command: 'plan'
-    workingDirectory: 'healthqueries'
+    workingDirectory: 'appInsights'
     commandOptions: '-out main.tfplan'
     environmentServiceNameAzureRM: 'My Azure Resource manager for Prod subscription'
 
@@ -48,7 +48,7 @@ steps:
   inputs:
     provider: 'azurerm'
     command: 'apply'
-    workingDirectory: 'healthqueries'
+    workingDirectory: 'appInsights'
     commandOptions: 'main.tfplan'
     environmentServiceNameAzureRM: 'My Azure Resource manager for Prod subscription'
 
