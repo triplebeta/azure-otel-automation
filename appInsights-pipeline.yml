@@ -26,6 +26,10 @@ steps:
     command: 'init'
     workingDirectory: 'appInsights'
     backendServiceArm: 'My Azure Resource manager for Prod subscription'
+    backendAzureRmResourceGroupName: 'pma5-poc'
+    backendAzureRmStorageAccountName: 'pma5pocstorage'
+    backendAzureRmContainerName: 'tfstate'
+    backendAzureRmKey: 'terraform.tfstate'
 
 - task: TerraformTaskV4@4
   name: terraformPlan
