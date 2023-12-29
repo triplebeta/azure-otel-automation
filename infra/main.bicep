@@ -17,7 +17,19 @@ resource azStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
   sku: {
     name: 'Standard_LRS'
   }
+  
+  resource tfBlobService 'blobServices@2023-01-01' = {
+    name: 'default'
+  }
 }
+  // Create container
+  resource containers 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
+    name: '${envResourceNamePrefix}storage/default/tfstate'
+    properties: {
+      publicAccess: 'None'
+      metadata: {}
+    }
+  }
 
 // TODO Find a better way than using listKeys
 #disable-next-line use-resource-symbol-reference
