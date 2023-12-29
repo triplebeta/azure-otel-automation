@@ -5,6 +5,12 @@ terraform {
       version = "~>2.0"
     }
   }
+  backend "azurerm" {
+    resource_group_name  = "pma5-poc"
+    storage_account_name = "pma5pocstorage"
+    container_name       = "tfstate"
+    key                  = "terraform.tfstate"
+  }
 }
 
 # Azurerm Provider configuration
