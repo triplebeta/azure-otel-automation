@@ -25,19 +25,23 @@ class TasksSimulationRequest:
         self.machine_nr = jsonBody.get('machine')                  # For which machine to run
         if (self.machine_nr is None): raise ValueError('Body must contain JSON with at least a value for machine.')
         
+        # set default, ensure the properties exist
+        self.tasks_error = None
+        self.tasks_iterations = 1
+        self.tasks_success=True
+        self.is_manual_run=False
+
+        # if they are set, override the default value
         tasks = jsonBody.get("tasks")
         if (tasks is not None):
             if (tasks.get('iterations') is not None):
                 self.tasks_iterations = int(jsonBody["tasks"]["iterations"])          # 1 for first run, 2 for first retry etc..
-            else: self.tasks_iterations = 1  # default    
 
             if (tasks.get('success') is not None):
                 self.tasks_success = bool(jsonBody["tasks"]["success"])               # True by default
-            else: self.tasks_success = True  # default    
 
             if (tasks.get('manualRetry') is not None):
                 self.tasks_is_manual = bool(jsonBody["tasks"]["manualRetry"])         # true to simulate retries were done manually
-            else: self.tasks_is_manual = False  # default    
 
             # If set, the Tasks run will fail with that error, otherwise it will succeed
             if (tasks.get('error') is not None):

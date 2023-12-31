@@ -34,19 +34,23 @@ class SimulationRequest:
 
         self.tasks_duration = random.randrange(2,6,1)              # default
 
+        # set default, ensure the properties exist
+        self.tasks_error = None
+        self.tasks_iterations = 1
+        self.tasks_success=True
+        self.is_manual_run=False
+
+        # if they are set, override the default value
         tasks = jsonBody.get("tasks")
         if (tasks is not None):
             if (tasks.get('iterations') is not None):
-                self.tasks_iterations = int(jsonBody["tasks"]["iterations"])          # 1 for first run, 2 for first retry etc..
-            else: self.tasks_iterations = 1  # default    
+                self.tasks_iterations = int(jsonBody["tasks"]["iterations"])          # 1 for first run, 2 for first retry etc..    
 
             if (tasks.get('success') is not None):
                 self.tasks_success = bool(jsonBody["tasks"]["success"])       # true by default
-            else: self.tasks_success=True  # default
 
             if (tasks.get('manualRetry') is not None):
                 self.is_manual_run = bool(jsonBody["tasks"]["manualRetry"])   # true to simulate retries were done manually
-            else: self.is_manual_run=False  # default
 
             # If set, the Tasks run will fail with that error, otherwise it will succeed
             if (tasks.get('error') is not None):
