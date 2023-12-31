@@ -33,9 +33,9 @@ parallel_runs_tracker=ParallelRunsTracker()
 metric_updown_parallel_runs=create_parallel_runs_observable_updown_counter(parallel_runs_tracker)
 
 app = func.FunctionApp()
-@app.function_name(name="pma5poc-loggen-app")
-@app.route(route="FakeLogGenerator", auth_level=func.AuthLevel.ANONYMOUS)
-def FakeLogGenerator(req: func.HttpRequest, context) -> func.HttpResponse:
+@app.function_name(name="pma5poc-states-app")
+@app.route(route="FakeStates", auth_level=func.AuthLevel.ANONYMOUS)
+def FakeStates(req: func.HttpRequest, context) -> func.HttpResponse:
     """
         Generates fake log and telemetry entries.
     """

@@ -5,9 +5,9 @@
 azure-functions
 azure-eventhub
 
-# IMPORTANT: a later version of the Azure Monitor OpenTelemetry package will use a higer version of
+# IMPORTANT: a later version of the Azure Monitor OpenTelemetry package will use a higher version of
 # the opentelemetry libraries. As of the next version, they introduce the concept of a Resource Detector
-# to find characteristics of resource. However, this throws on this statement:
+# to find characteristics of resource. However, this throws an exception on this statement:
 #     from azure.monitor.opentelemetry import configure_azure_monitor
 # the error is: 
 #  File "/home/site/wwwroot/.python_packages/lib/site-packages/opentelemetry/sdk/resources/__init__.py", line 125, in <module>

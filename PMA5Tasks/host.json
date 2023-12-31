@@ -3,10 +3,10 @@
   "logging": {
     "fileLoggingMode": "debugOnly",
     "logLevel": {
-      "default": "Warning",
-      "Host.Results": "Warning",
-      "Function": "Warning",
-      "Host.Aggregator": "Warning"
+      "default": "Trace",
+      "Host.Results": "Trace",
+      "Function": "Trace",
+      "Host.Aggregator": "Trace"
     },
     "applicationInsights": {
       "enableDependencyTracking": true,

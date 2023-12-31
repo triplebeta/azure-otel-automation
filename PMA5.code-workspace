@@ -7,10 +7,10 @@
 			"path": "PMA5Tasks"
 		},
 		{
-			"path": "infra"
+			"path": "PMA5FakeLogGenerator"
 		},
 		{
-			"path": "PMA5FakeLogGenerator"
+			"path": "infra"
 		},
 		{
 			"path": "appInsights"
