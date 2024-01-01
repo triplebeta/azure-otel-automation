@@ -20,6 +20,10 @@ from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapProp
 
 from simulation_request import SimulationRequest
 
+# Avoid duplicate logging
+root_logger = logging.getLogger()
+for handler in root_logger.handlers[:]:
+    root_logger.removeHandler(handler)
 configure_azure_monitor()
 tracer = trace.get_tracer(__name__)
 

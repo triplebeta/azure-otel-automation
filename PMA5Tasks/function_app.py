@@ -23,6 +23,11 @@ from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapProp
 from task_simulation_request import TasksSimulationRequest
 from metrics import metric_batch, metric_run, metric_run_retried, metric_run_retried, metric_run_completed, metric_tasks_count, metric_run_failed
 
+# Avoid duplicate logging
+root_logger = logging.getLogger()
+for handler in root_logger.handlers[:]:
+    root_logger.removeHandler(handler)
+
 # Enable telemetry for this Azure Function
 # TODO Pass a storage_directory for storing logs when offline
 # TODO Pass credential=ManagedIdentityCredential() to authenticate to ApplicationInsights
