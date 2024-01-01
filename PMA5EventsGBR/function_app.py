@@ -77,16 +77,20 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
     try:
         # Immediately pass additional info like machinenr to the span
         with tracer.start_as_current_span("Processing events", attributes=metadata):
-            logging.info(f"Events GBR started run", extra=metadata)
+            logging.info(f"Events started run", extra=metadata)
             metric_run.add(1,attributes=metadata)
 
             # If an error is set, raise it to abort this run. There will be not trigger for Tasks.
             if (params.events_error_text is not None):
                 raise Exception(params.events_error_text)
 
+            # When successful, update metrics and logs
+            events_created_count = random.randrange(30,200)
+            metric_events_count.add(events_created_count,attributes=metadata)
+
         # Send an event to the Event Hub
         with tracer.start_as_current_span("Send trigger for tasks to Event Hub", attributes=metadata):
-            logging.info(f'Sending trigger from Events GBR to Tasker', extra=metadata)
+            logging.info(f'Sending trigger from Events to Tasker', extra=metadata)
             EVENT_HUB_CONNECTION_STR = os.environ["EVENTHUB_CONNECTION_STRING"]
             producer = EventHubProducerClient.from_connection_string(EVENT_HUB_CONNECTION_STR, eventhub_name='eventsgbr') # , transport_type=TransportType.AmqpOverWebsocket
             
@@ -100,22 +104,24 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
                 event_data_batch = await producer.create_batch()
                 event_data_batch.add(EventData(jsonTaskerCmd))
                 await producer.send_batch(event_data_batch)
-                logging.info(f'Sent trigger from Events GBR to Tasker', extra=metadata)
+                logging.info(f'Sent trigger from Events to Tasker', extra=metadata)
 
         # Done with all of it
         metric_run_completed.add(1,attributes=metadata)
-        logging.info(f"Events GBR completed run", extra=metadata)
-        return func.HttpResponse(f"Completed processing events", status_code=200)
+        metadata["tasks_created"] = events_created_count
+        metadata["duration"] = params.tasks_duration
+        logging.info(f"Events completed run", extra=metadata)
+        return func.HttpResponse(f"Completed processing {events_created_count} events", status_code=200)
     
     except Exception as error:
         # Log the exception (which includes the traceback)
         # On the span, set record_exception=False because we handle it here and include more info
         logging.exception(f'Events error handled!',exc_info=error, extra=metadata)
-        logging.error(f"Events GBR ending unsuccessfully.", exc_info=error, extra=metadata)
+        logging.error(f"Events failed run.", exc_info=error, extra=metadata)
         metric_run_failed.add(1,attributes=metadata)
 
         # Indicate it failed, return 500 (Server error)
-        return func.HttpResponse(json.dumps(metadata), mimetype="application/json", status_code=500)
+        return func.HttpResponse("Events failed", mimetype="application/json", status_code=500)
 
     finally:
         # Workaround (part 3/3)
