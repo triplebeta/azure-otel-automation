@@ -90,7 +90,7 @@ def TaskerFake(myEvents: func.EventHubEvent, context):
           if (manual_retry): metadata["manual"]=manual_retry  # Only add this if it's a manual run 
 
           # Start the simulation of a Tasker run
-          with tracer.start_as_current_span("Execute tasker", record_exception=False, attributes=metadata):
+          with tracer.start_as_current_span(f"Execute tasker (iteration={counter+1})", record_exception=False, attributes=metadata):
                try:
                     # Track the start of a new run (sample for using an observable up/down counter)
                     parallel_runs_tracker.register_start_run(params)
