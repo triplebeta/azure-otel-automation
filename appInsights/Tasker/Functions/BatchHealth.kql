@@ -1,6 +1,0 @@
-customMetrics
-| where cloud_RoleName == 'Fake Log Generator (prod)'
-| where name == "tasks.batches"
-| where customDimensions["machine"] != ""
-| extend machinenr=tostring(customDimensions["machine"])
-| summarize sum(value) by bin(timestamp,1h), machinenr

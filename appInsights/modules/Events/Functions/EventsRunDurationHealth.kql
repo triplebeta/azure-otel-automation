@@ -1,0 +1,11 @@
+// Health of Events - Check duration of a run
+let Thresholds=ThresholdsEventsHealth();
+AppTraces
+| where Message startswith "Events"
+| where Message == "Events completed run"
+| extend machine=tostring(Properties["machine"])
+| extend duration=toint(Properties["duration"])
+| project TimeGenerated, machine, MetricName='EventsRunDuration', duration
+| lookup kind=inner Thresholds on $left.MetricName==$right.Name
+| extend IsYellow = iif(duration>=YellowThreshold and duration<RedThreshold, 1,0)
+| extend IsRed = iif(duration>=RedThreshold, 1,0)

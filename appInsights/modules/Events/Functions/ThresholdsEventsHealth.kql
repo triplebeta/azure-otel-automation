@@ -1,0 +1,6 @@
+let Thresholds=datatable(Name: string, YellowThreshold: double, RedThreshold: double) [
+    // Duration of a run of the Tasker
+    "events.runs.failed", 1, 2,
+    "EventsRunDuration", 4, 6,
+];
+Thresholds

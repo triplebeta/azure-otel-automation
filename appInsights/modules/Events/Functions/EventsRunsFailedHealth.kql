@@ -1,0 +1,9 @@
+// Events health - based on failed runs
+let Thresholds=ThresholdsEventsHealth();
+AppMetrics
+| where Name=='events.runs.failed'
+| summarize failureCount=sum(Sum) by Name
+| lookup kind=inner Thresholds on Name
+| extend IsYelow = iif (failureCount>0 and failureCount<=1, 1,0) 
+| extend IsRed = iif (failureCount>1, 1,0) 
+| project failureCount, IsYelow, IsRed

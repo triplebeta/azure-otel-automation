@@ -1,0 +1,10 @@
+// Health of Tasks - Check # of batch started
+let Thresholds=ThresholdsTasksHealth();
+AppMetrics
+| where AppRoleName == 'Tasker (prod)'
+| where Name == "tasks.batches"
+| extend machinenr=tostring(Properties["machine"])
+| summarize batchCount=sum(Sum) by machinenr,Name
+| lookup kind=inner Thresholds on $left.Name==$right.Name
+| extend IsYellow = iif(batchCount>=YellowThreshold and batchCount<RedThreshold, 1,0)
+| extend IsRed = iif(batchCount>=RedThreshold, 1,0)

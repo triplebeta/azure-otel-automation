@@ -1,0 +1,11 @@
+// Health of Tasks - Check duration of a run
+let Thresholds=ThresholdsTasksHealth();
+AppTraces
+| where Message startswith "Tasker"
+| where Message == "Tasker completed run"
+| extend machine=tostring(Properties["machine"])
+| extend duration=toint(Properties["duration"])
+| project TimeGenerated, machine, MetricName='TaskerRunDuration', duration
+| lookup kind=inner Thresholds on $left.MetricName==$right.Name
+| extend IsYellow = iif(duration>=YellowThreshold and duration<RedThreshold, 1,0)
+| extend IsRed = iif(duration>=RedThreshold, 1,0)
