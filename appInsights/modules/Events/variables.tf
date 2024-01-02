@@ -3,3 +3,7 @@ variable "main_resource_group" {
   type        = string
   default     = "pma5-poc"
 }
+variable "app_insights_name" {
+  description = "Name of the Application Insights instance"
+  type        = string
+}

@@ -4,9 +4,6 @@ terraform {
       source = "hashicorp/azurerm"
       version = "~>3.85.0"
     }
-    azapi = {
-      source = "azure/azapi"
-    }
   }
   backend "azurerm" {
     resource_group_name  = "pma5-poc"
@@ -24,9 +21,11 @@ provider "azurerm" {
 module "tasks" {
   source  = "./modules/Tasks"
   main_resource_group = var.main_resource_group
+  app_insights_name = var.app_insights_name
 }
 
 module "events" {
   source  = "./modules/Events"
   main_resource_group = var.main_resource_group
+  app_insights_name = var.app_insights_name
 }

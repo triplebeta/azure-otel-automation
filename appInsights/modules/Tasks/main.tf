@@ -11,7 +11,7 @@ data "azurerm_resource_group" "parent_group" {
 }
 
 data "azurerm_application_insights" "myAi" {
-  name = "pma5poc-ai"
+  name = var.app_insights_name
   resource_group_name = data.azurerm_resource_group.parent_group.name
 }
 
@@ -35,7 +35,7 @@ resource "azurerm_log_analytics_query_pack_query" "BatchDurationQuery" {
   query_pack_id = azurerm_log_analytics_query_pack.tasksQueryPack.id
 
   description = "How much time did the batch take."
-  display_name = "Tasker Batch Duration"
+  display_name = "Tasks Batch Duration"
   body = file("${path.module}/TasksQueryPack/BatchDuration.kql")
   categories = [ "applications" ]
   resource_types = [
@@ -54,8 +54,8 @@ resource "azurerm_log_analytics_query_pack_query" "BatchDurationQuery" {
 
 # Create a set of all KQL files in the directory.
 locals {
-  tasks_function_files = fileset(path.module, "./modules/Tasks/Functions/*.kql")
-  tasks_query_files = fileset(path.module, "./modules/Tasks/TasksQueryPack/*.kql")
+  tasks_function_files = fileset("./modules/Tasks/Functions", "*.kql")
+  TaskBatchFailedHealth = "./modules/Tasks/Functions/TaskBatchFailedHealth.kql"
 }
 
 # Create a function for each file in Functions
@@ -67,7 +67,7 @@ resource "azurerm_application_insights_analytics_item" "tasksFunctions" {
   name = "item"
   scope = "shared"
   function_alias = substr(basename(each.value),0, length(basename(each.value))-4) 
-  content = file(each.value)
+  content = file("./modules/Tasks/Functions/${each.value}")
 }
 
 

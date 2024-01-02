@@ -11,13 +11,13 @@ data "azurerm_resource_group" "parent_group" {
 }
 
 data "azurerm_application_insights" "myAi" {
-  name = "pma5poc-ai"
+  name = var.app_insights_name
   resource_group_name = data.azurerm_resource_group.parent_group.name
 }
 
 # Create a set of all KQL files in the directory.
 locals {
-  events_function_files = fileset("${path.module}/modules/Events/Functions", "*.kql")
+  events_function_files = fileset("./modules/Events/Functions", "*.kql")
 }
 
 
@@ -34,5 +34,5 @@ resource "azurerm_application_insights_analytics_item" "eventsFunctions" {
   name = "item"
   scope = "shared"
   function_alias = substr(basename(each.value),0, length(basename(each.value))-4) 
-  content = file(each.value)
+  content = file("./modules/Events/Functions/${each.value}")
 }
