@@ -1,7 +1,7 @@
 terraform {
   required_providers {
-    azapi = {
-      source = "azure/azapi"
+    azurerm = {
+      source = "hashicorp/azurerm"
     }
   }
 }
@@ -24,41 +24,28 @@ locals {
   tasks_querypack = fileset(path.module, "./modules/Tasks/TasksQueryPack/*.kql")
 }
 
-resource "azapi_resource" "tasksQueryPack" {
-  type = "Microsoft.OperationalInsights/queryPacks@2019-09-01"
-  name = "TasksQueryPack"
-  location = "westeurope"
-  body = jsonencode({
-    properties = {}
-  })
+resource "azurerm_log_analytics_query_pack" "tasksQueryPack" {
+  name                = "TasksQueryPack"
+  resource_group_name = data.azurerm_resource_group.parent_group.name
+  location            = data.azurerm_resource_group.parent_group.location
 }
 
-resource "azapi_resource" "BatchDurationQuery" {
-  type = "Microsoft.OperationalInsights/queryPacks/queries@2019-09-01"
-  name = "BatchDurationQuery"
-  parent_id = azapi_resource.tasksQueryPack.id
-  body = jsonencode({
-    properties = {
-      description: "How much time did the batch take."
-      displayName: "Tasker Batch Duration"
-      properties: {}
-      body: file("${path.module}/TasksQueryPack/BatchDuration.kql")
-      related: {
-        categories: [
-          "applications"
-        ]
-        resourceTypes: [
-          "microsoft.insights/components",
-          "microsoft.operationalinsights/workspaces"
-        ]
-        solutions: [
-          "ApplicationInsights"
-        ]
-      }
-      tags: {}
-    }
-  })
-  depends_on = [ azapi_resource.tasksQueryPack ]
+resource "azurerm_log_analytics_query_pack_query" "BatchDurationQuery" {
+  name = "d26b7a8c-c723-441e-965b-fd591ce07649"
+  query_pack_id = azurerm_log_analytics_query_pack.tasksQueryPack.id
+
+  description = "How much time did the batch take."
+  display_name = "Tasker Batch Duration"
+  body = file("${path.module}/TasksQueryPack/BatchDuration.kql")
+  categories = [ "applications" ]
+  resource_types = [
+      "microsoft.insights/components",
+      "microsoft.operationalinsights/workspaces"
+    ]
+  solutions = [
+      "ApplicationInsights"
+    ]
+  tags = {}
 }
 
 # ======================================
@@ -83,3 +70,25 @@ resource "azurerm_application_insights_analytics_item" "tasksFunctions" {
   content = file(each.value)
 }
 
+
+# ======================================
+# Azure portal dashboard
+# ======================================
+
+data "azurerm_subscription" "current" {}
+
+resource "azurerm_portal_dashboard" "machine-dashboard" {
+  name                = "machine-dashboard"
+  resource_group_name = data.azurerm_resource_group.parent_group.name
+  location            = data.azurerm_resource_group.parent_group.location
+  tags = {
+    hidden-title = "PMA5 Machine Dashboard"
+  }
+
+  // In the tpl file you can use these like: ${dashboard_title}
+  dashboard_properties =  templatefile("${path.module}/Dashboards/MachineDashboard.tpl",
+    {
+      dashboard_title = "PMA5 Machine Dashboard",
+      sub_id     = data.azurerm_subscription.current.subscription_id
+      })
+}
