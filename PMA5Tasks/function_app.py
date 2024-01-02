@@ -61,7 +61,7 @@ def TaskerFake(myEvents: func.EventHubEvent, context):
      parent_context = TraceContextTextMapPropagator().extract(carrier=functions_current_context)
      token = attach(parent_context)
 
-     try
+     try:
           # Extract the info from the Event Hub message
           # Read json to get the parameter values
           with tracer.start_as_current_span("Parse Tasker params") as span:
