@@ -61,85 +61,88 @@ def TaskerFake(myEvents: func.EventHubEvent, context):
      parent_context = TraceContextTextMapPropagator().extract(carrier=functions_current_context)
      token = attach(parent_context)
 
-     # Extract the info from the Event Hub message
-     # Read json to get the parameter values
-     with tracer.start_as_current_span("Parse Tasker params") as span:
-          try:
-               msgFromEventsGBR = myEvents.get_body().decode("utf-8")
-               jsonBody = json.loads(msgFromEventsGBR)
-               params = TasksSimulationRequest(jsonBody)
-          except ValueError as error:
-               logging.error("Failed to parse message from ")
-               raise
-
-     # Simulate a run an perhaps some retries. All of these are the same batch.
-     # Generate an id for the batch (1 or more runs)
-     batch_id = 'batch-' + uuid.uuid4().hex
-
-     # Note: if tasks_iterations = 1 then this loop will run once, with counter=0
-     for counter in range(params.tasks_iterations):
-          run_id = 'run-'+uuid.uuid4().hex
-
-          # Only simulate Manual runs for retries (just as an example)
-          if (counter>0): manual_retry = params.tasks_is_manual
-          else: manual_retry = False
-
-          # For convenience, define a list of all the attributes to add as dimensions for a trace or metric.
-          # Include is_manual_run only if it's a manual run
-          metadata={"machine":params.machine_nr, "batch_id":batch_id, "run_id":run_id, "iteration":counter+1}
-          if (manual_retry): metadata["manual"]=manual_retry  # Only add this if it's a manual run 
-
-          # Start the simulation of a Tasker run
-          with tracer.start_as_current_span(f"Execute tasker (iteration={counter+1})", record_exception=False, attributes=metadata):
+     try
+          # Extract the info from the Event Hub message
+          # Read json to get the parameter values
+          with tracer.start_as_current_span("Parse Tasker params") as span:
                try:
-                    # Track the start of a new run (sample for using an observable up/down counter)
-                    parallel_runs_tracker.register_start_run(params)
+                    msgFromEventsGBR = myEvents.get_body().decode("utf-8")
+                    jsonBody = json.loads(msgFromEventsGBR)
+                    params = TasksSimulationRequest(jsonBody)
+               except ValueError as error:
+                    logging.error("Failed to parse message from ")
+                    raise
 
-                    # Log start of the batch (which can consist of this one and possible retry runs)
-                    if (counter==0):
-                         logging.info(f'Tasker started batch', extra=metadata)
-                         metric_batch.add(1,attributes=metadata)
+          # Simulate a run an perhaps some retries. All of these are the same batch.
+          # Generate an id for the batch (1 or more runs)
+          batch_id = 'batch-' + uuid.uuid4().hex
 
-                    # Consider: shouldn't we use the "Tasker started retry" for retries? More expressive but counting runs will have to count both. 
-                    logging.info(f'Tasker started run', extra=metadata)
+          # Note: if tasks_iterations = 1 then this loop will run once, with counter=0
+          for counter in range(params.tasks_iterations):
+               run_id = 'run-'+uuid.uuid4().hex
 
-                    # Show the information also in the log text, as well as in the dimensions
-                    if (counter>0):
-                         metric_run_retried.add(1,attributes=metadata)
-                    else:
-                         metric_run.add(1,attributes=metadata)
+               # Only simulate Manual runs for retries (just as an example)
+               if (counter>0): manual_retry = params.tasks_is_manual
+               else: manual_retry = False
 
-                    # If an error was specified: abort the run with that error
-                    if (params.tasks_error is not None):
-                         if (counter+1<params.tasks_iterations or params.tasks_success==False):
-                              raise Exception(params.tasks_error)
+               # For convenience, define a list of all the attributes to add as dimensions for a trace or metric.
+               # Include is_manual_run only if it's a manual run
+               metadata={"machine":params.machine_nr, "batch_id":batch_id, "run_id":run_id, "iteration":counter+1}
+               if (manual_retry): metadata["manual"]=manual_retry  # Only add this if it's a manual run 
 
-                    # Simulate processing (to make the timestamps more realistic) and how many tasks were created
-                    time.sleep(params.tasks_duration)
+               # Start the simulation of a Tasker run
+               with tracer.start_as_current_span(f"Execute tasker (iteration={counter+1})", record_exception=False, attributes=metadata):
+                    try:
+                         # Track the start of a new run (sample for using an observable up/down counter)
+                         parallel_runs_tracker.register_start_run(params)
 
-                    # When successful, update metrics and logs
-                    tasks_created_count = random.randrange(30,200)
-                    metric_tasks_count.add(tasks_created_count,attributes=metadata)
-                    metric_run_completed.add(1,attributes=metadata)
+                         # Log start of the batch (which can consist of this one and possible retry runs)
+                         if (counter==0):
+                              logging.info(f'Tasker started batch', extra=metadata)
+                              metric_batch.add(1,attributes=metadata)
 
-                    # Add the tasks_created and duration in the meta data so we can report on it
-                    metadata["tasks_created"] = tasks_created_count
-                    metadata["duration"] = params.tasks_duration
-                    logging.info(f'Tasker completed run',extra=metadata)
-          
-               except Exception as error:
-                    # Log the exception (which includes the traceback)
-                    # On the span, set record_exception=False because we handle it here and include more info
-                    logging.exception(f'Tasker error handled!',exc_info=error, extra=metadata)
+                         # Consider: shouldn't we use the "Tasker started retry" for retries? More expressive but counting runs will have to count both. 
+                         logging.info(f'Tasker started run', extra=metadata)
 
-                    # And log a more simple error message
-                    logging.error(f'Tasker failed run',extra=metadata)
-                    metric_run_failed.add(1,attributes=metadata)
+                         # Show the information also in the log text, as well as in the dimensions
+                         if (counter>0):
+                              metric_run_retried.add(1,attributes=metadata)
+                         else:
+                              metric_run.add(1,attributes=metadata)
 
-               finally:
-                    # Update the counter for the parallel runs
-                    parallel_runs_tracker.register_end_run(params)     
+                         # If an error was specified: abort the run with that error
+                         if (params.tasks_error is not None):
+                              if (counter+1<params.tasks_iterations or params.tasks_success==False):
+                                   raise Exception(params.tasks_error)
 
-                    # Workaround (part 3/3)
-                    token = detach(token)
+                         # Simulate processing (to make the timestamps more realistic) and how many tasks were created
+                         time.sleep(params.tasks_duration)
+
+                         # When successful, update metrics and logs
+                         tasks_created_count = random.randrange(30,200)
+                         metric_tasks_count.add(tasks_created_count,attributes=metadata)
+                         metric_run_completed.add(1,attributes=metadata)
+
+                         # Add the tasks_created and duration in the meta data so we can report on it
+                         metadata["tasks_created"] = tasks_created_count
+                         metadata["duration"] = params.tasks_duration
+                         logging.info(f'Tasker completed run',extra=metadata)
+               
+                    except Exception as error:
+                         # Log the exception (which includes the traceback)
+                         # On the span, set record_exception=False because we handle it here and include more info
+                         logging.exception(f'Tasker error handled!',exc_info=error, extra=metadata)
+
+                         # And log a more simple error message
+                         logging.error(f'Tasker failed run',extra=metadata)
+                         metric_run_failed.add(1,attributes=metadata)
+
+                    finally:
+                         # Update the counter for the parallel runs
+                         parallel_runs_tracker.register_end_run(params)     
+               # with
+          # for
+     finally:
+          # Workaround (part 3/3)
+          token = detach(token)
 
