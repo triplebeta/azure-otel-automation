@@ -1,5 +1,5 @@
 // Health of Tasks - Check duration of a run
-let Thresholds=ThresholdsTasksHealth();
+let Thresholds=TasksThresholds();
 AppTraces
 | where Message startswith "Tasker"
 | where Message == "Tasker completed run"

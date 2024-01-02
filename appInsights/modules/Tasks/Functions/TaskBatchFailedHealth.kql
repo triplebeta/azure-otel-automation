@@ -1,5 +1,5 @@
 // Health of Tasks - Check # of batch started
-let Thresholds=ThresholdsTasksHealth();
+let Thresholds=TasksThresholds();
 AppMetrics
 | where AppRoleName == 'Tasker (prod)'
 | where Name == "tasks.batches"

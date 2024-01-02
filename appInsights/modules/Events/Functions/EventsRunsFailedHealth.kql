@@ -1,5 +1,5 @@
 // Events health - based on failed runs
-let Thresholds=ThresholdsEventsHealth();
+let Thresholds=EventsThresholds();
 AppMetrics
 | where Name=='events.runs.failed'
 | summarize failureCount=sum(Sum) by Name
