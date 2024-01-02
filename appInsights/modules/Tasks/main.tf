@@ -10,19 +10,9 @@ data "azurerm_resource_group" "parent_group" {
   name = var.main_resource_group
 }
 
-data "azurerm_application_insights" "myAi" {
-  name = var.app_insights_name
-  resource_group_name = data.azurerm_resource_group.parent_group.name
-}
-
 # ======================================
 # Query pack(s)
 # ======================================
-
-# Create a set of all KQL files in the directory.
-locals {
-  tasks_querypack = fileset(path.module, "./modules/Tasks/TasksQueryPack/*.kql")
-}
 
 resource "azurerm_log_analytics_query_pack" "tasksQueryPack" {
   name                = "TasksQueryPack"
@@ -30,44 +20,77 @@ resource "azurerm_log_analytics_query_pack" "tasksQueryPack" {
   location            = data.azurerm_resource_group.parent_group.location
 }
 
+# Add each query separately so we can specify more details.
 resource "azurerm_log_analytics_query_pack_query" "BatchDurationQuery" {
-  name = "d26b7a8c-c723-441e-965b-fd591ce07649"
+  name = "d26b7a8c-c723-441e-965b-fd591ce07649"  # must be hard-coded and unique
   query_pack_id = azurerm_log_analytics_query_pack.tasksQueryPack.id
-
   description = "How much time did the batch take."
-  display_name = "Tasks Batch Duration"
-  body = file("${path.module}/TasksQueryPack/BatchDuration.kql")
+  display_name = "Tasker Batch Duration"
+  body = file("./modules/Tasks/TasksQueryPack/BatchDuration.kql")
   categories = [ "applications" ]
   resource_types = [
       "microsoft.insights/components",
       "microsoft.operationalinsights/workspaces"
     ]
-  solutions = [
-      "ApplicationInsights"
-    ]
-  tags = {}
+  solutions = [ "ApplicationInsights" ]
 }
+
 
 # ======================================
 # Health functions
 # ======================================
 
+data "azurerm_log_analytics_workspace" "myWorkspace" {
+  name = var.log_analytics_workspace_name
+  resource_group_name = data.azurerm_resource_group.parent_group.name
+}
+
 # Create a set of all KQL files in the directory.
 locals {
   tasks_function_files = fileset("./modules/Tasks/Functions", "*.kql")
-  TaskBatchFailedHealth = "./modules/Tasks/Functions/TaskBatchFailedHealth.kql"
 }
 
-# Create a function for each file in Functions
-resource "azurerm_application_insights_analytics_item" "tasksFunctions" {
+#
+# Below are 2 different ways to deploy a KQL function:
+# - to Application Insights (using azurerm_application_insights_analytics_item)
+#   they will appear there under Function > "Component functions"
+# - to Log Analytics  (using azurerm_log_analytics_saved_search)
+#   they will appear there under Function > "Workspace functions"
+#
+# Here I install them ONLY in Log Analytics because that's more powerful:
+# you can not only query the AppInsights logs but alo any other log. 
+#
+
+
+# // Instal function in Application Insights - disabled!
+# data "azurerm_application_insights" "myAi" {
+#   name = var.app_insights_name
+#   resource_group_name = data.azurerm_resource_group.parent_group.name
+# }
+#
+# Create a function under Application Insights for each file in the Functions folder. 
+# resource "azurerm_application_insights_analytics_item" "tasksFunctions" {
+#   for_each = local.tasks_function_files
+
+#   application_insights_id = data.azurerm_application_insights.myAi.id
+#   type = "function"   # must be query, function, folder or recent
+#   name = "item"
+#   scope = "shared"
+#   function_alias = substr(basename(each.value),0, length(basename(each.value))-4) 
+#   content = file("./modules/Tasks/Functions/${each.value}")
+# }
+
+# Create a function under Log Analytics for each file in the Functions folder. 
+resource "azurerm_log_analytics_saved_search" "laTasksFunctions" {
   for_each = local.tasks_function_files
 
-  application_insights_id = data.azurerm_application_insights.myAi.id
-  type = "function"   # must be query, function, folder or recent
-  name = "item"
-  scope = "shared"
+  name                       = substr(basename(each.value),0, length(basename(each.value))-4)
+  log_analytics_workspace_id = data.azurerm_log_analytics_workspace.myWorkspace.id
   function_alias = substr(basename(each.value),0, length(basename(each.value))-4) 
-  content = file("./modules/Tasks/Functions/${each.value}")
+
+  category     = "Health"
+  display_name = substr(basename(each.value),0, length(basename(each.value))-4)
+  query        = file("./modules/Tasks/Functions/${each.value}")
 }
 
 

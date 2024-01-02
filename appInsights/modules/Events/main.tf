@@ -15,24 +15,30 @@ data "azurerm_application_insights" "myAi" {
   resource_group_name = data.azurerm_resource_group.parent_group.name
 }
 
-# Create a set of all KQL files in the directory.
-locals {
-  events_function_files = fileset("./modules/Events/Functions", "*.kql")
-}
-
 
 # ======================================
 # Health functions
 # ======================================
 
-# Create a function for each file in Functions
-resource "azurerm_application_insights_analytics_item" "eventsFunctions" {
+data "azurerm_log_analytics_workspace" "myWorkspace" {
+  name = var.log_analytics_workspace_name
+  resource_group_name = data.azurerm_resource_group.parent_group.name
+}
+
+# Create a set of all KQL files in the directory.
+locals {
+  events_function_files = fileset("./modules/Events/Functions", "*.kql")
+}
+
+# Create a function under Log Analytics for each file in the Functions folder. 
+resource "azurerm_log_analytics_saved_search" "laTasksFunctions" {
   for_each = local.events_function_files
 
-  application_insights_id = data.azurerm_application_insights.myAi.id
-  type = "function"   # must be query, function, folder or recent
-  name = "item"
-  scope = "shared"
+  name                       = substr(basename(each.value),0, length(basename(each.value))-4)
+  log_analytics_workspace_id = data.azurerm_log_analytics_workspace.myWorkspace.id
   function_alias = substr(basename(each.value),0, length(basename(each.value))-4) 
-  content = file("./modules/Events/Functions/${each.value}")
+
+  category     = "Health"
+  display_name = substr(basename(each.value),0, length(basename(each.value))-4)
+  query        = file("./modules/Events/Functions/${each.value}")
 }
