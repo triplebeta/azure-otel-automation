@@ -1,0 +1,11 @@
+// Fake Health score for an AKS cluster
+// Produces a static value for each minute of the selected range
+let StartTime = toscalar(AppTraces | summarize min(TimeGenerated));
+let StopTime = ago(-2m);
+let HealthIndicator=datatable(YellowThreshold: double, RedThreshold: double) [
+    80, 60 ];
+HealthIndicator
+| mv-expand TimeGenerated=range(bin(StartTime, 1m), StopTime, 1m)
+| extend MetricName="Cluster Availability (fake)"
+| extend ComponentName="AppService"
+| project TimeGenerated,MetricName,ComponentName, YellowThreshold, RedThreshold, IsYellow=0, IsRed=0
