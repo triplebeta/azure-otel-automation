@@ -8,4 +8,4 @@ HealthIndicator
 | mv-expand TimeGenerated=range(bin(StartTime, 1m), StopTime, 1m)
 | extend MetricName="Cluster Availability (fake)"
 | extend ComponentName="AppService"
-| project TimeGenerated,MetricName,ComponentName, YellowThreshold, RedThreshold, IsYellow=0, IsRed=0
+| project todatetime(TimeGenerated),MetricName,ComponentName, Value=100, YellowThreshold, RedThreshold, IsYellow=0, IsRed=0

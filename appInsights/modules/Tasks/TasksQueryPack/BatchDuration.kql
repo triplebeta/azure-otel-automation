@@ -1,11 +1,10 @@
 // Duration of batches
 // Get timestamp of start batch, join it with completed run on batchid
+// Also include the number of iterations needed to complete it.
 (AppTraces
 | where AppRoleName == 'Tasker (prod)'
-| where Message startswith 'Tasker started run'
+| where Message startswith 'Tasker started batch'
 | project-rename start_timestamp=TimeGenerated
-| extend iteration = toint(Properties['iteration'])
-| where iteration==1
 | extend batchid = tostring(Properties['batch_id'])
 | extend machinenr = tostring(Properties['machine'])
 | project start_timestamp, machinenr, batchid
@@ -15,5 +14,6 @@
     | where Message startswith 'Tasker completed run'
     | project-rename completed_timestamp=TimeGenerated
     | extend batchid = tostring(Properties['batch_id'])
-    | project completed_timestamp, batchid) on batchid)
-| project start_timestamp, machinenr, batchid, duration=completed_timestamp-start_timestamp
+    | extend iteration = toint(Properties['iteration'])
+    | project completed_timestamp, iteration, batchid) on batchid)
+| project start_timestamp, machinenr, batchid, duration=completed_timestamp-start_timestamp, iteration

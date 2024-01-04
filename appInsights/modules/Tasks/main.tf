@@ -95,23 +95,45 @@ resource "azurerm_log_analytics_saved_search" "laTasksFunctions" {
 
 
 # ======================================
-# Azure portal dashboard
+# Azure Workbooks - replacement of Azure Dashboards
 # ======================================
 
 data "azurerm_subscription" "current" {}
 
-resource "azurerm_portal_dashboard" "machine-dashboard" {
-  name                = "machine-dashboard"
+resource "azurerm_application_insights_workbook" "overall-health-status-workbook" {
+  name                = "429a12ba-9aa9-400f-9838-adf92c496d60"
   resource_group_name = data.azurerm_resource_group.parent_group.name
   location            = data.azurerm_resource_group.parent_group.location
-  tags = {
-    hidden-title = "PMA5 Machine Dashboard"
-  }
-
-  // In the tpl file you can use these like: ${dashboard_title}
-  dashboard_properties =  templatefile("${path.module}/Dashboards/MachineDashboard.tpl",
+  description         = "Overall view of the health of the system for the Devops teams"
+  display_name        = "PMA5 Overall Health Status"
+  
+  // In the tpl file you can use these like: ${sub_id}
+  data_json =  templatefile("${path.module}/Workbooks/OverallHealthStatus.tpl",
     {
-      dashboard_title = "PMA5 Machine Dashboard",
+      log_analytics_name = var.log_analytics_workspace_name
+      resource_group_name = data.azurerm_resource_group.parent_group.name
       sub_id     = data.azurerm_subscription.current.subscription_id
       })
 }
+
+
+
+# ======================================
+# Azure portal dashboard - Deprecated, use Azure Workbook instead
+# ======================================
+
+# resource "azurerm_portal_dashboard" "machine-dashboard" {
+#   name                = "machine-dashboard"
+#   resource_group_name = data.azurerm_resource_group.parent_group.name
+#   location            = data.azurerm_resource_group.parent_group.location
+#   tags = {
+#     hidden-title = "PMA5 Machine Dashboard"
+#   }
+
+#   // In the tpl file you can use these like: ${dashboard_title}
+#   dashboard_properties =  templatefile("${path.module}/Dashboards/MachineDashboard.tpl",
+#     {
+#       dashboard_title = "PMA5 Machine Dashboard",
+#       sub_id     = data.azurerm_subscription.current.subscription_id
+#       })
+# }
