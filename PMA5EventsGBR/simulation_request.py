@@ -25,6 +25,8 @@ class SimulationRequest:
         if (self.machine_nr is None): raise ValueError('Body must contain JSON with at least a value for machine.')
         
         # If set, the Events run will fail with that error, otherwise it will succeed
+        self.events_error_text=None
+        self.events_is_manual=False
         events = jsonBody.get("events")
         if (events is not None):
             if (events.get('error') is not None):
@@ -32,10 +34,6 @@ class SimulationRequest:
             
             if (events.get('manualRetry') is not None):
                 self.events_is_manual = bool(jsonBody["events"]["manualRetry"])         # true to simulate retries were done manually
-
-        else:
-            self.events_error_text=None
-            self.events_is_manual=False
 
         # ====================================
         # Tasks
