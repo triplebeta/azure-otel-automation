@@ -34,7 +34,7 @@ steps:
       azureSubscription: ${{ parameters.azureServiceConnection }}
       ScriptType: FilePath
       azurePowerShellVersion: latestVersion
-      ScriptPath: ${{ parameters.pathToAutomationDirectory }}/setup-source-control-link.ps1
+      ScriptPath: ${{ parameters.pathToAutomationDirectory }}/infra/setup-source-control-link.ps1
       ScriptArguments: 
         -ResourceGroupName ${{ parameters.resourceGroupName }}
         -AutomationAccountName ${{ parameters.automationAccountName }}
