@@ -39,5 +39,5 @@ steps:
         -ResourceGroupName ${{ parameters.resourceGroupName }}
         -AdoAccountName ${{ parameters.adoAccountName }}
         -RepositoryName ${{ parameters.adoRepositoryName }}
-        -PathToRunbooks 'runbooks'
+        -PathToRunbooks 'automation/runbooks'
         -AdoPat ${{ parameters.adoPat }}
