@@ -1,7 +1,7 @@
 param (
     [Parameter(Mandatory=$true)][String]$ResourceGroupName,
     [Parameter(Mandatory=$false)][String]$SourceControlType = "VsoGit",
-    [Parameter(Mandatory=$false)][String]$SourceControlBranch = "main",
+    [Parameter(Mandatory=$false)][String]$SourceControlBranch = "master",
     [Parameter(Mandatory=$true)][String]$AdoAccountName,
     [Parameter(Mandatory=$true)][String]$RepositoryName,
     [Parameter(Mandatory=$true)][String]$PathToRunbooks,
