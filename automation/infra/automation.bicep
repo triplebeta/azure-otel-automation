@@ -69,7 +69,7 @@ resource diagnosticSettings 'Microsoft.Automation/automationAccounts/providers/d
         category: 'DscNodeStatus'
         enabled: true
         retentionPolicy: {
-          enabled: true
+          enabled: false
           days: 0
         }
       }
@@ -77,7 +77,7 @@ resource diagnosticSettings 'Microsoft.Automation/automationAccounts/providers/d
         category: 'AuditEvent'
         enabled: true
         retentionPolicy: {
-          enabled: true
+          enabled: false
           days: 0
         }
       }

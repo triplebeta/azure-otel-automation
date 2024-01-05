@@ -69,13 +69,23 @@ resource azDiagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-prev
   scope: azFunctionApp
   properties: {
     workspaceId: azLogAnalyticsWorkspaceId
-    logs: [
+    // logs: [
+    //   {
+    //     categoryGroup: 'AllMetrics'   // Enable all metrics, not all logs
+    //     enabled: true
+    //     retentionPolicy: {
+    //       days: 0
+    //       enabled: false
+    //     }
+    //   }
+    // ]
+    metrics: [
       {
-        categoryGroup: 'AllMetrics'   // Enable all metrics, not all logs
+        category: 'AllMetrics'
         enabled: true
         retentionPolicy: {
+          enabled: true
           days: 0
-          enabled: false
         }
       }
     ]
