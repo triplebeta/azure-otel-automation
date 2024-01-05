@@ -39,7 +39,7 @@ stages:
                 resourceGroupName: ${{ variables.devResourceGroupName }}
                 environmentName: ${{ variables.devEnvironmentName }}
                 pathToInfrastructureDirectory: ${{ variables.pathToInfrastructureDirectory }}
-                automationAccountName: ${{ variables.automationAccountName }}
+                adoAccountName: ${{ variables.adoAccountName }}
                 adoRepositoryName: ${{ variables.adoRepositoryName }}
                 adoPat: $(AdoPat)
                 pathToAutomationDirectory: ${{ variables.pathToAutomationDirectory }}
@@ -60,7 +60,7 @@ stages:
   #               resourceGroupName: ${{ variables.stgResourceGroupName }}
   #               environmentName: ${{ variables.stgEnvironmentName }}
   #               pathToInfrastructureDirectory: ${{ variables.pathToInfrastructureDirectory }}
-  #               automationAccountName: ${{ variables.automationAccountName }}
+  #               adoAccountName: ${{ variables.adoAccountName }}
   #               adoRepositoryName: ${{ variables.adoRepositoryName }}
   #               adoPat: $(AdoPat)
   #               pathToAutomationDirectory: ${{ variables.pathToAutomationDirectory }}
@@ -80,7 +80,7 @@ stages:
   #               resourceGroupName: ${{ variables.prdResourceGroupName }}
   #               environmentName: ${{ variables.prdEnvironmentName }}
   #               pathToInfrastructureDirectory: ${{ variables.pathToInfrastructureDirectory }}
-  #               automationAccountName: ${{ variables.automationAccountName }}
+  #               adoAccountName: ${{ variables.adoAccountName }}
   #               adoRepositoryName: ${{ variables.adoRepositoryName }}
   #               adoPat: $(AdoPat)
   #               pathToAutomationDirectory: ${{ variables.pathToAutomationDirectory }}
