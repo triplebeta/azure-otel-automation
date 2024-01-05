@@ -25,7 +25,6 @@ stages:
             steps:            
             - checkout: self
               persistCredentials: true
-            - template: print-env.yml
             - task: AzurePowerShell@5
               displayName: Deploy Python packages in the Automation account
               inputs:
