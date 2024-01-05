@@ -7,7 +7,7 @@ name: Deploy Automation
 
 variables:
   - template: /automation/env/global.parameters.yml
-  - template: /automationenv/dev.parameters.yml
+  - template: /automation/env/dev.parameters.yml
   # - template: env/stg.parameters.yml
   # - template: env/prd.parameters.yml
   - template: variables_infra.yml
