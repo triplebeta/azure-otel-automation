@@ -8,5 +8,5 @@ parameters:
 #     D:\a\1\s
 # The simplest way to workaround was to just have a separate variables.yml file for each.
 variables:
-  pathToAutomationDirectory: $(System.DefaultWorkingDirectory)/${{ parameters.adoRepositoryName }}/automation
-  pathToInfrastructureDirectory: $(System.DefaultWorkingDirectory)/${{ parameters.adoRepositoryName }}/automation/infra
+  pathToAutomationDirectory: $(System.DefaultWorkingDirectory)/automation
+  pathToInfrastructureDirectory: $(System.DefaultWorkingDirectory)/automation/infra
