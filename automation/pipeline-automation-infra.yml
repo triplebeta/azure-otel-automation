@@ -10,7 +10,7 @@ variables:
   - template: env/dev.parameters.yml
   # - template: env/stg.parameters.yml
   # - template: env/prd.parameters.yml
-  - template: variables.yml
+  - template: variables_infra.yml
     parameters:
       adoRepositoryName: ${{ variables.adoRepositoryName }}
 
@@ -39,7 +39,7 @@ stages:
                 resourceGroupName: ${{ variables.devResourceGroupName }}
                 environmentName: ${{ variables.devEnvironmentName }}
                 pathToInfrastructureDirectory: ${{ variables.pathToInfrastructureDirectory }}
-                adoAccountName: ${{ variables.adoAccountName }}
+                automationAccountName: ${{ variables.automationAccountName }}
                 adoRepositoryName: ${{ variables.adoRepositoryName }}
                 adoPat: $(AdoPat)
                 pathToAutomationDirectory: ${{ variables.pathToAutomationDirectory }}
@@ -60,7 +60,7 @@ stages:
   #               resourceGroupName: ${{ variables.stgResourceGroupName }}
   #               environmentName: ${{ variables.stgEnvironmentName }}
   #               pathToInfrastructureDirectory: ${{ variables.pathToInfrastructureDirectory }}
-  #               adoAccountName: ${{ variables.adoAccountName }}
+  #               automationAccountName: ${{ variables.automationAccountName }}
   #               adoRepositoryName: ${{ variables.adoRepositoryName }}
   #               adoPat: $(AdoPat)
   #               pathToAutomationDirectory: ${{ variables.pathToAutomationDirectory }}
@@ -80,7 +80,7 @@ stages:
   #               resourceGroupName: ${{ variables.prdResourceGroupName }}
   #               environmentName: ${{ variables.prdEnvironmentName }}
   #               pathToInfrastructureDirectory: ${{ variables.pathToInfrastructureDirectory }}
-  #               adoAccountName: ${{ variables.adoAccountName }}
+  #               automationAccountName: ${{ variables.automationAccountName }}
   #               adoRepositoryName: ${{ variables.adoRepositoryName }}
   #               adoPat: $(AdoPat)
   #               pathToAutomationDirectory: ${{ variables.pathToAutomationDirectory }}

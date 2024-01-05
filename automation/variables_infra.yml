@@ -9,4 +9,3 @@ parameters:
 variables:
   pathToAutomationDirectory: $(System.DefaultWorkingDirectory)/automation
   pathToInfrastructureDirectory: $(System.DefaultWorkingDirectory)/automation/infra
-#  pathToRunbooksDirectory: $(System.DefaultWorkingDirectory)/runbooks

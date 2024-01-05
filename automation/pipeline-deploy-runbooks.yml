@@ -1,0 +1,86 @@
+name: Deploy Automation
+
+variables:
+  - template: env/global.parameters.yml
+  - template: env/dev.parameters.yml
+  # - template: env/stg.parameters.yml
+  # - template: env/prd.parameters.yml
+  - template: variables_runbooks.yml
+    parameters:
+      adoRepositoryName: ${{ variables.adoRepositoryName }}
+
+trigger:
+  - main
+
+stages:
+  - stage: Deploy_Runbooks_to_Dev 
+    jobs:
+    - deployment: Dev
+      pool:
+        vmImage: windows-latest
+      environment: ${{ variables.devEnvironmentName }}
+      strategy:
+        runOnce:
+          deploy:
+            steps:            
+            - checkout: self
+              persistCredentials: true
+            - template: print-env.yml
+            - task: AzurePowerShell@5
+              displayName: Deploy Python packages in the Automation account
+              inputs:
+                azureSubscription: ${{ variables.serviceConnectionName }}
+                scriptType: FilePath
+                scriptPath: '${{ variables.pathToAutomationDirectory }}//deploy-runbook-packages.ps1'
+                scriptArguments:
+                  -ResourceGroupName ${{ variables.devResourceGroupName }}
+                azurePowerShellVersion: latestVersion
+            - task: AzurePowerShell@5
+              displayName: Deploy Runbooks to Azure Automation
+              inputs:
+                azureSubscription: ${{ variables.serviceConnectionName }}
+                scriptType: FilePath
+                scriptPath: '${{ variables.pathToAutomationDirectory }}/deploy-runbooks.ps1'
+                scriptArguments:
+                  -ResourceGroupName ${{ variables.devResourceGroupName }}
+                azurePowerShellVersion: latestVersion
+  # - stage: Deploy_to_Stg
+  #   jobs:
+  #   - deployment: Stg
+  #     pool:
+  #       vmImage: windows-latest
+  #     environment: ${{ variables.stgEnvironmentName }}
+  #     strategy:
+  #       runOnce:
+  #         deploy:
+  #           steps:
+  #           - template: deploy-runbook-packages.yml
+  #             parameters:
+  #               azureServiceConnection: ${{ variables.serviceConnectionName }}
+  #               resourceGroupName: ${{ variables.devResourceGroupName }}
+  #               pathToAutomationDirectory: ${{ variables.pathToAutomationDirectory }}
+  #           - template: deploy-runbooks.yml
+  #             parameters:
+  #               azureServiceConnection: ${{ variables.serviceConnectionName }}
+  #               resourceGroupName: ${{ variables.stgResourceGroupName }}
+  #               pathToAutomationDirectory: ${{ variables.pathToAutomationDirectory }}
+  # - stage: Deploy_to_Prd 
+  #   jobs:
+  #   - deployment: Prd
+  #     pool:
+  #       vmImage: windows-latest
+  #     environment: ${{ variables.prdEnvironmentName }}
+  #     strategy:
+  #       runOnce:
+  #         deploy:
+  #           steps:
+  #           - template: deploy-runbook-packages.yml
+  #             parameters:
+  #               azureServiceConnection: ${{ variables.serviceConnectionName }}
+  #               resourceGroupName: ${{ variables.devResourceGroupName }}
+  #               pathToAutomationDirectory: ${{ variables.pathToAutomationDirectory }}
+  #           - template: deploy-runbooks.yml
+  #             parameters:
+  #               azureServiceConnection: ${{ variables.serviceConnectionName }}
+  #               resourceGroupName: ${{ variables.prdResourceGroupName }}
+  #               pathToAutomationDirectory: ${{ variables.pathToAutomationDirectory }}

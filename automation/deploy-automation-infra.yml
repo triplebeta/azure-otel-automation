@@ -3,7 +3,7 @@ parameters:
   - name: resourceGroupName
   - name: environmentName
   - name: pathToInfrastructureDirectory
-  - name: adoAccountName
+  - name: automationAccountName
   - name: adoRepositoryName
   - name: adoPat
   - name: pathToAutomationDirectory
@@ -37,7 +37,7 @@ steps:
       ScriptPath: ${{ parameters.pathToAutomationDirectory }}/setup-source-control-link.ps1
       ScriptArguments: 
         -ResourceGroupName ${{ parameters.resourceGroupName }}
-        -AdoAccountName ${{ parameters.adoAccountName }}
+        -AutomationAccountName ${{ parameters.automationAccountName }}
         -RepositoryName ${{ parameters.adoRepositoryName }}
         -PathToRunbooks 'automation/runbooks'
         -AdoPat ${{ parameters.adoPat }}

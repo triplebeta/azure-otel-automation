@@ -2,7 +2,7 @@ param (
     [Parameter(Mandatory=$true)][String]$ResourceGroupName,
     [Parameter(Mandatory=$false)][String]$SourceControlType = "VsoGit",
     [Parameter(Mandatory=$false)][String]$SourceControlBranch = "master",
-    [Parameter(Mandatory=$true)][String]$AdoAccountName,
+    [Parameter(Mandatory=$true)][String]$AutomationAccountName,
     [Parameter(Mandatory=$true)][String]$RepositoryName,
     [Parameter(Mandatory=$true)][String]$PathToRunbooks,
     [Parameter(Mandatory=$true)][String]$AdoPat
@@ -22,7 +22,7 @@ if(!$automationAccountName) {
 $adoPathSecureString = ConvertTo-SecureString -String $AdoPat -AsPlainText -Force
 
 New-AzAutomationSourceControl -Name SCReposGit `
-                              -RepoUrl https://dev.azure.com/$AdoAccountName/_git/$RepositoryName `
+                              -RepoUrl https://dev.azure.com/$AutomationAccountName/_git/$RepositoryName `
                               -SourceType $SourceControlType `
                               -AccessToken $adoPathSecureString `
                               -Branch $SourceControlBranch `
