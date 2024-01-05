@@ -1,22 +1,12 @@
 #!/usr/bin/env python3
 """
-Processes a webhook sent from an Azure alert.
-
-This Azure Automation sample runbook runs on Azure to process an alert sent
-through a webhook. It converts the RequestBody into a Python object
-by loading the json string sent in.
-
-Changelog:
-    2018-09-01 AutomationTeam:
-    -initial script
-
+Sample of a runbook that triggers a reload of the Events for a specific machine.
+Must be started with 1 parameter: a machine number 
 """
 import logging
 import requests
 import sys
 
-
-# Sample of Azure runbook in Python which is invoked in a Webhook.
 logging.info('Runbook started')
 print("Arguments: " + ','.join(sys.argv))
 
@@ -26,7 +16,7 @@ if (len(sys.argv)==2):
 else:
     raise Exception("Invalid arguments. Requires 1 argument: machinenr")
 
-print(f"Manually starting Events GBR function for machine {machinenr}...")
+print("Manually starting Events GBR function...")
 body= {
     "machine": machinenr,
     "events": {
