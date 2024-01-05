@@ -85,7 +85,7 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
             logging.info(f"Events started run", extra=metadata)
             metric_run.add(1,attributes=metadata)
 
-            # If an error is set, raise it to abort this run. There will be not trigger for Tasks.
+            # If an error is set, raise it to abort this run. There will be no trigger for Tasks.
             if (params.events_error_text is not None):
                 raise Exception(params.events_error_text)
 
@@ -113,7 +113,7 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
 
         # Done with all of it
         metric_run_completed.add(1,attributes=metadata)
-        metadata["tasks_created"] = events_created_count
+        metadata["events_created"] = events_created_count
         metadata["duration"] = params.tasks_duration
         logging.info(f"Events completed run", extra=metadata)
         return func.HttpResponse(f"Completed processing {events_created_count} events", status_code=200)
