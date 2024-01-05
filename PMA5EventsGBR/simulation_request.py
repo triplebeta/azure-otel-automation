@@ -26,8 +26,16 @@ class SimulationRequest:
         
         # If set, the Events run will fail with that error, otherwise it will succeed
         events = jsonBody.get("events")
-        if (events is not None): self.events_error_text = jsonBody["events"]["error"]
-        else: self.events_error_text=None
+        if (events is not None):
+            if (jsonBody.get('error') is not None):
+                self.events_error_text = jsonBody["events"]["error"]
+            
+            if (jsonBody.get('manualRetry') is not None):
+                self.events_is_manual = bool(jsonBody["events"]["manualRetry"])         # true to simulate retries were done manually
+
+        else:
+            self.events_error_text=None
+            self.events_is_manual=False
 
         # ====================================
         # Tasks

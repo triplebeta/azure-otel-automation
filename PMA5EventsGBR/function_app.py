@@ -76,6 +76,7 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
 
     # Compose metadata for the loglines and metrics
     metadata={"machine":params.machine_nr}
+    if (params.events_is_manual): metadata["manual"]=True  # Only add this if it's a manual run 
 
     # Assume processing will be successful
     try:
