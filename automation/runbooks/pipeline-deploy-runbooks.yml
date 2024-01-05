@@ -35,7 +35,7 @@ stages:
               inputs:
                 azureSubscription: ${{ variables.serviceConnectionName }}
                 scriptType: FilePath
-                scriptPath: '${{ variables.pathToAutomationDirectory }}//deploy-runbook-packages.ps1'
+                scriptPath: '${{ variables.pathToAutomationDirectory }}/runbooks/deploy-runbook-packages.ps1'
                 scriptArguments:
                   -ResourceGroupName ${{ variables.devResourceGroupName }}
                 azurePowerShellVersion: latestVersion
@@ -44,7 +44,7 @@ stages:
               inputs:
                 azureSubscription: ${{ variables.serviceConnectionName }}
                 scriptType: FilePath
-                scriptPath: '${{ variables.pathToAutomationDirectory }}/deploy-runbooks.ps1'
+                scriptPath: '${{ variables.pathToAutomationDirectory }}/runbooks/deploy-runbooks.ps1'
                 scriptArguments:
                   -ResourceGroupName ${{ variables.devResourceGroupName }}
                 azurePowerShellVersion: latestVersion
