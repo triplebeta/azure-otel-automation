@@ -10,7 +10,12 @@ variables:
       adoRepositoryName: ${{ variables.adoRepositoryName }}
 
 trigger:
-  - main
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - runbooks
 
 stages:
   - stage: Deploy_Runbooks_to_Dev 
