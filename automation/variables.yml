@@ -1,0 +1,12 @@
+parameters:
+  - name: adoRepositoryName
+
+# For some reason, the files for the runbooks deployment get checked out to
+#     D:\a\1\s\poc-automation-ado
+# while the files for the infra get checked out to
+#     D:\a\1\s
+# The simplest way to workaround was to just have a separate variables.yml file for each.
+variables:
+  pathToAutomationDirectory: $(System.DefaultWorkingDirectory)/automation
+  pathToInfrastructureDirectory: $(System.DefaultWorkingDirectory)/automation/infra
+#  pathToRunbooksDirectory: $(System.DefaultWorkingDirectory)/runbooks

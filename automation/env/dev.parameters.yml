@@ -1,0 +1,3 @@
+variables:
+  devEnvironmentName: dev
+  devResourceGroupName: pma5poc

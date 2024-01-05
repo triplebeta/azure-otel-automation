@@ -1,0 +1,43 @@
+parameters:
+  - name: azureServiceConnection
+  - name: resourceGroupName
+  - name: environmentName
+  - name: pathToInfrastructureDirectory
+  - name: adoAccountName
+  - name: adoRepositoryName
+  - name: adoPat
+  - name: pathToAutomationDirectory
+
+steps:
+  - checkout: self
+    persistCredentials: true
+  - template: print-env.yml
+  - task: AzureCLI@2
+    displayName: Compile Bicep to ARM
+    inputs:
+      azureSubscription: ${{ parameters.azureServiceConnection }}
+      workingDirectory: '${{ parameters.pathToInfrastructureDirectory }}'
+      scriptType: ps
+      scriptLocation: inlineScript
+      inlineScript:  |
+        az bicep build -f main.bicep
+  - task: AzureResourceGroupDeployment@2
+    displayName: Deploy Azure Automation account
+    inputs:
+      azureSubscription: ${{ parameters.azureServiceConnection }}
+      resourceGroupName: ${{ parameters.resourceGroupName }}
+      csmFile: ${{ parameters.pathToInfrastructureDirectory }}/main.json
+      csmParametersFile: ${{ parameters.pathToInfrastructureDirectory }}/env/${{ parameters.environmentName }}.bicepparameters.json
+  - task: AzurePowerShell@5
+    displayName: Setup Source Control link between Automation Account and Azure DevOps Git repo
+    inputs:
+      azureSubscription: ${{ parameters.azureServiceConnection }}
+      ScriptType: FilePath
+      azurePowerShellVersion: latestVersion
+      ScriptPath: ${{ parameters.pathToAutomationDirectory }}/setup-source-control-link.ps1
+      ScriptArguments: 
+        -ResourceGroupName ${{ parameters.resourceGroupName }}
+        -AdoAccountName ${{ parameters.adoAccountName }}
+        -RepositoryName ${{ parameters.adoRepositoryName }}
+        -PathToRunbooks 'runbooks'
+        -AdoPat ${{ parameters.adoPat }}
