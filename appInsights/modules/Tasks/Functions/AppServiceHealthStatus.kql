@@ -1,5 +1,5 @@
-// Fake Health status for an AKS cluster
-// Produces a static value for the current load on the cluster (fake).
+// Fake Health status for an AppService
+// Produces a static value for the availability %.
 // That metric is compared with the thresholds, if => 50 IsYellow will be 1, if >= 80 IsRed will be 1.
 // It returns 1 line for each minute of the selected range.
 let _maxAge = 30m; // Only include data from the last two days
@@ -9,7 +9,7 @@ let Thresholds=datatable(YellowThreshold: double, RedThreshold: double) [
     50, 80 ];
 Thresholds
 | mv-expand TimeGenerated=range(bin(_timespanStart, 1m), _timespanEnd, 1m)
-| extend MetricName="Cluster Availability"
+| extend MetricName="Availability"
 | extend ComponentName="AppService"
 | extend Value=51
 | project todatetime(TimeGenerated),MetricName,ComponentName, Value,

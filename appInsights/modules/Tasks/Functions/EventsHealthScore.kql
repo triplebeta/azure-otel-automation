@@ -1,0 +1,7 @@
+// This is the aggregate score for the whole Events service
+AppServiceHealthScore()
+| where TimeGenerated < ago(2m) // and TimeGenerated >= ago(30m)
+| summarize YellowScore = max(YellowScore), RedScore = max(RedScore) by bin(TimeGenerated, 2m)
+| extend HealthScore = 1 - (YellowScore * 0.25) - (RedScore * 0.5)
+| order by TimeGenerated desc
+| extend ComponentName = "Events", Dependencies = "AppService"

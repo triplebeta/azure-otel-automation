@@ -1,0 +1,20 @@
+// Health of Tasks - Check # of batch started
+// At least 1 batch must be started for it to be green
+let _maxAge = 2h; // Only include data from the last two days
+let _timespanStart = ago(_maxAge); // Start time for the timespan
+let _timespanEnd = now(-2m); // there is some ingestion lag, so we account for this by stripping the last 2m
+AppMetrics
+| where TimeGenerated between (_timespanStart .. _timespanEnd)
+| where AppRoleName == 'Tasker (prod)'
+| where Name == "tasks.batches"
+| summarize batchCount=sum(Sum) by bin(TimeGenerated,1m), Name
+| union (
+    range x from 1 to 1 step 1
+    | mv-expand TimeGenerated=range(_timespanStart, _timespanEnd, 1m) to typeof(datetime)
+    | extend batchCount=toreal(0), Name="tasks.batches"
+    )
+| summarize Value=sum(batchCount) by bin(TimeGenerated, 1m), Name
+| extend YellowThreshold=-1, IsYellow = 0 // There is never yellow
+| extend RedThreshold=1, IsRed = iif(Value==0, 1,0)
+| extend MetricName = "CompletedBatchCount", ComponentName="Tasks"
+| project TimeGenerated, MetricName, ComponentName, Value, YellowThreshold, RedThreshold, IsYellow, IsRed

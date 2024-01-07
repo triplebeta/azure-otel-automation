@@ -1,0 +1,21 @@
+// Health of Tasks - Check # of failed batches
+// Red if > 0
+let _maxAge = 2h; // Only include data from the last two days
+let _timespanStart = ago(_maxAge); // Start time for the timespan
+let _timespanEnd = now(-2m); // there is some ingestion lag, so we account for this by stripping the last 2m
+AppTraces
+| where AppRoleName == 'Tasker (prod)'
+| where Message == "Tasker failed run"
+| extend iteration=toint(Properties["iteration"])
+| where iteration==3
+| summarize failedBatchCount=count() by bin(TimeGenerated,1m)
+| union (
+    range x from 1 to 1 step 1
+    | mv-expand TimeGenerated=range(_timespanStart, _timespanEnd, 1m) to typeof(datetime)
+    | extend failedBatchCount=tolong(0)
+    )
+| summarize Value=sum(failedBatchCount) by bin(TimeGenerated, 1m)
+| extend YellowThreshold=-1, IsYellow = 0 // There is never yellow
+| extend RedThreshold=1, IsRed = iif(Value>0, 1,0)
+| extend MetricName = "FailedBatchCount", ComponentName="Tasks"
+| project TimeGenerated, MetricName, ComponentName, Value, YellowThreshold, RedThreshold, IsYellow, IsRed
