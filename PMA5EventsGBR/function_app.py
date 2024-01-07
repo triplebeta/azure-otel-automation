@@ -14,9 +14,11 @@ from azure.eventhub.aio import EventHubProducerClient
 from azure.monitor.opentelemetry import configure_azure_monitor
 from opentelemetry import trace, metrics
 
-# Workaround (part 1/3) specifically for Azure Functions, according to: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-python-opencensus-migrate
+# Azure Functions specific workaround (part 1/3) for Python opentelemetry.
+# For details check out: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-python-opencensus-migrate
 from opentelemetry.context import attach, detach
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+from simple_eventsgbr_fake import EventsGBRFakeSimple
 
 from simulation_request import SimulationRequest
 
@@ -37,6 +39,12 @@ metric_events_count = meter.create_counter(name="events.count", description="Cou
 
 app = func.FunctionApp()
 
+# For demo purposes: simple Function with basic functionality
+@app.route(route="EventsGBRSimple", auth_level=func.AuthLevel.ANONYMOUS)
+def EventsGBRSimple(req: func.HttpRequest) -> func.HttpResponse:
+    return EventsGBRFakeSimple(req, tracer)
+
+# Much more advanced function that includes retry, error handling etc
 @app.route(route="EventsGBRFake", auth_level=func.AuthLevel.ANONYMOUS)
 async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
     """ For logging in Python Function Apps, see:
@@ -122,13 +130,12 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
         # Log the exception (which includes the traceback)
         # On the span, set record_exception=False because we handle it here and include more info
         logging.exception(f'Events error handled!',exc_info=error, extra=metadata)
-        logging.error(f"Events failed run.", exc_info=error, extra=metadata)
+        logging.error(f"Events failed run", exc_info=error, extra=metadata)
         metric_run_failed.add(1,attributes=metadata)
 
         # Indicate it failed, return 500 (Server error)
-        return func.HttpResponse("Events failed", mimetype="application/json", status_code=500)
+        return func.HttpResponse("Events failed.", mimetype="application/json", status_code=500)
 
     finally:
         # Workaround (part 3/3)
         token = detach(token)
-

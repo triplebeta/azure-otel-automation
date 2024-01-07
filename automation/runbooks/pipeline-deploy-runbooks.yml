@@ -48,6 +48,22 @@ stages:
                 scriptArguments:
                   -ResourceGroupName ${{ variables.devResourceGroupName }}
                 azurePowerShellVersion: latestVersion
+            - task: AzureCLI@2
+              displayName: Compile Bicep to ARM
+              inputs:
+                azureSubscription: ${{ variables.serviceConnectionName }}
+                scriptType: ps
+                scriptLocation: inlineScript
+                inlineScript:  |
+                  az bicep build -f alerts.bicep
+            - task: AzureResourceGroupDeployment@2
+              displayName: Deploy Azure AlertRuleGroup to start a Runbook
+              inputs:
+                azureSubscription: ${{ variables.serviceConnectionName }}
+                resourceGroupName: ${{ variables.devResourceGroupName }}
+                csmFile: bicep.json
+                csmParametersFile: ${{ parameters.pathToInfrastructureDirectory }}/env/${{ parameters.environmentName }}.bicepparameters.json
+
   # - stage: Deploy_to_Stg
   #   jobs:
   #   - deployment: Stg
