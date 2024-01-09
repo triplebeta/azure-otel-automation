@@ -2,7 +2,7 @@
 // Produces a static value for the availability %.
 // That metric is compared with the thresholds, if => 50 IsYellow will be 1, if >= 80 IsRed will be 1.
 // It returns 1 line for each minute of the selected range.
-let _maxAge = 30m; // Only include data from the last two days
+let _maxAge = 2d; // Only include data from the last two days
 let _timespanStart = ago(_maxAge); // Start time for the timespan
 let _timespanEnd = now(-2m); // there is some ingestion lag, so we account for this by stripping the last 2m
 let Thresholds=datatable(YellowThreshold: double, RedThreshold: double) [

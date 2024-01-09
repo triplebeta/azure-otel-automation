@@ -1,6 +1,6 @@
 // Health of Tasks - Check # of batch started
 // At least 1 batch must be started for it to be green
-let _maxAge = 2h; // Only include data from the last two days
+let _maxAge = 2d; // Only include data from the last two days
 let _timespanStart = ago(_maxAge); // Start time for the timespan
 let _timespanEnd = now(-2m); // there is some ingestion lag, so we account for this by stripping the last 2m
 AppMetrics
