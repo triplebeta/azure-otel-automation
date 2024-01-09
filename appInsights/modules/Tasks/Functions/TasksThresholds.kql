@@ -1,6 +1,0 @@
-let Thresholds=datatable(Name: string, YellowThreshold: double, RedThreshold: double) [
-    // Duration of a run of the Tasker
-    "tasks.runs.failed", 1, 2,
-    "TaskerRunDuration", 3, 7,   // Values 3, 4, 5 and 6  are yellow, 7 and higher is red
-];
-Thresholds
