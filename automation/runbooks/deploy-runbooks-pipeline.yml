@@ -1,5 +1,10 @@
 name: Deploy Automation
 
+trigger:
+  branches:
+    include:
+    - master
+
 variables:
   - template: /automation/env/global.parameters.yml
   - template: /automation/env/dev.parameters.yml
@@ -8,14 +13,6 @@ variables:
   - template: variables_runbooks.yml
     parameters:
       adoRepositoryName: ${{ variables.adoRepositoryName }}
-
-trigger:
-  branches:
-    include:
-    - master
-  paths:
-    include:
-    - runbooks
 
 stages:
   - stage: Deploy_Runbooks_to_Dev 

@@ -30,7 +30,7 @@ app = func.FunctionApp()
 
 # For demo purposes: simple Function with basic functionality
 @app.route(route="EventsSimple", auth_level=func.AuthLevel.ANONYMOUS)
-def EventsSimpleFunction(req: func.HttpRequest) -> func.HttpResponse:
+def EventsSimple(req: func.HttpRequest) -> func.HttpResponse:
     return EventsSimpleFunction(req, tracer)
 
 # Much more advanced function that includes retry, error handling etc

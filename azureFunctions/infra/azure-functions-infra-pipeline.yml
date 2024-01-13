@@ -3,17 +3,14 @@ trigger:
   branches:
     include:
     - master
-  paths:
-    include:
-    - infra
-    - infra-pipeline.yml
 
 name: Deploy Bicep files
 
 variables:
+  - name: azureServiceConnection
+  
   vmImageName: 'ubuntu-latest'
 
-  azureServiceConnection: 'Triple Beta ARM Service Connection'
   resourceGroupName: 'otelpoc'
   location: 'westeurope'
   templateFile: './infra/main.bicep'

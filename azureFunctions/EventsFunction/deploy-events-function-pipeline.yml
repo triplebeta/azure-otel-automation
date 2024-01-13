@@ -10,7 +10,7 @@ trigger:
 
 variables:
   # Azure Resource Manager connection created during pipeline creation
-  azureSubscription: 'Triple Beta ARM Service Connection'
+  - name: azureServiceConnection
 
   # Function app name
   functionAppNameEvents: 'events-app'
@@ -61,3 +61,13 @@ stages:
 
     - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).EventsFunction.zip
       artifact: EventsFunction
+    
+    - task: AzureFunctionApp@2
+      displayName: 'Azure Function App Deploy: Events function'
+      inputs:
+        connectedServiceNameARM: azureServiceConnection
+        appType: functionAppLinux
+        appName: 'events-app'
+        package: '$(System.DefaultWorkingDirectory)/EventsFunction/*.zip'
+        runtimeStack: 'PYTHON|3.9'
+        deploymentMethod: runFromPackage
