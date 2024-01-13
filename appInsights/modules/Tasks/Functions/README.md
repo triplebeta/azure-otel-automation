@@ -6,3 +6,5 @@ It is based on this guidance and example:
 [Health modeling and observability of mission-critical workloads on Azure - Microsoft Azure Well-Architected Framework](https://learn.microsoft.com/en-us/azure/well-architected/mission-critical/mission-critical-health-modeling)
 
 [Azure/Mission-Critical-Online](https://learn.microsoft.com/en-us/azure/well-architected/mission-critical/mission-critical-health-modeling)
+
+These functions are deployed with Terraform using the pipeline in the appInsights/infra

@@ -3,23 +3,27 @@
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/python
 
+parameters:
+  # Azure Resource Manager connection created during pipeline creation
+  - name: azureServiceConnection
+
 trigger:
   branches:
     include:
     - master
 
 variables:
-  # Azure Resource Manager connection created during pipeline creation
-  - name: azureServiceConnection
-
   # Function app name
-  functionAppNameTasks: 'tasks-app'
+  - name: functionAppNameTasks
+    value: 'tasks-app'
 
   # Agent VM image name
-  vmImageName: 'ubuntu-latest'
+  - name: vmImageName
+    value: 'ubuntu-latest'
 
   # Working Directory
-  workingDirectory: '$(System.DefaultWorkingDirectory)'
+  - name: workingDirectory
+    value: '$(System.DefaultWorkingDirectory)'
 
 stages:
 - stage: BuildTasks
@@ -70,4 +74,4 @@ stages:
         appName: 'tasks-app'
         package: '$(System.DefaultWorkingDirectory)/TasksFunction/*.zip'
         runtimeStack: 'PYTHON|3.9'
-        deploymentMethod: runFromPackage
+        deploymentMethod: runFrom

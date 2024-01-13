@@ -3,23 +3,28 @@
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/python
 
+parameters:
+  # Azure Resource Manager connection created during pipeline creation
+  - name: azureServiceConnection
+
 trigger:
   branches:
     include:
     - master
 
 variables:
-  # Azure Resource Manager connection created during pipeline creation
-  - name: azureServiceConnection
 
   # Function app name
-  functionAppNameEvents: 'events-app'
+  - name: functionAppNameEvents
+    value: 'events-app'
 
   # Agent VM image name
-  vmImageName: 'ubuntu-latest'
+  - name: vmImageName
+    value: 'ubuntu-latest'
 
   # Working Directory
-  workingDirectory: '$(System.DefaultWorkingDirectory)'
+  - name: workingDirectory
+    value: '$(System.DefaultWorkingDirectory)'
 
 stages:
 - stage: BuildEvents
@@ -70,4 +75,4 @@ stages:
         appName: 'events-app'
         package: '$(System.DefaultWorkingDirectory)/EventsFunction/*.zip'
         runtimeStack: 'PYTHON|3.9'
-        deploymentMethod: runFromPackage
+        deploymentMethod: runFromPa
