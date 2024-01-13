@@ -1,0 +1,9 @@
+// Workspace settings
+{
+    // The following will hide the js and map files in the editor
+	"azurite.location": "c:\Temp\azurite",
+    "files.exclude": {
+        "**/__*__": true,
+        "**/__*__.json": true
+    }
+}

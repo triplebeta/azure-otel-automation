@@ -11,7 +11,7 @@ param alertRuleName string = 'NotifyOnCallTeam'
 var actionGroupEmail = 'jeroen@triplebeta.nl'
 
 resource automationAccount 'Microsoft.Automation/automationAccounts@2023-11-01' existing = {
-  name: 'pma5poc-aa'
+  name: 'otelpoc-aa'
 }
 
 resource runbookForAlerts 'Microsoft.Automation/automationAccounts/runbooks@2023-11-01' existing = {

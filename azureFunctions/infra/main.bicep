@@ -2,8 +2,7 @@
 param deploymentNameId string = '0000000000'
 param location string = resourceGroup().location
 
-var azAppConfigurationName = 'PMA5poc'
-var envResourceNamePrefix = 'pma5poc'
+var envResourceNamePrefix = 'otelpoc'
 
 
 // ========================================================
@@ -68,7 +67,7 @@ resource azAppInsights 'Microsoft.Insights/components@2020-02-02' = {
   tags: {
     // Needed for in the portal, according to https://markheath.net/post/azure-functions-bicep
     // circular dependency means we can't reference functionApp directly  /subscriptions/<subscriptionId>/resourceGroups/<rg-name>/providers/Microsoft.Web/sites/<appName>"
-     'hidden-link:/subscriptions/${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.Web/sites/${functionAppEventsGBRName}': 'Resource'
+     'hidden-link:/subscriptions/${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.Web/sites/${functionAppEventsName}': 'Resource'
      'hidden-link:/subscriptions/${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.Web/sites/${functionAppTasksName}': 'Resource'
   }
 }
@@ -97,17 +96,16 @@ resource azHostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
 // ========================================================
 
 // Must be defined separately since they are also used in the hidden tag of the AppInsights to avoid circular references.
-var functionAppEventsGBRName = '${envResourceNamePrefix}-eventsgbr-app'
+var functionAppEventsName = '${envResourceNamePrefix}-events-app'
 var functionAppTasksName = '${envResourceNamePrefix}-tasks-app'
-var functionAppLogGeneratorName = '${envResourceNamePrefix}-loggen-app'
 
 
 // set the app settings on function app's deployment slots
-module azFunctionAppEventsGBR 'functionApp.bicep' = {
-  name: '${deploymentNameId}-eventsgbr'
+module azFunctionAppEvents 'functionApp.bicep' = {
+  name: '${deploymentNameId}-events'
   params: {
     serviceNameAppName: 'GBR Events'
-    functionAppName: functionAppEventsGBRName
+    functionAppName: functionAppEventsName
     location: location
     azHostingPlanId: azHostingPlan.id
     appInsightsInstrumentationKey: azAppInsightsInstrumentationKey
@@ -115,9 +113,8 @@ module azFunctionAppEventsGBR 'functionApp.bicep' = {
     appInsightsName: azAppInsights.name
     azStorageAccountName: azStorageAccount.name
     azStorageAccountPrimaryAccessKey: azStorageAccountPrimaryAccessKey
-    eventHub_PROD_ConnectionString: azEventHubEventsGBR_Sender_ConnectionString
+    eventHub_PROD_ConnectionString: azEventHubEvents_Sender_ConnectionString
     azLogAnalyticsWorkspaceId: azLogAnalyticsWorkspace.id
-//    eventHub_STAGING_ConnectionString: azEventHubEventsGBRStaging_Sender_ConnectionString  // No Longer use staging
   }
 }
 
@@ -135,31 +132,10 @@ module azFunctionAppTasks 'functionApp.bicep' = {
     appInsightsName: azAppInsights.name
     azStorageAccountName: azStorageAccount.name
     azStorageAccountPrimaryAccessKey: azStorageAccountPrimaryAccessKey
-    eventHub_PROD_ConnectionString: azEventHubEventsGBR_Listener_ConnectionString
-    azLogAnalyticsWorkspaceId: azLogAnalyticsWorkspace.id
-//    eventHub_STAGING_ConnectionString: azEventHubEventsGBRStaging_Listener_ConnectionString  // No Longer use staging
-  }
-}
-
-
-// set the app settings on function app's deployment slots
-module azFunctionAppLogGenerator 'functionApp.bicep' = {
-  name: '${deploymentNameId}-loggen'
-  params: {
-    serviceNameAppName: 'Fake Log Generator'
-    functionAppName: functionAppLogGeneratorName
-    location: location
-    azHostingPlanId: azHostingPlan.id
-    appInsightsInstrumentationKey: azAppInsightsInstrumentationKey
-    appInsightsConnectionString: azAppInsightsConnectionString
-    appInsightsName: azAppInsights.name
-    azStorageAccountName: azStorageAccount.name
-    azStorageAccountPrimaryAccessKey: azStorageAccountPrimaryAccessKey
-    eventHub_PROD_ConnectionString: azEventHubEventsGBR_Sender_ConnectionString
+    eventHub_PROD_ConnectionString: azEventHubEvents_Listener_ConnectionString
     azLogAnalyticsWorkspaceId: azLogAnalyticsWorkspace.id
   }
 }
-
 
 // ========================================================
 // Event Hub Namespace
@@ -219,9 +195,9 @@ resource azDiagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-prev
 var azureEventHubDataSenderRoleId = '2b629674-e913-4c01-ae53-ef4638d8f975'   // Azure Event Hub Data Sender
 var azureEventHubDataReceiverRoleId = 'a638d3c7-ab3a-418d-83e6-5f17a39d4fde' // Azure Event Hub Data Receiver
 
-resource azEventHubEventsGBR 'Microsoft.EventHub/namespaces/eventhubs@2021-11-01' = {
+resource azEventHubEvents 'Microsoft.EventHub/namespaces/eventhubs@2021-11-01' = {
   parent: azEventHubNamespace
-  name: 'eventsgbr'
+  name: 'events'
   properties: {
     messageRetentionInDays: 1
     partitionCount: 1
@@ -229,8 +205,8 @@ resource azEventHubEventsGBR 'Microsoft.EventHub/namespaces/eventhubs@2021-11-01
 }
 
 // Create event hub authorizationRule for the Sender and the Listener
-resource azEventHubEventsGBR_Sender 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-01-01-preview' = {
-  parent: azEventHubEventsGBR
+resource azEventHubEvents_Sender 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-01-01-preview' = {
+  parent: azEventHubEvents
   name: 'Producer'
   properties: {
     rights: [
@@ -238,8 +214,8 @@ resource azEventHubEventsGBR_Sender 'Microsoft.EventHub/namespaces/eventhubs/aut
     ]
   }
 }
-resource azEventHubEventsGBR_Listener 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-01-01-preview' = {
-  parent: azEventHubEventsGBR
+resource azEventHubEvents_Listener 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-01-01-preview' = {
+  parent: azEventHubEvents
   name: 'Consumer'
   properties: {
     rights: [
@@ -249,62 +225,24 @@ resource azEventHubEventsGBR_Listener 'Microsoft.EventHub/namespaces/eventhubs/a
 }
 
 #disable-next-line use-resource-symbol-reference // TODO Find a better way than using listKeys
-var azEventHubEventsGBR_Sender_ConnectionString = listKeys(azEventHubEventsGBR_Sender.id, azEventHubEventsGBR_Sender.apiVersion).primaryConnectionString
+var azEventHubEvents_Sender_ConnectionString = listKeys(azEventHubEvents_Sender.id, azEventHubEvents_Sender.apiVersion).primaryConnectionString
 
 #disable-next-line use-resource-symbol-reference // TODO Find a better way than using listKeys
-var azEventHubEventsGBR_Listener_ConnectionString = listKeys(azEventHubEventsGBR_Listener.id, azEventHubEventsGBR_Listener.apiVersion).primaryConnectionString
+var azEventHubEvents_Listener_ConnectionString = listKeys(azEventHubEvents_Listener.id, azEventHubEvents_Listener.apiVersion).primaryConnectionString
 
-
-// ========================================================
-// Create the Event Hub for STAGING: eventgbr-staging
-// ========================================================
-// No longer use a staging environment
-/*
-resource azEventHubEventsGBRStaging 'Microsoft.EventHub/namespaces/eventhubs@2021-11-01' = {
-  parent: azEventHubNamespace
-  name: 'eventsgbr-staging'
-  properties: {
-    messageRetentionInDays: 1
-    partitionCount: 1
-  }
-}
-
-
-// Create event hub authorizationRule for the Sender and the Listener
-resource azEventHubEventsGBRStaging_Sender 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-01-01-preview' = {
-  parent: azEventHubEventsGBRStaging
-  name: 'Producer'
-  properties: {
-    rights: [
-      'Send'
-    ]
-  }
-}
-resource azEventHubEventsGBRStaging_Listener 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-01-01-preview' = {
-  parent: azEventHubEventsGBRStaging
-  name: 'Consumer'
-  properties: {
-    rights: [
-      'Listen'
-    ]
-  }
-}
-var azEventHubEventsGBRStaging_Sender_ConnectionString = listKeys(azEventHubEventsGBRStaging_Sender.id, azEventHubEventsGBRStaging_Sender.apiVersion).primaryConnectionString
-var azEventHubEventsGBRStaging_Listener_ConnectionString = listKeys(azEventHubEventsGBRStaging_Listener.id, azEventHubEventsGBRStaging_Listener.apiVersion).primaryConnectionString
-*/
 
 // =================================================================================
 // Assign the Sender and Listener roles to the Service Principals of the functions
 // =================================================================================
 
-// Assign the SP of the EventsGBR functionApp the Event Hub Data Sender role
+// Assign the SP of the Events functionApp the Event Hub Data Sender role
 module azAssignEventHubDataSenderRole 'eventHub-roleassignment.bicep' = {
-  name: '${deploymentNameId}-EventsGBRDataSenderRole'
+  name: '${deploymentNameId}-EventsDataSenderRole'
   params: {
-    eventHubName: azEventHubEventsGBR.name
+    eventHubName: azEventHubEvents.name
     eventHubNamespaceName: azEventHubNamespace.name
     roleId: azureEventHubDataSenderRoleId
-    funcAppPrincipalId: azFunctionAppEventsGBR.outputs.functionPrincipalId
+    funcAppPrincipalId: azFunctionAppEvents.outputs.functionPrincipalId
   }
 }
 
@@ -312,7 +250,7 @@ module azAssignEventHubDataSenderRole 'eventHub-roleassignment.bicep' = {
 module azAssignEventHubDataReceiverRole 'eventHub-roleassignment.bicep' = {
   name: '${deploymentNameId}-TasksDataReceiverRole'
   params: {
-    eventHubName: azEventHubEventsGBR.name
+    eventHubName: azEventHubEvents.name
     eventHubNamespaceName: azEventHubNamespace.name
     roleId: azureEventHubDataReceiverRoleId
     funcAppPrincipalId: azFunctionAppTasks.outputs.functionPrincipalId
@@ -321,10 +259,9 @@ module azAssignEventHubDataReceiverRole 'eventHub-roleassignment.bicep' = {
 
 
 /* Service Principals for the function apps */
-output eventsGBRFunctionPrincipalId string = azFunctionAppEventsGBR.outputs.functionPrincipalId
+output eventsFunctionPrincipalId string = azFunctionAppEvents.outputs.functionPrincipalId
 output tasksFunctionPrincipalId string = azFunctionAppTasks.outputs.functionPrincipalId
 
 
 /* define outputs */
-output appConfigName string = azAppConfigurationName
 output appInsightsInstrumentionKey string = azAppInsightsInstrumentationKey

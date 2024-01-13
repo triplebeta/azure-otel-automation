@@ -14,7 +14,7 @@ variables:
   vmImageName: 'ubuntu-latest'
 
   azureServiceConnection: 'Triple Beta ARM Service Connection'
-  resourceGroupName: 'pma5-poc'
+  resourceGroupName: 'otelpoc'
   location: 'westeurope'
   templateFile: './infra/main.bicep'
 pool:
@@ -31,4 +31,4 @@ steps:
     templateLocation: 'Linked artifact'
     csmFile: '$(templateFile)'
     deploymentMode: 'Incremental'
-    deploymentName: 'pma5poc-infra'
+    deploymentName: 'otelpoc-infra'

@@ -45,9 +45,9 @@ app = func.FunctionApp()
 # Cardinality can be set to "many" or to "one".
 # It will log more metrics when using "many" 
 # 
-@app.function_name(name="TaskerFake")
-@app.event_hub_message_trigger(arg_name="myEvents", event_hub_name='eventsgbr', cardinality="one", connection="EVENTHUB_CONNECTION_STRING") 
-def TaskerFake(myEvents: func.EventHubEvent, context):
+@app.function_name(name="Tasks")
+@app.event_hub_message_trigger(arg_name="myEvents", event_hub_name='events', cardinality="one", connection="EVENTHUB_CONNECTION_STRING") 
+def Tasks(myEvents: func.EventHubEvent, context):
      """
           Generates fake log and telemetry entries.
      """
@@ -66,8 +66,8 @@ def TaskerFake(myEvents: func.EventHubEvent, context):
           # Read json to get the parameter values
           with tracer.start_as_current_span("Parse Tasker params") as span:
                try:
-                    msgFromEventsGBR = myEvents.get_body().decode("utf-8")
-                    jsonBody = json.loads(msgFromEventsGBR)
+                    msgFromEvents = myEvents.get_body().decode("utf-8")
+                    jsonBody = json.loads(msgFromEvents)
                     params = TasksSimulationRequest(jsonBody)
                except ValueError as error:
                     logging.error("Failed to parse message from ")

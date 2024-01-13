@@ -1,16 +1,12 @@
-import json
-import uuid
-import os
-import datetime
+#
+# This is a simple version of the full function
+#
+
+import azure.functions as func
+from simulation_request import SimulationRequest
 import logging
 import random
-import azure.functions as func
 
-# For using the event hub
-from azure.eventhub import EventData
-from azure.eventhub.aio import EventHubProducerClient
-
-# Open Telemetry
 from azure.monitor.opentelemetry import configure_azure_monitor
 from opentelemetry import trace, metrics
 
@@ -18,16 +14,15 @@ from opentelemetry import trace, metrics
 # For details check out: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-python-opencensus-migrate
 from opentelemetry.context import attach, detach
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
-from simple_eventsgbr_fake import EventsGBRFakeSimple
 
-from simulation_request import SimulationRequest
-
+# NOTE: This code is not needed here since we pass the tracer from the function_app.py to avoid duplicate logs
 # Avoid duplicate logging
-root_logger = logging.getLogger()
-for handler in root_logger.handlers[:]:
-    root_logger.removeHandler(handler)
-configure_azure_monitor()
-tracer = trace.get_tracer(__name__)
+# root_logger = logging.getLogger()
+# for handler in root_logger.handlers[:]:
+#     root_logger.removeHandler(handler)
+# configure_azure_monitor()
+# tracer = trace.get_tracer(__name__)
+
 
 # Create metrics. unit must be one of the values from the UCUM, see: https://ucum.org/ucum
 # Types of telemetry, https://www.timescale.com/blog/a-deep-dive-into-open-telemetry-metrics/
@@ -37,16 +32,10 @@ metric_run_failed = meter.create_counter(name="events.runs.failed", description=
 metric_run_completed = meter.create_counter(name="events.runs.completed", description="Count successfully completed runs.")
 metric_events_count = meter.create_counter(name="events.count", description="Count of successfully created events.")
 
-app = func.FunctionApp()
-
-# For demo purposes: simple Function with basic functionality
-@app.route(route="EventsGBRSimple", auth_level=func.AuthLevel.ANONYMOUS)
-def EventsGBRSimple(req: func.HttpRequest) -> func.HttpResponse:
-    return EventsGBRFakeSimple(req, tracer)
-
-# Much more advanced function that includes retry, error handling etc
-@app.route(route="EventsGBRFake", auth_level=func.AuthLevel.ANONYMOUS)
-async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
+#
+# This is the default one, so it will expose endpoint /api/Events
+#
+async def EventsAdvancedFunction(req: func.HttpRequest, context) -> func.HttpResponse:
     """ For logging in Python Function Apps, see:
         https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python?tabs=asgi%2Capplication-level&pivots=python-mode-decorators
 
@@ -105,7 +94,7 @@ async def EventsGBRFake(req: func.HttpRequest, context) -> func.HttpResponse:
         with tracer.start_as_current_span("Send trigger for tasks to Event Hub", attributes=metadata):
             logging.info(f'Sending trigger from Events to Tasker', extra=metadata)
             EVENT_HUB_CONNECTION_STR = os.environ["EVENTHUB_CONNECTION_STRING"]
-            producer = EventHubProducerClient.from_connection_string(EVENT_HUB_CONNECTION_STR, eventhub_name='eventsgbr') # , transport_type=TransportType.AmqpOverWebsocket
+            producer = EventHubProducerClient.from_connection_string(EVENT_HUB_CONNECTION_STR, eventhub_name='events') # , transport_type=TransportType.AmqpOverWebsocket
             
             async with producer:
                 # Create the message for the Tasker with number of valid events.

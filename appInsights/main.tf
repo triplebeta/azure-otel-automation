@@ -6,8 +6,8 @@ terraform {
     }
   }
   backend "azurerm" {
-    resource_group_name  = "pma5-poc"
-    storage_account_name = "pma5pocstorage"
+    resource_group_name  = "otelpoc"
+    storage_account_name = "otelpocstorage"
     container_name       = "tfstate"
     key                  = "terraform.tfstate"
   }

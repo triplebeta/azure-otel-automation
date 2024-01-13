@@ -1,0 +1,153 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "OTEL PoC - Events",
+    "dateExported": "2024-01-12T20:06:20.976Z",
+    "version": "1.1",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "e9df3113-4f57-43f1-8512-912bc5755c78",
+            "colId": "bd0a70ad-02c7-4c01-bc20-ad671bbd5318",
+            "containerId": "",
+            "name": "AA11 - all successful",
+            "url": "{{baseurl}}/api/Events",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2024-01-11T07:24:46.538Z",
+            "modified": "2024-01-12T20:05:40.319Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n    \"machine\": \"AA11\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "d7ac4f6f-614e-4d24-a4ef-2165bf6607e4",
+            "colId": "bd0a70ad-02c7-4c01-bc20-ad671bbd5318",
+            "containerId": "",
+            "name": "BB22 - Events ok, Tasks 1st fails, 2nd succeeds",
+            "url": "{{baseurl}}/api/Events",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2024-01-11T07:24:46.539Z",
+            "modified": "2024-01-12T20:05:10.071Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n    \"machine\": \"BB22\",\n    \"tasks\": {\n        \"iterations\": 2,\n        \"error\": \"Tasker out of memory\"\n    }\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "e4620c3b-49d8-4794-882b-152369e0269d",
+            "colId": "bd0a70ad-02c7-4c01-bc20-ad671bbd5318",
+            "containerId": "",
+            "name": "CC33 - Events ok, Tasks 3 runs fail",
+            "url": "{{baseurl}}/api/Events",
+            "method": "POST",
+            "sortNum": 30000,
+            "created": "2024-01-11T07:24:46.540Z",
+            "modified": "2024-01-12T20:05:48.761Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n    \"machine\": \"CC33\",\n    \"tasks\": {\n        \"iterations\": 3,\n        \"success\": false,\n    \"error\": \"Data Quality issue found in input data\"\n    }\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "36d63870-64ea-4242-980e-2fd1b9dd9c96",
+            "colId": "bd0a70ad-02c7-4c01-bc20-ad671bbd5318",
+            "containerId": "",
+            "name": "DD44 - Events ok, Tasks 1 run fails",
+            "url": "{{baseurl}}/api/Events",
+            "method": "POST",
+            "sortNum": 40000,
+            "created": "2024-01-11T07:24:46.541Z",
+            "modified": "2024-01-12T20:05:53.016Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n    \"machine\": \"DD44\",\n    \"tasks\": {\n        \"iterations\": 1,\n        \"success\": false,\n        \"error\": \"Tasker terminated by AKS\"\n    }\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "c729dd8e-577f-4fd2-82ce-1e66ca5d9ab8",
+            "colId": "bd0a70ad-02c7-4c01-bc20-ad671bbd5318",
+            "containerId": "",
+            "name": "EE55 - Events ok, Tasks 1 run fails , manual retry success",
+            "url": "{{baseurl}}/api/Events",
+            "method": "POST",
+            "sortNum": 50000,
+            "created": "2024-01-11T07:24:46.542Z",
+            "modified": "2024-01-12T20:05:55.622Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n    \"machine\": \"EE55\",\n    \"tasks\": {\n        \"iterations\": 2,\n        \"manualRetry\": true,\n        \"success\": true,\n        \"error\": \"Tasker terminated by AKS\"\n    }\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "be445ed0-7318-49ad-b094-7089712d5cf5",
+            "colId": "bd0a70ad-02c7-4c01-bc20-ad671bbd5318",
+            "containerId": "",
+            "name": "FF66 - Events fails",
+            "url": "{{baseurl}}/api/Events",
+            "method": "POST",
+            "sortNum": 60000,
+            "created": "2024-01-11T07:24:46.543Z",
+            "modified": "2024-01-12T20:05:59.041Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n    \"machine\": \"FF66\",\n    \"events\": {\n        \"error\": \"Out of memory\"\n    }\n}",
+                "form": []
+            },
+            "tests": []
+        }
+    ]
+}

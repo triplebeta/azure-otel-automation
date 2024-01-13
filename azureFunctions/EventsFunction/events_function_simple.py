@@ -1,3 +1,7 @@
+#
+# This is a simple version of the full function
+#
+
 import azure.functions as func
 from simulation_request import SimulationRequest
 import logging
@@ -19,8 +23,10 @@ metric_run_started = meter.create_counter(name="events.runs", description="Count
 metric_run_failed = meter.create_counter(name="events.runs.failed", description="Count failed runs.")
 metric_run_completed = meter.create_counter(name="events.runs.failed", description="Count failed runs.")
 
-
-def EventsGBRFakeSimple(req: func.HttpRequest, tracer) -> func.HttpResponse:
+#
+# This is not the default one, so it will expose endpoint /api/EventsSimple
+#
+def EventsSimpleFunction(req: func.HttpRequest, tracer) -> func.HttpResponse:
     logging.info(f"Extracting parameters from request...")
     params = SimulationRequest(req.get_json())
 

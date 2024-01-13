@@ -1,0 +1,63 @@
+# Python Function App to Linux on Azure
+# Build a Python function app and deploy it to Azure as a Linux function app.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/python
+
+trigger:
+  branches:
+    include:
+    - master
+
+variables:
+  # Azure Resource Manager connection created during pipeline creation
+  azureSubscription: 'Triple Beta ARM Service Connection'
+
+  # Function app name
+  functionAppNameEvents: 'events-app'
+
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
+  # Working Directory
+  workingDirectory: '$(System.DefaultWorkingDirectory)'
+
+stages:
+- stage: BuildEvents
+  displayName: Build Events
+
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+
+    steps:
+    - bash: |
+        if [ -f extensions.csproj ]
+        then
+            dotnet build extensions.csproj --runtime ubuntu.16.04-x64 --output ./bin
+        fi
+      workingDirectory: $(workingDirectory)/EventsFunction
+      displayName: 'Build extensions'
+
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.9'
+      inputs:
+        versionSpec: 3.9 # Functions V2 supports Python 3.6 as of today
+
+    - bash: |
+        pip install --target="./.python_packages/lib/site-packages" -r ./requirements.txt
+      workingDirectory: $(workingDirectory)/EventsFunction
+      displayName: 'Install application dependencies'
+
+    - task: ArchiveFiles@2
+      displayName: 'Archive files'
+      inputs:
+        rootFolderOrFile: '$(workingDirectory)/EventsFunction'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).EventsFunction.zip
+        replaceExistingArchive: true
+
+    - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).EventsFunction.zip
+      artifact: EventsFunction

@@ -23,7 +23,7 @@
                     "metrics": [
                       {
                         "resourceMetadata": {
-                          "id": "/subscriptions/${sub_id}/resourceGroups/pma5-poc/providers/Microsoft.Insights/components/pma5poc-ai"
+                          "id": "/subscriptions/${sub_id}/resourceGroups/otelpoc/providers/Microsoft.Insights/components/${resource_group_name}-ai"
                         },
                         "name": "customMetrics/eventscreated",
                         "aggregationType": 1,
@@ -33,7 +33,7 @@
                         }
                       }
                     ],
-                    "title": "Sum eventscreated for pma5poc-ai by machinenr",
+                    "title": "Sum eventscreated for ${resource_group_name}-ai by machinenr",
                     "titleKind": 1,
                     "visualization": {
                       "chartType": 1,
@@ -79,7 +79,7 @@
                     "metrics": [
                       {
                         "resourceMetadata": {
-                          "id": "/subscriptions/${sub_id}/resourceGroups/pma5-poc/providers/Microsoft.Insights/components/pma5poc-ai"
+                          "id": "/subscriptions/${sub_id}/resourceGroups/${resource_group_name}/providers/Microsoft.Insights/components/${resource_group_name}-ai"
                         },
                         "name": "customMetrics/eventscreated",
                         "aggregationType": 1,

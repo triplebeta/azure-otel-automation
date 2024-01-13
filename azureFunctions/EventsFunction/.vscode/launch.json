@@ -1,11 +1,11 @@
 {
     "version": "0.2.0",
-    "configurations": [
+    "configurations": [           
         {
-            "name": "Attach to Python Functions",
+            "name": "Attach to Events",
             "type": "python",
             "request": "attach",
-            "port": 9092,
+            "port": 9091,
             "preLaunchTask": "func: host start"
         }
     ]

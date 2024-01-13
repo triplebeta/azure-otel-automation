@@ -16,7 +16,7 @@ if (len(sys.argv)==2):
 else:
     raise Exception("Invalid arguments. Requires 1 argument: machinenr")
 
-print("Manually starting Events GBR function...")
+print("Manually starting Events function...")
 body= {
     "machine": machinenr,
     "events": {
@@ -24,6 +24,6 @@ body= {
     }
 }
 
-url="https://pma5poc-eventsgbr-app.azurewebsites.net/api/EventsGBRFake"
+url="https://otelpoc-events-app.azurewebsites.net/api/Events"
 response = requests.post(url, json=body)
 print(response.text)
