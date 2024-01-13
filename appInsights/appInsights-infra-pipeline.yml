@@ -1,10 +1,6 @@
 # Azure Devops pipeline to deploy ApplicationInsights functions.
 # This cannot be done using Bicep because of a bug in the Bicep templates.
 
-parameters:
-  # Azure Resource Manager connection created during pipeline creation
-  - name: azureServiceConnection
-
 trigger:
   branches:
     include:
@@ -15,6 +11,11 @@ trigger:
 
 pool:
   vmImage: ubuntu-latest
+
+variables:
+  # Azure Resource Manager connection created during pipeline creation
+  - name: azureServiceConnection
+    value: $(azureServiceConnection)
 
 steps:
 - task: TerraformInstaller@1

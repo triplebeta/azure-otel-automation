@@ -1,7 +1,8 @@
 variables:
   System.Debug: true
-  adoAccountName: triplebeta/Azure-infra
-  serviceConnectionName: My Azure Resource manager for Prod subscription
-  subscriptionId: a6faafc0-def0-429a-bd0e-2c2550f163a3
-  tenantId: 1d9ecc25-6fef-4fe9-b766-603f6c0ecf89
-  adoRepositoryName: PMA5-telemetry-poc
+  adoAccountName: $(adoAccountName)
+  serviceConnectionName: $(azureServiceConnection)
+  subscriptionId: $(subscriptionId)
+  tenantId: $(tenantId)
+  adoRepositoryName: $(adoRepositoryName)
+
