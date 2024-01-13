@@ -2,6 +2,9 @@ trigger:
   branches:
     include:
     - master
+  paths:
+    include:
+      - azureFunctions/infra
 
 name: Deploy Bicep files
 

@@ -7,6 +7,9 @@ trigger:
   branches:
     include:
     - master
+  paths:
+    include:
+      - azureFunctions/EventsFunction
 
 variables:
   # Azure Resource Manager connection created during pipeline creation
