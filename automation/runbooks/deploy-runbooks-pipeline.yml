@@ -11,98 +11,48 @@ trigger:
       - /**/*.md
 
 variables:
-  - template: /automation/env/global.parameters.yml
-  - template: /automation/env/dev.parameters.yml
-  # - template: env/stg.parameters.yml
-  # - template: env/prd.parameters.yml
-  - template: variables_runbooks.yml
-    parameters:
-      adoRepositoryName: ${{ variables.adoRepositoryName }}
+  - group: otelpoc
+  - name: templateFile
+    value: 'automation/runbooks/alerts.bicep'
 
 stages:
-  - stage: Deploy_Runbooks_to_Dev 
-    jobs:
-    - deployment: Dev
-      pool:
-        vmImage: windows-latest
-      environment: ${{ variables.devEnvironmentName }}
-      strategy:
-        runOnce:
-          deploy:
-            steps:            
-            - checkout: self
-              persistCredentials: true
-            - task: AzurePowerShell@5
-              displayName: Deploy Python packages in the Automation account
-              inputs:
-                azureSubscription: ${{ variables.serviceConnectionName }}
-                scriptType: FilePath
-                scriptPath: '${{ variables.pathToAutomationDirectory }}/runbooks/deploy-runbook-packages.ps1'
-                scriptArguments:
-                  -ResourceGroupName ${{ variables.devResourceGroupName }}
-                azurePowerShellVersion: latestVersion
-            - task: AzurePowerShell@5
-              displayName: Deploy Runbooks to Azure Automation
-              inputs:
-                azureSubscription: ${{ variables.serviceConnectionName }}
-                scriptType: FilePath
-                scriptPath: '${{ variables.pathToAutomationDirectory }}/runbooks/deploy-runbooks.ps1'
-                scriptArguments:
-                  -ResourceGroupName ${{ variables.devResourceGroupName }}
-                azurePowerShellVersion: latestVersion
-            - task: AzureCLI@2
-              displayName: Compile Bicep to ARM
-              inputs:
-                azureSubscription: ${{ variables.serviceConnectionName }}
-                scriptType: ps
-                scriptLocation: inlineScript
-                inlineScript:  |
-                  az bicep build -f alerts.bicep
-            - task: AzureResourceGroupDeployment@2
-              displayName: Deploy Azure AlertRuleGroup to start a Runbook
-              inputs:
-                azureSubscription: ${{ variables.serviceConnectionName }}
-                resourceGroupName: ${{ variables.devResourceGroupName }}
-                csmFile: bicep.json
-                csmParametersFile: ${{ parameters.pathToInfrastructureDirectory }}/env/${{ parameters.environmentName }}.bicepparameters.json
-
-  # - stage: Deploy_to_Stg
-  #   jobs:
-  #   - deployment: Stg
-  #     pool:
-  #       vmImage: windows-latest
-  #     environment: ${{ variables.stgEnvironmentName }}
-  #     strategy:
-  #       runOnce:
-  #         deploy:
-  #           steps:
-  #           - template: deploy-runbook-packages.yml
-  #             parameters:
-  #               azureServiceConnection: ${{ variables.serviceConnectionName }}
-  #               resourceGroupName: ${{ variables.devResourceGroupName }}
-  #               pathToAutomationDirectory: ${{ variables.pathToAutomationDirectory }}
-  #           - template: deploy-runbooks.yml
-  #             parameters:
-  #               azureServiceConnection: ${{ variables.serviceConnectionName }}
-  #               resourceGroupName: ${{ variables.stgResourceGroupName }}
-  #               pathToAutomationDirectory: ${{ variables.pathToAutomationDirectory }}
-  # - stage: Deploy_to_Prd 
-  #   jobs:
-  #   - deployment: Prd
-  #     pool:
-  #       vmImage: windows-latest
-  #     environment: ${{ variables.prdEnvironmentName }}
-  #     strategy:
-  #       runOnce:
-  #         deploy:
-  #           steps:
-  #           - template: deploy-runbook-packages.yml
-  #             parameters:
-  #               azureServiceConnection: ${{ variables.serviceConnectionName }}
-  #               resourceGroupName: ${{ variables.devResourceGroupName }}
-  #               pathToAutomationDirectory: ${{ variables.pathToAutomationDirectory }}
-  #           - template: deploy-runbooks.yml
-  #             parameters:
-  #               azureServiceConnection: ${{ variables.serviceConnectionName }}
-  #               resourceGroupName: ${{ variables.prdResourceGroupName }}
-  #               pathToAutomationDirectory: ${{ variables.pathToAutomationDirectory }}
+- stage: DeployAutomationInfra
+  displayName: Deploy automation infra
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: windows-latest
+    steps:       
+      - checkout: self
+        persistCredentials: true
+      - task: AzurePowerShell@5
+        displayName: Deploy Python packages in the Automation account
+        inputs:
+          azureSubscription: $(azureServiceConnection)
+          scriptType: FilePath
+          scriptPath: '$(System.DefaultWorkingDirectory)/automation/runbooks/deploy-runbook-packages.ps1'
+          scriptArguments:
+            -ResourceGroupName $(resourceGroupName)
+          azurePowerShellVersion: latestVersion
+      - task: AzurePowerShell@5
+        displayName: Deploy Runbooks to Azure Automation
+        inputs:
+          azureSubscription: $(azureServiceConnection)
+          scriptType: FilePath
+          scriptPath: '$(System.DefaultWorkingDirectory)/automation/runbooks/deploy-runbooks.ps1'
+          scriptArguments:
+            -ResourceGroupName $(resourceGroupName)
+          azurePowerShellVersion: latestVersion
+      - task: AzureResourceManagerTemplateDeployment@3
+        displayName: Deploy Azure AlertRuleGroup to start a Runbook
+        inputs:
+          deploymentScope: 'Resource Group'
+          azureResourceManagerConnection: '$(azureServiceConnection)'
+          action: 'Create Or Update Resource Group'
+          resourceGroupName: '$(resourceGroupName)'
+          location: '$(location)'
+          templateLocation: 'Linked artifact'
+          csmFile: '$(templateFile)'
+          deploymentMode: 'Incremental'
+          deploymentName: '$(resourceGroupName)-alerts'
