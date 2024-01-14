@@ -11,9 +11,6 @@ variables:
   - template: /automation/env/dev.parameters.yml
   # - template: env/stg.parameters.yml
   # - template: env/prd.parameters.yml
-  - template: variables_infra.yml
-    parameters:
-      adoRepositoryName: ${{ variables.adoRepositoryName }}
 
 trigger:
   branches:
@@ -41,11 +38,11 @@ stages:
                 azureServiceConnection: $(azureServiceConnection)
                 resourceGroupName: $(resourceGroupName)
                 environmentName: ${{ variables.devEnvironmentName }}
-                pathToInfrastructureDirectory: $(pathToInfrastructure)
+                pathToInfrastructureDirectory: '$(System.DefaultWorkingDirectory)/automation/infra'
                 adoAccountName: $(adoAccountName)
                 adoRepositoryName: $(adoRepositoryName)
                 adoPat: $(AdoPat)
-                pathToAutomationDirectory: $(pathToAutomation)
+                pathToAutomationDirectory: '$(System.DefaultWorkingDirectory)/automation'
   
   # - stage: Deploy_to_Stg
   #   jobs:
