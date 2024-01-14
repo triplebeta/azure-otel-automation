@@ -9,18 +9,7 @@ trigger:
 name: Deploy Bicep files
 
 variables:
-  # Azure Resource Manager connection created during pipeline creation
-  - name: azureServiceConnection
-    value: $(azureServiceConnection)
-
-  - name: vmImageName
-    value: 'ubuntu-latest'
-
-  - name: resourceGroupName
-    value: 'otelpoc'
-
-  - name: location
-    value: 'westeurope'
+  - group: otelpoc
 
   - name: templateFile
     value: './infra/main.bicep'
