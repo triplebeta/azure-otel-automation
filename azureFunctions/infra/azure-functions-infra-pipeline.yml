@@ -17,7 +17,7 @@ variables:
     value: 'azureFunctions/infra/main.bicep'
 
 pool:
-  vmImage: $(vmImageName)
+  vmImage: ubuntu-latest
 
 steps:
 - task: AzureResourceManagerTemplateDeployment@3
