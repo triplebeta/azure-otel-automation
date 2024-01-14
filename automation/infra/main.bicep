@@ -1,5 +1,6 @@
-param appName string
 param location string = resourceGroup().location
+var appName = resourceGroup().name
+
 
 module managedIdentityDeployment 'managed-identities.bicep' = {
   name: 'managed-identity-deployment'

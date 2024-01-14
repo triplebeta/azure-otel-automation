@@ -30,4 +30,4 @@ steps:
     templateLocation: 'Linked artifact'
     csmFile: '$(templateFile)'
     deploymentMode: 'Incremental'
-    deploymentName: 'otelpoc-infra'
+    deploymentName: '$(resourceGroupName)-infra'

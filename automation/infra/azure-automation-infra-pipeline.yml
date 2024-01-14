@@ -12,15 +12,16 @@ trigger:
   paths:
     include:
       - automation/infra
+    exclude:
+      - /**/*.md
   
 variables:
   - group: otelpoc
-  - name: environmentName
-    value: 'dev'
-
+  - name: templateFile
+    value: 'automation/infra/main.bicep'
 
 stages:
-  - stage: Deploy_to_Dev 
+  - stage: DeployAutomationInfra
     jobs:
     - deployment: Dev
       pool:
@@ -32,22 +33,17 @@ stages:
               - checkout: self
                 persistCredentials: true
               - template: print-env.yml
-              - task: AzureCLI@2
-                displayName: Compile Bicep to ARM
+              - task: AzureResourceManagerTemplateDeployment@3
                 inputs:
-                  azureSubscription: $(azureServiceConnection)
-                  workingDirectory: '$(System.DefaultWorkingDirectory)/automation/infra'
-                  scriptType: ps
-                  scriptLocation: inlineScript
-                  inlineScript:  |
-                    az bicep build -f main.bicep
-              - task: AzureResourceGroupDeployment@2
-                displayName: Deploy Azure Automation account
-                inputs:
-                  azureSubscription: $(azureServiceConnection)
-                  resourceGroupName: $(resourceGroupName)
-                  csmFile: $(System.DefaultWorkingDirectory)/automation/infra/main.json
-                  csmParametersFile: $(System.DefaultWorkingDirectory)/automation/infra/env/$(environmentName).bicepparameters.json
+                  deploymentScope: 'Resource Group'
+                  azureResourceManagerConnection: '$(azureServiceConnection)'
+                  action: 'Create Or Update Resource Group'
+                  resourceGroupName: '$(resourceGroupName)'
+                  location: '$(location)'
+                  templateLocation: 'Linked artifact'
+                  csmFile: '$(templateFile)'
+                  deploymentMode: 'Incremental'
+                  deploymentName: '$(resourceGroupName)-infra'
               - task: AzurePowerShell@5
                 displayName: Setup Source Control link between Automation Account and Azure DevOps Git repo
                 inputs:
