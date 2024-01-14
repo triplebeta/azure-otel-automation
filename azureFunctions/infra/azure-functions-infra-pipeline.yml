@@ -5,6 +5,8 @@ trigger:
   paths:
     include:
       - azureFunctions/infra
+    exclude:
+      - /**/*.md
 
 name: Deploy Bicep files
 

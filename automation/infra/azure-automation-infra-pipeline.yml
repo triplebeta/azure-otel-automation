@@ -21,6 +21,8 @@ trigger:
   paths:
     include:
     - automation/infra
+    exclude:
+      - /**/*.md
 
 stages:
   - stage: Deploy_to_Dev 

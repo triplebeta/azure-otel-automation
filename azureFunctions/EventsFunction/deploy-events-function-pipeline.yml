@@ -10,23 +10,15 @@ trigger:
   paths:
     include:
       - azureFunctions/EventsFunction
+    exclude:
+      - /**/*.md
 
 variables:
-  # Azure Resource Manager connection created during pipeline creation
-  - name: azureServiceConnection
-    value: $(azureServiceConnection)
+  - group: otelpoc
 
   # Function app name
   - name: functionAppNameEvents
     value: 'events-app'
-
-  # Agent VM image name
-  - name: vmImageName
-    value: 'ubuntu-latest'
-
-  # Working Directory
-  - name: workingDirectory
-    value: '$(System.DefaultWorkingDirectory)'
 
 stages:
 - stage: BuildEvents
@@ -44,7 +36,7 @@ stages:
         then
             dotnet build extensions.csproj --runtime ubuntu.16.04-x64 --output ./bin
         fi
-      workingDirectory: $(workingDirectory)/EventsFunction
+      workingDirectory: $(System.DefaultWorkingDirectory)/EventsFunction
       displayName: 'Build extensions'
 
     - task: UsePythonVersion@0
@@ -54,13 +46,13 @@ stages:
 
     - bash: |
         pip install --target="./.python_packages/lib/site-packages" -r ./requirements.txt
-      workingDirectory: $(workingDirectory)/EventsFunction
+      workingDirectory: $(System.DefaultWorkingDirectory)/EventsFunction
       displayName: 'Install application dependencies'
 
     - task: ArchiveFiles@2
       displayName: 'Archive files'
       inputs:
-        rootFolderOrFile: '$(workingDirectory)/EventsFunction'
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/EventsFunction'
         includeRootFolder: false
         archiveType: zip
         archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).EventsFunction.zip
