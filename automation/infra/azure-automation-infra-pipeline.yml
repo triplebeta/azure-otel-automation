@@ -11,9 +11,10 @@ trigger:
     - master
   paths:
     include:
-    - automation/infra
+      - automation/infra
     exclude:
       - /**/*.md
+  
 
 variables:
   - name: environmentName
