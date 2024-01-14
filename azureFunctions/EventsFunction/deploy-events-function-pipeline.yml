@@ -67,6 +67,6 @@ stages:
         connectedServiceNameARM: $(azureServiceConnection)
         appType: functionAppLinux
         appName: '$(functionAppName)'
-        package: '$(System.DefaultWorkingDirectory)/*.zip'
+        package: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).EventsFunction.zip
         runtimeStack: 'PYTHON|3.9'
         deploymentMethod: runFromPa
