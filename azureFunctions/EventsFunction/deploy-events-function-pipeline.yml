@@ -64,7 +64,7 @@ stages:
     - task: AzureFunctionApp@2
       displayName: 'Azure Function App Deploy: Events function'
       inputs:
-        connectedServiceNameARM: azureServiceConnection
+        connectedServiceNameARM: $(azureServiceConnection)
         appType: functionAppLinux
         appName: 'events-app'
         package: '$(System.DefaultWorkingDirectory)/EventsFunction/*.zip'

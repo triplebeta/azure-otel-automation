@@ -29,7 +29,7 @@ steps:
     provider: 'azurerm'
     command: 'init'
     workingDirectory: 'appInsights'
-    backendServiceArm: azureServiceConnection
+    backendServiceArm: $(azureServiceConnection)
     backendAzureRmResourceGroupName: $(resourceGroupName)
     backendAzureRmStorageAccountName: '$(resourceGroupName)storage'
     backendAzureRmContainerName: 'tfstate'
@@ -43,7 +43,7 @@ steps:
     command: 'plan'
     workingDirectory: 'appInsights'
     commandOptions: '-out main.tfplan'
-    environmentServiceNameAzureRM: azureServiceConnection
+    environmentServiceNameAzureRM: $(azureServiceConnection)
 
 # Only runs if the 'terraformPlan' task has detected changes the in state. 
 - task: TerraformTaskV4@4
@@ -54,5 +54,5 @@ steps:
     command: 'apply'
     workingDirectory: 'appInsights'
     commandOptions: 'main.tfplan'
-    environmentServiceNameAzureRM: azureServiceConnection
+    environmentServiceNameAzureRM: $(azureServiceConnection)
 

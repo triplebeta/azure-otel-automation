@@ -10,23 +10,15 @@ trigger:
   paths:
     include:
       - azureFunctions/TasksFunction
+    exclude:
+      - /**/*.md
 
 variables:
-  # Azure Resource Manager connection created during pipeline creation
-  - name: azureServiceConnection
-    value: $(azureServiceConnection)
-
+  - group: otelpoc
+  
   # Function app name
   - name: functionAppNameTasks
     value: 'tasks-app'
-
-  # Agent VM image name
-  - name: vmImageName
-    value: 'ubuntu-latest'
-
-  # Working Directory
-  - name: workingDirectory
-    value: '$(System.DefaultWorkingDirectory)'
 
 stages:
 - stage: BuildTasks
@@ -44,7 +36,7 @@ stages:
         then
             dotnet build extensions.csproj --runtime ubuntu.16.04-x64 --output ./bin
         fi
-      workingDirectory: $(workingDirectory)/TasksFunction
+      workingDirectory: $(System.DefaultWorkingDirectory)/TasksFunction
       displayName: 'Build extensions'
 
     - task: UsePythonVersion@0
@@ -54,13 +46,13 @@ stages:
 
     - bash: |
         pip install --target="./.python_packages/lib/site-packages" -r ./requirements.txt
-      workingDirectory: $(workingDirectory)/TasksFunction
+      workingDirectory: $(System.DefaultWorkingDirectory)/TasksFunction
       displayName: 'Install application dependencies'
 
     - task: ArchiveFiles@2
       displayName: 'Archive files'
       inputs:
-        rootFolderOrFile: '$(workingDirectory)/TasksFunction'
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/TasksFunction'
         includeRootFolder: false
         archiveType: zip
         archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).TasksFunction.zip
@@ -72,7 +64,7 @@ stages:
     - task: AzureFunctionApp@2
       displayName: 'Azure Function App Deploy: Tasks function'
       inputs:
-        connectedServiceNameARM: azureServiceConnection
+        connectedServiceNameARM: $(azureServiceConnection)
         appType: functionAppLinux
         appName: 'tasks-app'
         package: '$(System.DefaultWorkingDirectory)/TasksFunction/*.zip'
