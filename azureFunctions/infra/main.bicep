@@ -28,6 +28,9 @@ resource azStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
       publicAccess: 'None'
       metadata: {}
     }
+    dependsOn: [
+      azStorageAccount
+    ]
   }
 
 // TODO Find a better way than using listKeys
