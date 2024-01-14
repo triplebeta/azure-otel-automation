@@ -12,7 +12,7 @@ variables:
   - group: otelpoc
 
   - name: templateFile
-    value: './infra/main.bicep'
+    value: 'main.bicep'
 
 pool:
   vmImage: $(vmImageName)
