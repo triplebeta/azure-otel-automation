@@ -18,7 +18,7 @@ variables:
 
   # Function app name
   - name: functionAppName
-    value: '${resourceGroupName}-events-app'
+    value: '$(resourceGroupName)-events-app'
 
 stages:
 - stage: BuildEvents
