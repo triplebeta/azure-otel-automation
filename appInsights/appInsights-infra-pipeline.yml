@@ -30,8 +30,8 @@ steps:
     command: 'init'
     workingDirectory: 'appInsights'
     backendServiceArm: azureServiceConnection
-    backendAzureRmResourceGroupName: 'otelpoc'
-    backendAzureRmStorageAccountName: 'otelpocstorage'
+    backendAzureRmResourceGroupName: $(resourceGroupName)
+    backendAzureRmStorageAccountName: '$(resourceGroupName)storage'
     backendAzureRmContainerName: 'tfstate'
     backendAzureRmKey: 'terraform.tfstate'
 
