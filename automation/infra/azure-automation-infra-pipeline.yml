@@ -38,14 +38,14 @@ stages:
             steps:
             - template: deploy-automation-infra.yml
               parameters:
-                azureServiceConnection: ${{ variables.serviceConnectionName }}
-                resourceGroupName: ${{ variables.devResourceGroupName }}
+                azureServiceConnection: $(azureServiceConnection)
+                resourceGroupName: $(resourceGroupName)
                 environmentName: ${{ variables.devEnvironmentName }}
-                pathToInfrastructureDirectory: ${{ variables.pathToInfrastructureDirectory }}
-                adoAccountName: ${{ variables.adoAccountName }}
-                adoRepositoryName: ${{ variables.adoRepositoryName }}
+                pathToInfrastructureDirectory: $(pathToInfrastructure)
+                adoAccountName: $(adoAccountName)
+                adoRepositoryName: $(adoRepositoryName)
                 adoPat: $(AdoPat)
-                pathToAutomationDirectory: ${{ variables.pathToAutomationDirectory }}
+                pathToAutomationDirectory: $(pathToAutomation)
   
   # - stage: Deploy_to_Stg
   #   jobs:
