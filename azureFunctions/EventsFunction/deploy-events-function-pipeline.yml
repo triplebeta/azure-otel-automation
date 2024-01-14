@@ -18,7 +18,7 @@ variables:
 
   # Function app name
   - name: functionAppNameEvents
-    value: 'events-app'
+    value: '${resourceGroupName}-events-app'
 
 stages:
 - stage: BuildEvents
@@ -66,7 +66,7 @@ stages:
       inputs:
         connectedServiceNameARM: $(azureServiceConnection)
         appType: functionAppLinux
-        appName: 'events-app'
+        appName: '${functionAppNameTasks}'
         package: '$(System.DefaultWorkingDirectory)/azureFunctions/EventsFunction/*.zip'
         runtimeStack: 'PYTHON|3.9'
         deploymentMethod: runFromPa
