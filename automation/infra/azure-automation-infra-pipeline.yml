@@ -6,6 +6,7 @@
 name: Deploy Automation
 
 variables:
+  - group: otelpoc
   - template: /automation/env/global.parameters.yml
   - template: /automation/env/dev.parameters.yml
   # - template: env/stg.parameters.yml
