@@ -7,6 +7,8 @@ trigger:
   paths:
     include:
     - automation/runbooks
+    exclude:
+      - /**/*.md
 
 variables:
   - template: /automation/env/global.parameters.yml
