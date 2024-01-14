@@ -25,7 +25,6 @@ stages:
     - deployment: Dev
       pool:
         vmImage: windows-latest
-      environment: $(environmentName)
       strategy:
         runOnce:
           deploy:
@@ -60,46 +59,6 @@ stages:
                     -ResourceGroupName $(resourceGroupName)
                     -adoAccountName $(adoAccountName)
                     -RepositoryName $(adoRepositoryName)
-                    -PathToRunbooks 'runbooks'
+                    -PathToRunbooks 'automation/runbooks'
                     -AdoPat $(AdoPat)
   
-  # - stage: Deploy_to_Stg
-  #   jobs:
-  #   - deployment: Stg
-  #     pool:
-  #       vmImage: windows-latest
-  #     environment: ${{ variables.stgEnvironmentName }}
-  #     strategy:
-  #       runOnce:
-  #         deploy:
-  #           steps:
-  #           - template: deploy-infrastructure.yml
-  #             parameters:
-  #               azureServiceConnection: ${{ variables.serviceConnectionName }}
-  #               resourceGroupName: ${{ variables.stgResourceGroupName }}
-  #               environmentName: ${{ variables.stgEnvironmentName }}
-  #               pathToInfrastructureDirectory: ${{ variables.pathToInfrastructureDirectory }}
-  #               adoAccountName: ${{ variables.adoAccountName }}
-  #               adoRepositoryName: ${{ variables.adoRepositoryName }}
-  #               adoPat: $(AdoPat)
-  #               pathToAutomationDirectory: ${{ variables.pathToAutomationDirectory }}
-  # - stage: Deploy_to_Prd 
-  #   jobs:
-  #   - deployment: Prd
-  #     pool:
-  #       vmImage: windows-latest
-  #     environment: ${{ variables.prdEnvironmentName }}
-  #     strategy:
-  #       runOnce:
-  #         deploy:
-  #           steps:
-  #           - template: deploy-infrastructure.yml
-  #             parameters:
-  #               azureServiceConnection: ${{ variables.serviceConnectionName }}
-  #               resourceGroupName: ${{ variables.prdResourceGroupName }}
-  #               environmentName: ${{ variables.prdEnvironmentName }}
-  #               pathToInfrastructureDirectory: ${{ variables.pathToInfrastructureDirectory }}
-  #               adoAccountName: ${{ variables.adoAccountName }}
-  #               adoRepositoryName: ${{ variables.adoRepositoryName }}
-  #               adoPat: $(AdoPat)
-  #               pathToAutomationDirectory: ${{ variables.pathToAutomationDirectory }}
