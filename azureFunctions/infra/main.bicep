@@ -107,7 +107,7 @@ var functionAppTasksName = '${envResourceNamePrefix}-tasks-app'
 module azFunctionAppEvents 'functionApp.bicep' = {
   name: '${deploymentNameId}-events'
   params: {
-    serviceNameAppName: 'GBR Events'
+    serviceNameAppName: 'Events'
     functionAppName: functionAppEventsName
     location: location
     azHostingPlanId: azHostingPlan.id
@@ -126,7 +126,7 @@ module azFunctionAppEvents 'functionApp.bicep' = {
 module azFunctionAppTasks 'functionApp.bicep' = {
   name: '${deploymentNameId}-tasks'
   params: {
-    serviceNameAppName: 'Tasker'
+    serviceNameAppName: 'Tasks'
     functionAppName: functionAppTasksName
     location: location
     azHostingPlanId: azHostingPlan.id
