@@ -7,6 +7,12 @@ You can use the Azure Devops pipeline [deploy-runbooks-pipeline.yml](deploy-runb
 
 It deploys the runbooks and for one of them it creates a webhook. It also deployes an alert, connected with an actionGroup and actionRules. When the alert fires, it will trigger the runbook using the webhook.
 
+_*important:*_: you must MANUALLY assign the Contributor role to the managed identity of the automation account. Otherwise the deploy-runbooks-pipeline will fail with an exception:
+```
+User-Assigned Managed Identity is enabled but it does not have Contributor access to  Automation account (User-Assigned Managed Identity is enabled but it does not have  Contributor access to Automation account)
+```
+
+
 ## Testing a runbook locally
 You can easily test the runbook by running the python file from the commandline:
 
@@ -20,4 +26,4 @@ A runbook accepts input parameters and if you create runbook using PowerShell, y
 
 Runbook [ManuallyStartEventsRun.py](ManuallyStartEventsRun.py) shows how to use a parameter.
 
-In case the runbook is started from a webhook, it's more complex because the runbook receives 1 parameter, WEBHOOKDATA, containing all the data as a json string. The runbook [MyFirstPythonRunbookForWebhook.py](MyFirstPythonRunbookForWebhook.py) shows how to handle t
+In case the runbook is started from a webhook, it's more complex because the runbook receives 1 parameter, WEBHOOKDATA, containing all the data as a json string. The runbook [MyFirstPythonRunbookForWebhook.py](MyFirstPythonRunbookForWebhook.py) shows how to handle 

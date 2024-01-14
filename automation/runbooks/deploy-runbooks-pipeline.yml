@@ -1,4 +1,4 @@
-name: Deploy Automation
+name: Deploy Runbooks and alerts
 
 trigger:
   branches:
