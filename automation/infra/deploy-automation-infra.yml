@@ -1,12 +1,11 @@
-parameters:
-  - name: azureServiceConnection
-  - name: resourceGroupName
+variables:
+  - group: otelpoc
   - name: environmentName
-  - name: pathToInfrastructureDirectory
-  - name: adoAccountName
-  - name: adoRepositoryName
-  - name: adoPat
-  - name: pathToAutomationDirectory
+    value: 'dev'
+
+
+      parameters:
+        pathToAutomationDirectory: '$(System.DefaultWorkingDirectory)/automation'
 
 steps:
   - checkout: self
@@ -15,8 +14,8 @@ steps:
   - task: AzureCLI@2
     displayName: Compile Bicep to ARM
     inputs:
-      azureSubscription: ${{ parameters.azureServiceConnection }}
-      workingDirectory: '${{ parameters.pathToInfrastructureDirectory }}'
+      azureSubscription: $(azureServiceConnection)
+      workingDirectory: '$(System.DefaultWorkingDirectory)/automation/infra'
       scriptType: ps
       scriptLocation: inlineScript
       inlineScript:  |
@@ -24,20 +23,20 @@ steps:
   - task: AzureResourceGroupDeployment@2
     displayName: Deploy Azure Automation account
     inputs:
-      azureSubscription: ${{ parameters.azureServiceConnection }}
-      resourceGroupName: ${{ parameters.resourceGroupName }}
-      csmFile: ${{ parameters.pathToInfrastructureDirectory }}/main.json
-      csmParametersFile: ${{ parameters.pathToInfrastructureDirectory }}/env/${{ parameters.environmentName }}.bicepparameters.json
+      azureSubscription: $(azureServiceConnection)
+      resourceGroupName: $(resourceGroupName)
+      csmFile: $(System.DefaultWorkingDirectory)/automation/infra/main.json
+      csmParametersFile: $(System.DefaultWorkingDirectory)/automation/infra/env/$(environmentName).bicepparameters.json
   - task: AzurePowerShell@5
     displayName: Setup Source Control link between Automation Account and Azure DevOps Git repo
     inputs:
-      azureSubscription: ${{ parameters.azureServiceConnection }}
+      azureSubscription: $(azureServiceConnection)
       ScriptType: FilePath
       azurePowerShellVersion: latestVersion
-      ScriptPath: ${{ parameters.pathToAutomationDirectory }}/infra/setup-source-control-link.ps1
+      ScriptPath: $(System.DefaultWorkingDirectory)/automation/infra/setup-source-control-link.ps1
       ScriptArguments: 
-        -ResourceGroupName ${{ parameters.resourceGroupName }}
-        -adoAccountName ${{ parameters.adoAccountName }}
-        -RepositoryName ${{ parameters.adoRepositoryName }}
+        -ResourceGroupName $(resourceGroupName)
+        -adoAccountName $(adoAccountName)
+        -RepositoryName $(adoRepositoryName)
         -PathToRunbooks 'runbooks'
-        -AdoPat ${{ parameters.adoPat }}
+        -AdoPat $(AdoPat)

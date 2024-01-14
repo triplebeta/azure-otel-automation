@@ -1,8 +1,0 @@
-variables:
-  System.Debug: true
-  adoAccountName: $(adoAccountName)
-  serviceConnectionName: $(azureServiceConnection)
-  subscriptionId: $(subscriptionId)
-  tenantId: $(tenantId)
-  adoRepositoryName: $(adoRepositoryName)
-
