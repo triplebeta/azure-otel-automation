@@ -17,7 +17,7 @@ variables:
   - group: otelpoc
   
   # Function app name
-  - name: functionAppNameTasks
+  - name: functionAppName
     value: '${resourceGroupName}-tasks-app'
 
 stages:
@@ -66,7 +66,7 @@ stages:
       inputs:
         connectedServiceNameARM: $(azureServiceConnection)
         appType: functionAppLinux
-        appName: '${functionAppNameTasks}'
+        appName: '$(functionAppName)'
         package: '$(System.DefaultWorkingDirectory)/azureFunctions/TasksFunction/*.zip'
         runtimeStack: 'PYTHON|3.9'
         deploymentMethod: runFrom
