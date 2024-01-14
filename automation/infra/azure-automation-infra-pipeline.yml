@@ -21,40 +21,38 @@ variables:
     value: 'automation/infra/main.bicep'
 
 stages:
-  - stage: DeployAutomationInfra
-    jobs:
-    - deployment: Dev
-      pool:
-        vmImage: windows-latest
-      strategy:
-        runOnce:
-          deploy:
-            steps:
-              - checkout: self
-                persistCredentials: true
-              - template: print-env.yml
-              - task: AzureResourceManagerTemplateDeployment@3
-                inputs:
-                  deploymentScope: 'Resource Group'
-                  azureResourceManagerConnection: '$(azureServiceConnection)'
-                  action: 'Create Or Update Resource Group'
-                  resourceGroupName: '$(resourceGroupName)'
-                  location: '$(location)'
-                  templateLocation: 'Linked artifact'
-                  csmFile: '$(templateFile)'
-                  deploymentMode: 'Incremental'
-                  deploymentName: '$(resourceGroupName)-infra'
-              - task: AzurePowerShell@5
-                displayName: Setup Source Control link between Automation Account and Azure DevOps Git repo
-                inputs:
-                  azureSubscription: $(azureServiceConnection)
-                  ScriptType: FilePath
-                  azurePowerShellVersion: latestVersion
-                  ScriptPath: $(System.DefaultWorkingDirectory)/automation/infra/setup-source-control-link.ps1
-                  ScriptArguments: 
-                    -ResourceGroupName $(resourceGroupName)
-                    -adoAccountName $(adoAccountName)
-                    -RepositoryName $(adoRepositoryName)
-                    -PathToRunbooks 'automation/runbooks'
-                    -AdoPat $(AdoPat)
-  
+- stage: DeployAutomationInfra
+  displayName: Deploy automation infra
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: windows-latest
+    steps:
+      - checkout: self
+        persistCredentials: true
+      - template: print-env.yml
+      - task: AzureResourceManagerTemplateDeployment@3
+        inputs:
+          deploymentScope: 'Resource Group'
+          azureResourceManagerConnection: '$(azureServiceConnection)'
+          action: 'Create Or Update Resource Group'
+          resourceGroupName: '$(resourceGroupName)'
+          location: '$(location)'
+          templateLocation: 'Linked artifact'
+          csmFile: '$(templateFile)'
+          deploymentMode: 'Incremental'
+          deploymentName: '$(resourceGroupName)-infra'
+      - task: AzurePowerShell@5
+        displayName: Setup Source Control link between Automation Account and Azure DevOps Git repo
+        inputs:
+          azureSubscription: $(azureServiceConnection)
+          ScriptType: FilePath
+          azurePowerShellVersion: latestVersion
+          ScriptPath: $(System.DefaultWorkingDirectory)/automation/infra/setup-source-control-link.ps1
+          ScriptArguments: 
+            -ResourceGroupName $(resourceGroupName)
+            -adoAccountName $(adoAccountName)
+            -RepositoryName $(adoRepositoryName)
+            -PathToRunbooks 'automation/runbooks'
+            -AdoPat $(AdoPat)
