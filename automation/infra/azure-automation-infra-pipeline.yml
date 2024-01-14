@@ -15,7 +15,6 @@ trigger:
     exclude:
       - /**/*.md
   
-
 variables:
   - name: environmentName
     value: 'dev'
