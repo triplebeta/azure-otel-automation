@@ -4,6 +4,9 @@ trigger:
   branches:
     include:
     - master
+  paths:
+    include:
+    - automation/runbooks
 
 variables:
   - template: /automation/env/global.parameters.yml
