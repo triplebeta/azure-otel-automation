@@ -3,10 +3,6 @@ variables:
   - name: environmentName
     value: 'dev'
 
-
-      parameters:
-        pathToAutomationDirectory: '$(System.DefaultWorkingDirectory)/automation'
-
 steps:
   - checkout: self
     persistCredentials: true
