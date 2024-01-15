@@ -1,7 +1,7 @@
 # Introduction
 This solution shows how you can utilize standard Azure services to monitor a solution perform common maintenance actions. It implements a working solution and deployment is automated as well.
 
-The goal of this setup is to demonstrate the capabilities and to provide a playground to tinker with it. It can help to learn how to use these concepts. Here you can find a [description of the components](Components.md).
+The goal of this setup is to demonstrate the capabilities and to provide a playground to tinker with it. It can help to learn how to use these concepts. Here you can find a [description of the components](docs/Components.md).
 
 Credits: The Azure Automation part is based on this setup: [https://github.com/jordanbean-msft/automation-ado](https://github.com/jordanbean-msft/automation-ado)
 
@@ -67,4 +67,4 @@ All resources can be deployed with Infrastructure as Code using Azure Devops pip
 
 8. Run pipelines 4, 5 and 6.
 
-Now you are ready to start exploring the solution so as a next step go to [Getting started](GettingStarted.md)
+Now you are ready to start exploring the solution so as a next step go to [Getting started](docs/GettingStarted.md)
