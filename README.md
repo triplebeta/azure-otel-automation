@@ -9,16 +9,6 @@ Credits: The Azure Automation part is based on this setup: [https://github.com/j
 ## Disclaimer
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-## Prerequisites
-You should install a few plugins to be able to run the code on your local laptop:
-* Python 3.11 - install from the software catalog
-* [Python plugin for VS Code](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
-* [Azurite plugin for VS Code](https://marketplace.visualstudio.com/items?itemName=Azurite.azurite) - simulator for Azure infrastructure
-* [Bicep](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-bicep)- language support for the Bicep infrastructure code
-* [Azure tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-node-azure-pack) - standard Microsoft plugin to work with Azure services (like functions)
-* [Azure Functions](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions) - Microsoft plugin to work with Functions
-* [Azure Automation](https://marketplace.visualstudio.com/items?itemName=azure-automation.vscode-azureautomation)
-
 ## Deployment
 The following steps help you to setup this solution on Azure. If all goes well, you will end up with one resource group containing:
 * An AppService with 2 Azure Functions
@@ -68,3 +58,19 @@ All resources can be deployed with Infrastructure as Code using Azure Devops pip
 8. Run pipelines 4, 5 and 6.
 
 Now you are ready to start exploring the solution so as a next step go to [Getting started](docs/GettingStarted.md)
+
+
+## Prerequisites for local development
+
+You should install a few plugins to be able to run the code on your local laptop:
+* Python 3.11 - install from the software catalog
+* [Python plugin for VS Code](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
+* [Azurite plugin for VS Code](https://marketplace.visualstudio.com/items?itemName=Azurite.azurite) - simulator for Azure infrastructure
+* [Bicep](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-bicep)- language support for the Bicep infrastructure code
+* [Azure tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-node-azure-pack) - standard Microsoft plugin to work with Azure services (like functions)
+* [Azure Functions](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions) - Microsoft plugin to work with Functions
+* [Azure Automation](https://marketplace.visualstudio.com/items?itemName=azure-automation.vscode-azureautomation)
+
+
+
+

@@ -21,6 +21,7 @@ python.exe ManuallyStartEventsRun.py,TESTJE
 ```
 You might need to create a local.settings.json file for the configuration.
 
+
 ## Passing parameters to a Python runbook
 A runbook accepts input parameters and if you create runbook using PowerShell, you can use named parameters. However, Python runbooks do not support that so you need to parse the parameters by their position.
 
