@@ -10,5 +10,10 @@
         "__azurite*": true,
         "__blobstorage__": true,
         "__queuestorage__": true
+    },
+    "search.exclude": {
+        "**/.git": true,
+        "**/__pycache__": true,
+        "**/.venv": true
     }
 }

@@ -21,7 +21,7 @@ resource azFunctionApp 'Microsoft.Web/sites@2021-03-01' = {
     serverFarmId: azHostingPlanId
     siteConfig: {
       alwaysOn: false
-      linuxFxVersion: 'python|3.9'
+      linuxFxVersion: 'python|3.11'
     }
   }
 

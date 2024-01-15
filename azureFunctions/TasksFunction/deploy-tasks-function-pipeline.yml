@@ -40,9 +40,9 @@ stages:
       displayName: 'Build extensions'
 
     - task: UsePythonVersion@0
-      displayName: 'Use Python 3.9'
+      displayName: 'Use Python 3.11'
       inputs:
-        versionSpec: 3.9 # Functions V2 supports Python 3.6 as of today
+        versionSpec: 3.11 # Functions V2 supports Python 3.6 as of today
 
     - bash: |
         pip install --target="./.python_packages/lib/site-packages" -r ./requirements.txt
@@ -68,5 +68,5 @@ stages:
         appType: functionAppLinux
         appName: '$(functionAppName)'
         package: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).TasksFunction.zip
-        runtimeStack: 'PYTHON|3.9'
+        runtimeStack: 'PYTHON|3.11'
         deploymentMethod: runFrom
