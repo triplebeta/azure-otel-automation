@@ -69,4 +69,4 @@ stages:
         appName: '$(functionAppName)'
         package: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).TasksFunction.zip
         runtimeStack: 'PYTHON|3.11'
-        deploymentMethod: runFrom
+        deploymentMethod: runFromPackage
