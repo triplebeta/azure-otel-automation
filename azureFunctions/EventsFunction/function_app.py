@@ -1,14 +1,5 @@
-import json
-import uuid
-import os
-import datetime
 import logging
-import random
 import azure.functions as func
-
-# For using the event hub
-from azure.eventhub import EventData
-from azure.eventhub.aio import EventHubProducerClient
 
 # Open Telemetry
 from azure.monitor.opentelemetry import configure_azure_monitor
@@ -29,11 +20,13 @@ tracer = trace.get_tracer(__name__)
 app = func.FunctionApp()
 
 # For demo purposes: simple Function with basic functionality
+# Pass in the tracer as an extra argument since it's created in this routine.
 @app.route(route="EventsSimple", auth_level=func.AuthLevel.ANONYMOUS)
 def EventsSimple(req: func.HttpRequest) -> func.HttpResponse:
     return EventsSimpleFunction(req, tracer)
 
 # Much more advanced function that includes retry, error handling etc
+# Pass in the tracer as an extra argument since it's created in this routine.
 @app.route(route="Events", auth_level=func.AuthLevel.ANONYMOUS)
 async def EventsAdvanced(req: func.HttpRequest, context) -> func.HttpResponse:
-    return EventsAdvancedFunction(req,context)
+    return await EventsAdvancedFunction(req,context, tracer)

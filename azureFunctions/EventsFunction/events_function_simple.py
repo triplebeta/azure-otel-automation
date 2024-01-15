@@ -8,7 +8,7 @@ import logging
 import random
 
 from azure.monitor.opentelemetry import configure_azure_monitor
-from opentelemetry import trace, metrics
+from opentelemetry import metrics
 
 # NOTE: This code is not needed here since we pass the tracer from the function_app.py to avoid duplicate logs
 # Avoid duplicate logging

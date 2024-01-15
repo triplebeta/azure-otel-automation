@@ -6,9 +6,17 @@ import azure.functions as func
 from simulation_request import SimulationRequest
 import logging
 import random
+import json
+import os
 
+
+# For using the event hub
+from azure.eventhub import EventData
+from azure.eventhub.aio import EventHubProducerClient
+
+# Open telemetry packages
 from azure.monitor.opentelemetry import configure_azure_monitor
-from opentelemetry import trace, metrics
+from opentelemetry import metrics
 
 # Azure Functions specific workaround (part 1/3) for Python opentelemetry.
 # For details check out: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-python-opencensus-migrate
@@ -35,7 +43,7 @@ metric_events_count = meter.create_counter(name="events.count", description="Cou
 #
 # This is the default one, so it will expose endpoint /api/Events
 #
-async def EventsAdvancedFunction(req: func.HttpRequest, context) -> func.HttpResponse:
+async def EventsAdvancedFunction(req: func.HttpRequest, context, tracer) -> func.HttpResponse:
     """ For logging in Python Function Apps, see:
         https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python?tabs=asgi%2Capplication-level&pivots=python-mode-decorators
 
