@@ -1,16 +1,19 @@
 # Introduction
+
 This solution shows how you can utilize standard Azure services to monitor a solution perform common maintenance actions. It implements a working solution and deployment is automated as well.
 
 The goal of this setup is to demonstrate the capabilities and to provide a playground to tinker with it. It can help to learn how to use these concepts. Here you can find a [description of the components](docs/Components.md).
 
-Credits: The Azure Automation part is based on this setup: [https://github.com/jordanbean-msft/automation-ado](https://github.com/jordanbean-msft/automation-ado)
-
+![Solution overview](docs/SolutionOverview.png)
 
 ## Disclaimer
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ## Deployment
+
 The following steps help you to setup this solution on Azure. If all goes well, you will end up with one resource group containing:
+
 * An AppService with 2 Azure Functions
 * An Event Hub
 * Log Analytics
@@ -23,16 +26,17 @@ The following steps help you to setup this solution on Azure. If all goes well, 
 All of these are configured with minimal cost.
 
 All resources can be deployed with Infrastructure as Code using Azure Devops pipelines.
+
 1. Clone the repo & upload into your own Azure DevOps instance.
 
 2. Configure a pipeline for these files:
-* [azure-functions-infra-pipeline.yml](azureFunctions/infra/azure-functions-infra-pipeline.yml)
-* [appInsights-infra-pipeline.yml](appInsights/appInsights-infra-pipeline.yml)
-* [azure-automation-infra-pipeline.yml](automation/infra/azure-automation-infra-pipeline.yml)
-* [deploy-events-function-pipeline.yml](azureFunctions/EventsFunction/deploy-events-function-pipeline.yml)
-* [deploy-tasks-function-pipeline.yml](azureFunctions/TasksFunction/deploy-tasks-function-pipeline.yml)
+    * [azure-functions-infra-pipeline.yml](azureFunctions/infra/azure-functions-infra-pipeline.yml)
+    * [appInsights-infra-pipeline.yml](appInsights/appInsights-infra-pipeline.yml)
+    * [azure-automation-infra-pipeline.yml](automation/infra/azure-automation-infra-pipeline.yml)
+    * [deploy-events-function-pipeline.yml](azureFunctions/EventsFunction/deploy-events-function-pipeline.yml)
+    * [deploy-tasks-function-pipeline.yml](azureFunctions/TasksFunction/deploy-tasks-function-pipeline.yml)
 
-* [deploy-runbooks-pipeline.yml](automation/runbooks/deploy-runbooks-pipeline.yml)
+    * [deploy-runbooks-pipeline.yml](automation/runbooks/deploy-runbooks-pipeline.yml)
 
 3. Create a variable group named otelpoc and add the following items to it:
 
@@ -59,10 +63,10 @@ All resources can be deployed with Infrastructure as Code using Azure Devops pip
 
 Now you are ready to start exploring the solution so as a next step go to [Getting started](docs/GettingStarted.md)
 
-
 ## Prerequisites for local development
 
 You should install a few plugins to be able to run the code on your local laptop:
+
 * Python 3.11 - install from the software catalog
 * [Python plugin for VS Code](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
 * [Azurite plugin for VS Code](https://marketplace.visualstudio.com/items?itemName=Azurite.azurite) - simulator for Azure infrastructure
@@ -71,6 +75,6 @@ You should install a few plugins to be able to run the code on your local laptop
 * [Azure Functions](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions) - Microsoft plugin to work with Functions
 * [Azure Automation](https://marketplace.visualstudio.com/items?itemName=azure-automation.vscode-azureautomation)
 
+## Credits
 
-
-
+The Azure Automation part is based on this setup: [https://github.com/jordanbean-msft/automation-ado](https://github.com/jordanbean-msft/automation-ado)
