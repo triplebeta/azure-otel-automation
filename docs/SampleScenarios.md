@@ -1,27 +1,12 @@
-# Showcase
-
-This repo is a showcase of how to produce logs and metrics (OpenTelemery), how to analyze it (Log Analytics) and respond to it (Azure Automate).
-
-![EventsTasksStoryline.png](/../../docs/EventsTasksStoryline.png)
-
-This serves as a mental model to understand the role of each service:
-
-* Events: simulates an IoT event producing events.
-* Tasks: simulates a Controller handling the events to perform some Task
-
-Both Functions contain no actual business logic and are just meant to create telemetry data to analyze.
-
-The Events function can fail, simulating a situation such as a device crash or no connectivity. Then no event will be sent to the Event Hub.
-
-The Tasks function also fail but has a retry feature, so if fails to switch the light on, it will try at most 2 more times. Those (1, 2 or 3) attempts are considered to be 1 batch. So if a batch succeeds, the light is on. In the telemetry you can see the iterations, which can serve as a leading indicator for problems.
-
-## Sample requests
+# Sample scenarios
 
 To start a scenario you send an http POST request to the Events function. You can use the following sample payloads to run the sample scenarios. You must also send the following header:  Content-Type: application/json 
 
 Each of samples executes a different paths in the code, some are successful, others are intended to fail. With each scenario, the Functions produce trace messages and metrics that we use for the other samples such as the Query packs, Workbooks and Alerts.
 
 TIP: Each sample uses its own value for device_id. This makes it easy to relate the log lines to a scenario when using Log Analytics.
+
+## Requests
 
 ### 1. Happy day scenario
 
