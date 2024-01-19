@@ -6,8 +6,8 @@
 | where Message startswith 'Tasker started batch'
 | project-rename start_timestamp=TimeGenerated
 | extend batchid = tostring(Properties['batch_id'])
-| extend machinenr = tostring(Properties['machine'])
-| project start_timestamp, machinenr, batchid
+| extend device_id = tostring(Properties['device_id'])
+| project start_timestamp, device_id, batchid
 | join kind=leftouter 
     (AppTraces
     | where AppRoleName == 'Tasker (prod)'
@@ -16,4 +16,4 @@
     | extend batchid = tostring(Properties['batch_id'])
     | extend iteration = toint(Properties['iteration'])
     | project completed_timestamp, iteration, batchid) on batchid)
-| project start_timestamp, machinenr, batchid, duration=completed_timestamp-start_timestamp, iteration
+| project start_timestamp, device_id, batchid, duration=completed_timestamp-start_timestamp, iteration

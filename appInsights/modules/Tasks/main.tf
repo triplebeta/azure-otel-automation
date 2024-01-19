@@ -124,18 +124,18 @@ resource "azurerm_application_insights_workbook" "overall-health-status-workbook
 #
 # ============================================================================
 
-# resource "azurerm_portal_dashboard" "machine-dashboard" {
-#   name                = "machine-dashboard"
+# resource "azurerm_portal_dashboard" "device-dashboard" {
+#   name                = "device-dashboard"
 #   resource_group_name = data.azurerm_resource_group.parent_group.name
 #   location            = data.azurerm_resource_group.parent_group.location
 #   tags = {
-#     hidden-title = "Machine Dashboard"
+#     hidden-title = "Device Dashboard"
 #   }
 
 #   // In the tpl file you can use these like: ${dashboard_title}
-#   dashboard_properties =  templatefile("${path.module}/Dashboards/MachineDashboard.tpl",
+#   dashboard_properties =  templatefile("${path.module}/Dashboards/DeviceDashboard.tpl",
 #     {
-#       dashboard_title = "Machine Dashboard",
+#       dashboard_title = "Device Dashboard",
 #       sub_id     = data.azurerm_subscription.current.subscription_id
 #       })
 # }

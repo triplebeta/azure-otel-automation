@@ -4,6 +4,8 @@ This solution shows how you can utilize standard Azure services to monitor a sol
 
 The goal of this setup is to demonstrate the capabilities and to provide a playground to tinker with it. It can help to learn how to use these concepts. Here you can find a [description of the components](docs/Components.md).
 
+NOTE: The sample code can also be used with Databricks. To connect Databricks to Log Analytics, check out this repository: [https://github.com/Azure-Samples/databricks-observability](https://github.com/Azure-Samples/databricks-observability) 
+
 ![Solution overview](docs/SolutionOverview.png)
 
 ## Disclaimer

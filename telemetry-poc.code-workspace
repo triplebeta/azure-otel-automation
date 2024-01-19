@@ -1,48 +1,51 @@
 {
-	"folders": [	
-        {
-            "name": "Events function",
+	"folders": [
+		{
+			"name": "Events function",
 			"path": "azureFunctions/EventsFunction"
 		},
 		{
-            "name": "Tasks function",
+			"name": "Tasks function",
 			"path": "azureFunctions/TasksFunction"
-		},	
+		},
 		{
-            "name": "Events Health functions",
+			"name": "Events Health functions",
 			"path": "appInsights/modules/Events/Functions"
 		},
 		{
-            "name": "Tasks Health functions",
+			"name": "Tasks Health functions",
 			"path": "appInsights/modules/Tasks/Functions"
 		},
 		{
-            "name": "Tasks QueryPack",
+			"name": "Tasks QueryPack",
 			"path": "appInsights/modules/Tasks/TasksQueryPack"
 		},
 		{
-            "name": "Azure Workbooks",
+			"name": "Azure Workbooks",
 			"path": "appInsights/modules/Tasks/Workbooks"
 		},
 		{
-            "name": "Runbooks (Azure Automation)",
+			"name": "Runbooks (Azure Automation)",
 			"path": "automation/runbooks"
 		},
 		{
-            "name": "Infra for Azure functions",
+			"name": "Infra for Azure functions",
 			"path": "azureFunctions/infra"
 		},
 		{
-            "name": "Infra for AppInsights",
+			"name": "Infra for AppInsights",
 			"path": "appInsights"
 		},
 		{
-            "name": "Infra for Azure Automation",
+			"name": "Infra for Azure Automation",
 			"path": "automation/infra"
 		},
 		{
-            "name": "Azure Dashboard (deprecated)",
+			"name": "Azure Dashboard (deprecated)",
 			"path": "appInsights/modules/Tasks/Dashboards"
+		},
+		{
+			"path": "docs"
 		}
 	],
 	"settings": {

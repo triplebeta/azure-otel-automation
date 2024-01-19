@@ -45,105 +45,30 @@ This will first install the dependencies from the Requirements.txt file and you 
 It should show something like:
 ![Events started successfully](assets/EventsStartupUrls.png)
 
-## How to invoke the Azure Function
+## Sample requests to get started
 
 You can activate this function using a tool like Postman or the [Thunder Client plugin for VS Code](https://marketplace.visualstudio.com/items?itemName=rangav.vscode-thunder-client).
 
-You can find a collection of requests for the Thunder client in [thunder-collection_EventsFunctions.json](/thunder-collection_EventsFunctions.json). It contains several requests. Each triggers a different behavior in the functions, leading to different log lines. Below you find more details about the options.
+You can find a collection of requests for the Thunder client in [thunder-client-Sample-Events-collection.json](/thunder-client-Sample-Events-collection.json). It contains a set of requests to run 6 scenarios.
+
+Each request triggers a different behavior in the functions, leading to different log lines. Below you find more details about the options. See also: [Sample http requests](../../docs/Sample_http_requests.md).
 
 The requests use a variable for the baseurl so you can use the same requests to execute the function locally or remote on Azure.
 
 First define a new environment and add the baseurl variable. Configure it to point to the right host, like:
     [http://localhost:5800](http://localhost:5800)
 
-## Sample commands for the Events function
 
-The idea is that the events function simulates generation of events by a specific machine. You can use the JSON structure to tigger different scenarios and inject errors.
+## Limitation: must use older version opentelemetry package
 
-### Happy day scenario
+This sample uses an older version of the open telemetry libraries because in December 2023, using version 1.22.0 raised an error:
 
-Start the Events function for machine AA11, run it without injecting errors. It will post a message to the Event Hub for the Tasks function.
-
-The Tasks function will also succeed without retries.
-
-```json
-{
-    "machine": "AA11"
-}
+```
+AttributeError: type object 'ResourceAttribute' has no attribute 'PROCESS_PARENT_PID' 
 ```
 
-### BB22 - Events ok, Tasks 1st fails, 2nd succeeds
+To avoid this we must use an older version of the azure-monitor-opentelemetry package, which depends on opentelemetry version that does not yet use Resource Detectors.
 
-Same as AA11 but instructs Tasks to fail its first run and succeed in the 2nd run.
-
-By specifying the error text and iterations, the Tasks will raise an exception with the given text.
-
-```json
-{
-    "machine": "BB22",
-    "tasks": {
-        "iterations": 2,
-        "error": "Tasker out of memory"
-    }
-}
-```
-
-### CC33 - Events ok, Tasks 3 runs fail
-
-Same as previous but Tasks will fail 3 times.
-Since the Tasks retries at most 2 times, failing 3 times means that the batch failed permanently.
-
-```json
-{
-    "machine": "CC33",
-    "tasks": {
-        "iterations": 3,
-        "success": false,
-    "error": "Data Quality issue found in input data"
-    }
-}
-```
-
-### DD44 - Events ok, Tasks 1 run fails
-
-Events succeeds but Tasks fails in the first iteration and for some reason does not retry.
-
-```json
-{
-    "machine": "DD44",
-    "tasks": {
-        "iterations": 1,
-        "success": false,
-        "error": "Tasker terminated by AKS"
-    }
-}
-```
-
-### EE55 - Events ok, Tasks 1 run fails , manual retry success
-
-Events suceeds, after one failed Tasks run it simulates a manual retry of Tasks. This shows as extra attributes in the telemetry.
-
-```json
-{
-    "machine": "EE55",
-    "tasks": {
-        "iterations": 2,
-        "manualRetry": true,
-        "success": true,
-        "error": "Tasker terminated by AKS"
-    }
-}
-```
-
-### FF66 - Events fails
-
-Simulate a failure of the events function.
-
-```json
-{
-    "machine": "FF66",
-    "events": {
-        "error": "Out of memory"
-    }
-}
-```
+* azure-monitor-opentelemetry==1.0.0b15
+* opentelemetry-sdk==1.19.0
+* opentelemetry-api==1.19.0

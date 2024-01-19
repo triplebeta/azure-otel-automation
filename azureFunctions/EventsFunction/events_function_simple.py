@@ -31,10 +31,10 @@ def EventsSimpleFunction(req: func.HttpRequest, tracer) -> func.HttpResponse:
     params = SimulationRequest(req.get_json())
 
     try:
-        # Immediately pass additional info like machinenr to the span
-        with tracer.start_as_current_span("Processing events", attributes={"machine":params.machine_nr}):
-            logging.info(f"Events started run", extra={"machine":params.machine_nr})
-            metric_run_started.add(1,attributes={"machine":params.machine_nr})
+        # Immediately pass additional info like device_id to the span
+        with tracer.start_as_current_span("Processing events", attributes={"device_id":params.device_id}):
+            logging.info(f"Events started run", extra={"device_id":params.device_id})
+            metric_run_started.add(1,attributes={"device_id":params.device_id})
             events_created_count = random.randrange(30,200)
             metric_run_completed.add(1)
 

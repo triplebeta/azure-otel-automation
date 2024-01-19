@@ -33,7 +33,7 @@
                         }
                       }
                     ],
-                    "title": "Sum eventscreated for ${resource_group_name}-ai by machinenr",
+                    "title": "Sum eventscreated for ${resource_group_name}-ai by device_id",
                     "titleKind": 1,
                     "visualization": {
                       "chartType": 1,
@@ -54,7 +54,7 @@
                       }
                     },
                     "grouping": {
-                      "dimension": "customDimensions/machinenr",
+                      "dimension": "customDimensions/device_id",
                       "sort": 2,
                       "top": 10
                     },
@@ -89,7 +89,7 @@
                         }
                       }
                     ],
-                    "title": "Events created per machine",
+                    "title": "Events created per device",
                     "titleKind": 2,
                     "visualization": {
                       "chartType": 1,
@@ -111,7 +111,7 @@
                       "disablePinning": true
                     },
                     "grouping": {
-                      "dimension": "customDimensions/machinenr",
+                      "dimension": "customDimensions/device_id",
                       "sort": 2,
                       "top": 10
                     }

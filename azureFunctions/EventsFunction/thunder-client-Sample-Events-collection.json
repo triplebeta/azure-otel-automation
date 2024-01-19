@@ -24,7 +24,7 @@
             "params": [],
             "body": {
                 "type": "json",
-                "raw": "{\n    \"machine\": \"AA11\"\n}",
+                "raw": "{\n    \"device_id\": \"AA11\"\n}",
                 "form": []
             },
             "tests": []
@@ -48,7 +48,7 @@
             "params": [],
             "body": {
                 "type": "json",
-                "raw": "{\n    \"machine\": \"BB22\",\n    \"tasks\": {\n        \"iterations\": 2,\n        \"error\": \"Tasker out of memory\"\n    }\n}",
+                "raw": "{\n    \"device_id\": \"BB22\",\n    \"tasks\": {\n        \"iterations\": 2,\n        \"error\": \"Tasker out of memory\"\n    }\n}",
                 "form": []
             },
             "tests": []
@@ -72,7 +72,7 @@
             "params": [],
             "body": {
                 "type": "json",
-                "raw": "{\n    \"machine\": \"CC33\",\n    \"tasks\": {\n        \"iterations\": 3,\n        \"success\": false,\n    \"error\": \"Data Quality issue found in input data\"\n    }\n}",
+                "raw": "{\n    \"device_id\": \"CC33\",\n    \"tasks\": {\n        \"iterations\": 3,\n        \"success\": false,\n    \"error\": \"Data Quality issue found in input data\"\n    }\n}",
                 "form": []
             },
             "tests": []
@@ -96,7 +96,7 @@
             "params": [],
             "body": {
                 "type": "json",
-                "raw": "{\n    \"machine\": \"DD44\",\n    \"tasks\": {\n        \"iterations\": 1,\n        \"success\": false,\n        \"error\": \"Tasker terminated by AKS\"\n    }\n}",
+                "raw": "{\n    \"device_id\": \"DD44\",\n    \"tasks\": {\n        \"iterations\": 1,\n        \"success\": false,\n        \"error\": \"Tasker terminated by AKS\"\n    }\n}",
                 "form": []
             },
             "tests": []
@@ -120,7 +120,7 @@
             "params": [],
             "body": {
                 "type": "json",
-                "raw": "{\n    \"machine\": \"EE55\",\n    \"tasks\": {\n        \"iterations\": 2,\n        \"manualRetry\": true,\n        \"success\": true,\n        \"error\": \"Tasker terminated by AKS\"\n    }\n}",
+                "raw": "{\n    \"device_id\": \"EE55\",\n    \"tasks\": {\n        \"iterations\": 2,\n        \"manualRetry\": true,\n        \"success\": true,\n        \"error\": \"Tasker terminated by AKS\"\n    }\n}",
                 "form": []
             },
             "tests": []
@@ -144,7 +144,7 @@
             "params": [],
             "body": {
                 "type": "json",
-                "raw": "{\n    \"machine\": \"FF66\",\n    \"events\": {\n        \"error\": \"Out of memory\"\n    }\n}",
+                "raw": "{\n    \"device_id\": \"FF66\",\n    \"events\": {\n        \"error\": \"Out of memory\"\n    }\n}",
                 "form": []
             },
             "tests": []

@@ -87,7 +87,7 @@ def Tasks(myEvents: func.EventHubEvent, context):
 
                # For convenience, define a list of all the attributes to add as dimensions for a trace or metric.
                # Include is_manual_run only if it's a manual run
-               metadata={"machine":params.machine_nr, "batch_id":batch_id, "run_id":run_id, "iteration":counter+1}
+               metadata={"device_id":params.device_id, "batch_id":batch_id, "run_id":run_id, "iteration":counter+1}
                if (manual_retry): metadata["manual"]=manual_retry  # Only add this if it's a manual run 
 
                # Start the simulation of a Tasker run

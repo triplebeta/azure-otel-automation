@@ -52,6 +52,17 @@ This local setup uses the ApplicationInsights and EventHub on Azure so you must 
 
 This will first install the dependencies from the Requirements.txt file and you should then see the endpoints that are available.
 
+## Sample requests to get started
+
+You can find a collection of requests for the Thunder client in [thunder-client-Sample-Events-collection.json](/thunder-client-Sample-Events-collection.json). It contains a set of requests to invoke the Events function.
+
+Each request triggers a different behavior in the Events and/or Tasks function, leading to different log lines. Below you find more details about the options. See also: [Sample http requests](../../docs/Sample_http_requests.md).
+
+The requests use a variable for the baseurl so you can use the same requests to execute the function locally or remote on Azure.
+
+First define a new environment and add the baseurl variable. Configure it to point to the right host, like:
+    [http://localhost:5800](http://localhost:5800)
+
 ## Known issues
 
 ### Event Hub checkpoint of local and Azure Tasks function get out of sync

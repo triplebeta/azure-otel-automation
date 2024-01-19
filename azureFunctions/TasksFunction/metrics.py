@@ -24,8 +24,8 @@ class ParallelRunsTracker:
         return len(self.activeRuns)
 
 
-# Not the best example of a gauge but it helps to show how to implement an observable metric
-# TODO Instead of 1 value, return an array with the number of parallel runs per machine
+# Not the best example of a gauge but it helps to show how to implement an observable metric.
+# TODO Instead of 1 value, return an array with the number of parallel runs per device.
 def create_parallel_runs_observable_updown_counter(parallel_runs_tracker: ParallelRunsTracker) -> ObservableUpDownCounter:
     """ Create an async UpDown counter """
     def observable_updown_counter_func(options: CallbackOptions) -> Iterable[Observation]:
@@ -42,13 +42,13 @@ def create_parallel_runs_observable_updown_counter(parallel_runs_tracker: Parall
 # Counter: delta's, only increasing
 # Gauge: data you would not want to sum but might want to avg or use max.
 meter = metrics.get_meter_provider().get_meter(__name__)
-metric_batch = meter.create_counter(name="tasks.batches", description="Count of batches processed for a machine.")
+metric_batch = meter.create_counter(name="tasks.batches", description="Count of batches processed for a device.")
 
 # Metrics for the runs
-metric_run = meter.create_counter(name="tasks.runs", description="Count all runs for a machine, incl. retries.")
-metric_run_retried = meter.create_counter(name="tasks.runs.retried", description="Count only of retry-runs for a machine.")
-metric_run_failed = meter.create_counter(name="tasks.runs.failed", description="Count failed runs for a machine.")
-metric_run_completed = meter.create_counter(name="tasks.runs.completed", description="Count successfully completed runs for a machine.")
+metric_run = meter.create_counter(name="tasks.runs", description="Count all runs for a device, incl. retries.")
+metric_run_retried = meter.create_counter(name="tasks.runs.retried", description="Count only of retry-runs for a device.")
+metric_run_failed = meter.create_counter(name="tasks.runs.failed", description="Count failed runs for a device.")
+metric_run_completed = meter.create_counter(name="tasks.runs.completed", description="Count successfully completed runs for a device.")
 
 # Metrics for the tasks
 metric_tasks_count = meter.create_counter(name="tasks.count", description="Count of successfully created tasks.")

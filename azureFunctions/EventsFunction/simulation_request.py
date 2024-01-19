@@ -1,9 +1,9 @@
 #
 # Entity to capture details of the request.
-# Most values are optional, only the "machine" is required
+# Most values are optional, only the "device_id" is required
 #
 # {
-#     "machine": 123,  //   Number of the machine to process
+#     "device_id": 123,  //   Number of the device to process
 #     "events": {
 #         "error": "Some error message"   // If set, this function will abort with this error
 #     },
@@ -21,8 +21,8 @@ import random
 
 class SimulationRequest:
     def __init__(self, jsonBody):
-        self.machine_nr = jsonBody.get('machine')                  # For which machine to run
-        if (self.machine_nr is None): raise ValueError('Body must contain JSON with at least a value for machine.')
+        self.device_id = jsonBody.get('device_id')   # For which device to run
+        if (self.device_id is None): raise ValueError('Body must contain JSON with at least a value for device_id.')
         
         # If set, the Events run will fail with that error, otherwise it will succeed
         self.events_error_text=None

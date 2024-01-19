@@ -3,7 +3,7 @@ let Thresholds=EventsThresholds();
 AppTraces
 | where Message startswith "Events"
 | where Message == "Events completed run"
-//| extend machine=tostring(Properties["machine"])
+//| extend device_id=tostring(Properties["device_id"])
 | extend Value=toint(Properties["duration"])
 | project TimeGenerated, MetricName='EventsRunDuration', Value
 | lookup kind=inner Thresholds on $left.MetricName==$right.Name

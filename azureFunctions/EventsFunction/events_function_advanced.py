@@ -50,7 +50,7 @@ async def EventsAdvancedFunction(req: func.HttpRequest, context, tracer) -> func
         Events GBR simulation: pretents that a batch of events is processed
         Http POST should contain json to specify the details for this function:
         {
-            "machine": 123,  //   Number of the machine to process
+            "device_id": 123,  //   Number of the device to process
             "events": {
                 "error": "Some error message"   // If set, this function will abort with this error
             }
@@ -65,7 +65,7 @@ async def EventsAdvancedFunction(req: func.HttpRequest, context, tracer) -> func
     parent_context = TraceContextTextMapPropagator().extract(carrier=functions_current_context)
     token = attach(parent_context)
 
-    # Extract the machinenr from the POST request
+    # Extract the device_id from the POST request
     # Read json to get the parameter values
     with tracer.start_as_current_span("Parse request") as span:
         logging.info(f"Extracting parameters from request...")
@@ -77,15 +77,15 @@ async def EventsAdvancedFunction(req: func.HttpRequest, context, tracer) -> func
         else:
             params = SimulationRequest(jsonBody)
 
-        if not params.machine_nr: return func.HttpResponse("Body must contain machine.", status_code=400)
+        if not params.device_id: return func.HttpResponse("Body must contain device_id.", status_code=400)
 
     # Compose metadata for the loglines and metrics
-    metadata={"machine":params.machine_nr}
+    metadata={"device_id":params.device_id}
     if (params.events_is_manual): metadata["manual"]=True  # Only add this if it's a manual run 
 
     # Assume processing will be successful
     try:
-        # Immediately pass additional info like machinenr to the span
+        # Immediately pass additional info like device_id to the span
         with tracer.start_as_current_span("Processing events", attributes=metadata):
             logging.info(f"Events started run", extra=metadata)
             metric_run.add(1,attributes=metadata)
@@ -107,7 +107,7 @@ async def EventsAdvancedFunction(req: func.HttpRequest, context, tracer) -> func
             async with producer:
                 # Create the message for the Tasker with number of valid events.
                 # TODO Add Start and End to the message, and # of events
-                taskerCmd = { "machine": params.machine_nr, "tasks": { "iterations":params.tasks_iterations, "success": params.tasks_success, "manualRetry": params.is_manual_run, "error": params.tasks_error}  }
+                taskerCmd = { "device_id": params.device_id, "tasks": { "iterations":params.tasks_iterations, "success": params.tasks_success, "manualRetry": params.is_manual_run, "error": params.tasks_error}  }
                 jsonTaskerCmd = json.dumps(taskerCmd)
 
                 # Send trigger to the tasker via Event Hub
