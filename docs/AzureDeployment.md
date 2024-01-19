@@ -18,13 +18,13 @@ All resources can be deployed with Infrastructure as Code using Azure Devops pip
 1. Clone the repo & upload into your own Azure DevOps instance.
 
 2. Configure a pipeline for these files:
-    * [azure-functions-infra-pipeline.yml](azureFunctions/infra/azure-functions-infra-pipeline.yml)
-    * [appInsights-infra-pipeline.yml](appInsights/appInsights-infra-pipeline.yml)
-    * [azure-automation-infra-pipeline.yml](automation/infra/azure-automation-infra-pipeline.yml)
-    * [deploy-events-function-pipeline.yml](azureFunctions/EventsFunction/deploy-events-function-pipeline.yml)
-    * [deploy-tasks-function-pipeline.yml](azureFunctions/TasksFunction/deploy-tasks-function-pipeline.yml)
+    * [azure-functions-infra-pipeline.yml](../azureFunctions/infra/azure-functions-infra-pipeline.yml)
+    * [appInsights-infra-pipeline.yml](../appInsights/appInsights-infra-pipeline.yml)
+    * [azure-automation-infra-pipeline.yml](../automation/infra/azure-automation-infra-pipeline.yml)
+    * [deploy-events-function-pipeline.yml](../azureFunctions/EventsFunction/deploy-events-function-pipeline.yml)
+    * [deploy-tasks-function-pipeline.yml](../azureFunctions/TasksFunction/deploy-tasks-function-pipeline.yml)
 
-    * [deploy-runbooks-pipeline.yml](automation/runbooks/deploy-runbooks-pipeline.yml)
+    * [deploy-runbooks-pipeline.yml](../automation/runbooks/deploy-runbooks-pipeline.yml)
 
 3. Create a variable group named otelpoc and add the following items to it:
 
@@ -49,4 +49,4 @@ All resources can be deployed with Infrastructure as Code using Azure Devops pip
 
 8. Run pipelines 4, 5 and 6.
 
-Now you are ready to start exploring the solution so as a next step go to [Getting started](docs/GettingStarted.md)
+Now you are ready to start exploring the solution using the [sample scenarios](../docs/SampleScenarios.md).

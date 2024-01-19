@@ -4,7 +4,7 @@ This solution shows how you can utilize standard Azure services to monitor a sol
 
 The goal of this showcase is to demonstrate the capabilities and to provide a playground to tinker with it. It can help to learn how to use these concepts.
 
-To understand the concepts of the showcase, please check out [Showcase.md](Showcase.md). As a next step you can check [the Components](docs/Components.md). 
+To understand the concepts of the showcase, please check out [this show case description](docs/Showcase.md). As a next step you can check [the list of components](docs/Components.md). 
 
 NOTE: The sample code can also be used with Databricks. To connect Databricks to Log Analytics, check out this repository: [https://github.com/Azure-Samples/databricks-observability](https://github.com/Azure-Samples/databricks-observability) 
 

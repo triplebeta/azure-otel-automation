@@ -2,7 +2,7 @@
 
 This repo is a showcase of how to produce logs and metrics (OpenTelemery), how to analyze it (Log Analytics) and respond to it (Azure Automate).
 
-![EventsTasksStoryline.png](EventsTasksStoryline.png)
+![Events and Tasks analogy](EventsTasksStoryline.png)
 
 This serves as a mental model to understand the role of each service:
 
@@ -15,4 +15,4 @@ The Events function can fail, simulating a situation such as a device crash or n
 
 The Tasks function also fail but has a retry feature, so if fails to switch the light on, it will try at most 2 more times. Those (1, 2 or 3) attempts are considered to be 1 batch. So if a batch succeeds, the light is on. In the telemetry you can see the iterations, which can serve as a leading indicator for problems.
 
-Here is a collection of samples you can run: [SampleScenarios.md](SampleScenarios.md).
+Here is [collection of sample scenarios](SampleScenarios.md) for you can run and explore. Each of them creates telemetry data that you can then explore in Log Analytics.
