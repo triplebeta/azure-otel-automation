@@ -122,6 +122,10 @@ resource sop_aa 'Microsoft.Automation/automationAccounts@2023-11-01' = {
   }
 }
 
+/*
+// Assigning Contibutor role still fails.
+// But it's not yet clear why it would need that role.
+
 // Grant Contributor role to system assigned identity
 resource AutomationAccountContributorRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(resourceGroup().id, sop_aa.id) 
@@ -134,6 +138,7 @@ resource AutomationAccountContributorRole 'Microsoft.Authorization/roleAssignmen
     principalType: 'ServicePrincipal'
   }
 }
+*/
 
 // ========================================================
 // AppServicePlan
