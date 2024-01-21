@@ -13,7 +13,7 @@ trigger:
 variables:
   - group: otelpoc
   - name: templateFile
-    value: 'automation/runbooks/alerts.bicep'
+    value: './alerts.bicep'
 
 stages:
 - stage: DeployAutomationInfra
