@@ -135,7 +135,7 @@ resource "azurerm_automation_webhook" "sop_runbook_manual_run" {
 }
 
 // Store the webhook credentials in the key vault
-/*
+
 // Get reference to the Key Vault
 data "azurerm_key_vault" kv {
   name = "${data.azurerm_resource_group.parent_group.name}-kv"
@@ -148,16 +148,16 @@ resource "azurerm_key_vault_secret" "webhook_secret_sop_runbook_manual_run" {
   value        = azurerm_automation_webhook.sop_runbook_manual_run.uri
   key_vault_id = data.azurerm_key_vault.kv.id
 }
-*/
+
 
 // For now: just show the uri so you can manually add it to the key vault
-output "keyvault_secret_name_for_runbook_webhook_uri" {
-  value = local.webhook_name
-}
-output "runbook_webhook_uri" {
-  sensitive = true
-  value = azurerm_automation_webhook.sop_runbook_manual_run.uri
-}
+# output "keyvault_secret_name_for_runbook_webhook_uri" {
+#   value = local.webhook_name
+# }
+# output "runbook_webhook_uri" {
+#   sensitive = true
+#   value = azurerm_automation_webhook.sop_runbook_manual_run.uri
+# }
 
 /*
 These items will not be used.
