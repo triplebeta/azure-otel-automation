@@ -220,7 +220,7 @@ resource "azurerm_monitor_action_group" "myActionGroup" {
     is_global_runbook = false
     runbook_name = local.runbook_name
     webhook_resource_id = "${data.azurerm_automation_account.sop_aa.id}/webHooks/${local.webhook_name}"
-    service_uri = data.azurerm_key_vault_secret.webhook_secret_sop_runbook_manual_run.value
+    service_uri = azurerm_key_vault_secret.webhook_secret_sop_runbook_manual_run.value
   }
 }
 
