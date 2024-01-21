@@ -6,6 +6,8 @@ You should install a few plugins to be able to run the code on your local laptop
 * [Python plugin for VS Code](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
 * [Azurite plugin for VS Code](https://marketplace.visualstudio.com/items?itemName=Azurite.azurite) - simulator for Azure infrastructure
 * [Bicep](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-bicep)- language support for the Bicep infrastructure code
+* [Hashicorp Terraform](https://marketplace.visualstudio.com/items?itemName=HashiCorp.terraform)- language support for the Terraform from Hashicorp
+* [Azure Terraform](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azureterraform)- language support for the Terraform infrastructure code
 * [Azure tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-node-azure-pack) - standard Microsoft plugin to work with Azure services (like functions)
 * [Azure Functions](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions) - Microsoft plugin to work with Functions
 * [Azure Automation](https://marketplace.visualstudio.com/items?itemName=azure-automation.vscode-azureautomation)

@@ -58,6 +58,17 @@ The requests use a variable for the baseurl so you can use the same requests to 
 First define a new environment and add the baseurl variable. Configure it to point to the right host, like:
     [http://localhost:5800](http://localhost:5800)
 
+The Events function will return a message indicating if it succeeded or failed. In case of success  (e.g. scenario 1) it returns status code 200 and a message with the (fake) number of events processed:
+
+```
+Completed processing 129 events
+```
+
+In case of an error (e.g. scenario 6) you will get:
+
+```
+Events failed.
+```
 
 ## Limitation: must use older version opentelemetry package
 

@@ -1,20 +1,20 @@
 {
     "client": "Thunder Client",
     "collectionName": "OTEL PoC - Events",
-    "dateExported": "2024-01-12T20:06:20.976Z",
+    "dateExported": "2024-01-20T13:47:49.689Z",
     "version": "1.1",
     "folders": [],
     "requests": [
         {
-            "_id": "e9df3113-4f57-43f1-8512-912bc5755c78",
-            "colId": "bd0a70ad-02c7-4c01-bc20-ad671bbd5318",
+            "_id": "7b8114cb-a401-4ed9-a7bb-89ad143f4640",
+            "colId": "1c5eb446-26f3-4a29-8da1-696da45765f2",
             "containerId": "",
-            "name": "AA11 - all successful",
+            "name": "Example 1 - device AA11 - all successful",
             "url": "{{baseurl}}/api/Events",
             "method": "POST",
             "sortNum": 10000,
-            "created": "2024-01-11T07:24:46.538Z",
-            "modified": "2024-01-12T20:05:40.319Z",
+            "created": "2024-01-20T13:44:24.707Z",
+            "modified": "2024-01-20T13:44:24.707Z",
             "headers": [
                 {
                     "name": "Content-Type",
@@ -30,15 +30,15 @@
             "tests": []
         },
         {
-            "_id": "d7ac4f6f-614e-4d24-a4ef-2165bf6607e4",
-            "colId": "bd0a70ad-02c7-4c01-bc20-ad671bbd5318",
+            "_id": "7e205357-4e4b-4a6f-b0ff-21be6318ce60",
+            "colId": "1c5eb446-26f3-4a29-8da1-696da45765f2",
             "containerId": "",
-            "name": "BB22 - Events ok, Tasks 1st fails, 2nd succeeds",
+            "name": "Example 2 - device BB22 - Events ok, Tasks 1st fails, 2nd succeeds",
             "url": "{{baseurl}}/api/Events",
             "method": "POST",
             "sortNum": 20000,
-            "created": "2024-01-11T07:24:46.539Z",
-            "modified": "2024-01-12T20:05:10.071Z",
+            "created": "2024-01-20T13:44:24.708Z",
+            "modified": "2024-01-20T13:44:57.870Z",
             "headers": [
                 {
                     "name": "Content-Type",
@@ -48,21 +48,21 @@
             "params": [],
             "body": {
                 "type": "json",
-                "raw": "{\n    \"device_id\": \"BB22\",\n    \"tasks\": {\n        \"iterations\": 2,\n        \"error\": \"Tasker out of memory\"\n    }\n}",
+                "raw": "{\n    \"device_id\": \"BB22\",\n    \"tasks\": {\n        \"iterations\": 2,\n        \"error\": \"Lightbulb did not respond\"\n    }\n}",
                 "form": []
             },
             "tests": []
         },
         {
-            "_id": "e4620c3b-49d8-4794-882b-152369e0269d",
-            "colId": "bd0a70ad-02c7-4c01-bc20-ad671bbd5318",
+            "_id": "4a8704ac-2584-4767-8ace-c28f77f76b4e",
+            "colId": "1c5eb446-26f3-4a29-8da1-696da45765f2",
             "containerId": "",
-            "name": "CC33 - Events ok, Tasks 3 runs fail",
+            "name": "Example 3 - device CC33 - Events ok, Tasks 3 runs fail",
             "url": "{{baseurl}}/api/Events",
             "method": "POST",
             "sortNum": 30000,
-            "created": "2024-01-11T07:24:46.540Z",
-            "modified": "2024-01-12T20:05:48.761Z",
+            "created": "2024-01-20T13:44:24.709Z",
+            "modified": "2024-01-20T13:45:26.824Z",
             "headers": [
                 {
                     "name": "Content-Type",
@@ -72,21 +72,21 @@
             "params": [],
             "body": {
                 "type": "json",
-                "raw": "{\n    \"device_id\": \"CC33\",\n    \"tasks\": {\n        \"iterations\": 3,\n        \"success\": false,\n    \"error\": \"Data Quality issue found in input data\"\n    }\n}",
+                "raw": "{\n    \"device_id\": \"CC33\",\n    \"tasks\": {\n        \"iterations\": 3,\n        \"success\": false,\n    \"error\": \"Failed to connect to lightbulb\"\n    }\n}",
                 "form": []
             },
             "tests": []
         },
         {
-            "_id": "36d63870-64ea-4242-980e-2fd1b9dd9c96",
-            "colId": "bd0a70ad-02c7-4c01-bc20-ad671bbd5318",
+            "_id": "4c393607-9872-44a7-bae7-01b6856b61da",
+            "colId": "1c5eb446-26f3-4a29-8da1-696da45765f2",
             "containerId": "",
-            "name": "DD44 - Events ok, Tasks 1 run fails",
+            "name": "Example 4 - device DD44 - Events ok, Tasks 1 run fails",
             "url": "{{baseurl}}/api/Events",
             "method": "POST",
             "sortNum": 40000,
-            "created": "2024-01-11T07:24:46.541Z",
-            "modified": "2024-01-12T20:05:53.016Z",
+            "created": "2024-01-20T13:44:24.710Z",
+            "modified": "2024-01-20T13:45:53.666Z",
             "headers": [
                 {
                     "name": "Content-Type",
@@ -96,21 +96,21 @@
             "params": [],
             "body": {
                 "type": "json",
-                "raw": "{\n    \"device_id\": \"DD44\",\n    \"tasks\": {\n        \"iterations\": 1,\n        \"success\": false,\n        \"error\": \"Tasker terminated by AKS\"\n    }\n}",
+                "raw": "{\n    \"device_id\": \"DD44\",\n    \"tasks\": {\n        \"iterations\": 1,\n        \"success\": false,\n        \"error\": \"Crash of Tasks\"\n    }\n}",
                 "form": []
             },
             "tests": []
         },
         {
-            "_id": "c729dd8e-577f-4fd2-82ce-1e66ca5d9ab8",
-            "colId": "bd0a70ad-02c7-4c01-bc20-ad671bbd5318",
+            "_id": "a69073cb-4388-4941-92a5-e0cac0d151d3",
+            "colId": "1c5eb446-26f3-4a29-8da1-696da45765f2",
             "containerId": "",
-            "name": "EE55 - Events ok, Tasks 1 run fails , manual retry success",
+            "name": "Example 5 - device EE55 - Events ok, Tasks 1 run fails , manual retry success",
             "url": "{{baseurl}}/api/Events",
             "method": "POST",
             "sortNum": 50000,
-            "created": "2024-01-11T07:24:46.542Z",
-            "modified": "2024-01-12T20:05:55.622Z",
+            "created": "2024-01-20T13:44:24.711Z",
+            "modified": "2024-01-20T13:46:03.232Z",
             "headers": [
                 {
                     "name": "Content-Type",
@@ -120,21 +120,21 @@
             "params": [],
             "body": {
                 "type": "json",
-                "raw": "{\n    \"device_id\": \"EE55\",\n    \"tasks\": {\n        \"iterations\": 2,\n        \"manualRetry\": true,\n        \"success\": true,\n        \"error\": \"Tasker terminated by AKS\"\n    }\n}",
+                "raw": "{\n    \"device_id\": \"EE55\",\n    \"tasks\": {\n        \"iterations\": 2,\n        \"manualRetry\": true,\n        \"success\": true,\n        \"error\": \"Crash of Tasks\"\n    }\n}",
                 "form": []
             },
             "tests": []
         },
         {
-            "_id": "be445ed0-7318-49ad-b094-7089712d5cf5",
-            "colId": "bd0a70ad-02c7-4c01-bc20-ad671bbd5318",
+            "_id": "5fc8f112-d6a2-4aae-8427-f4ef57856675",
+            "colId": "1c5eb446-26f3-4a29-8da1-696da45765f2",
             "containerId": "",
-            "name": "FF66 - Events fails",
+            "name": "Example 6 - device FF66 - Events fails",
             "url": "{{baseurl}}/api/Events",
             "method": "POST",
             "sortNum": 60000,
-            "created": "2024-01-11T07:24:46.543Z",
-            "modified": "2024-01-12T20:05:59.041Z",
+            "created": "2024-01-20T13:44:24.712Z",
+            "modified": "2024-01-20T13:46:25.398Z",
             "headers": [
                 {
                     "name": "Content-Type",
@@ -144,7 +144,7 @@
             "params": [],
             "body": {
                 "type": "json",
-                "raw": "{\n    \"device_id\": \"FF66\",\n    \"events\": {\n        \"error\": \"Out of memory\"\n    }\n}",
+                "raw": "{\n    \"device_id\": \"FF66\",\n    \"events\": {\n        \"error\": \"No connectivity\"\n    }\n}",
                 "form": []
             },
             "tests": []
