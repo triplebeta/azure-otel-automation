@@ -70,7 +70,7 @@ locals {
 #
 
 // Deploy a Python runbook to restart a run for Events
-resource "azurerm_automation_runbook" "sop_events_manual_run_runbook" {
+resource "azurerm_automation_runbook" "sop_python_runbook" {
   for_each = local.python_runbook_files
   
   name                    = substr(basename(each.value),0, length(basename(each.value))-3)
@@ -86,7 +86,7 @@ resource "azurerm_automation_runbook" "sop_events_manual_run_runbook" {
 }
 
 // Deploy a PowerShell runbook to restart a run for Events
-resource "azurerm_automation_runbook" "sop_events_manual_run_runbook" {
+resource "azurerm_automation_runbook" "sop_powershell_runbooks" {
   for_each = local.powershell_runbook_files
   
   name                    = substr(basename(each.value),0, length(basename(each.value))-4)
