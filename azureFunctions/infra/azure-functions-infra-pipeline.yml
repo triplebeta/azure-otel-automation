@@ -14,8 +14,6 @@ trigger:
     exclude:
       - /**/*.md
 
-name: Deploy Bicep files
-
 variables:
   - group: otelpoc
 

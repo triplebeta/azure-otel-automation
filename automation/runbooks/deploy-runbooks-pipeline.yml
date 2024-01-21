@@ -61,27 +61,26 @@ stages:
           commandOptions: 'main.tfplan'
           environmentServiceNameAzureRM: $(azureServiceConnection)
        
-      HIER NOG AANPASSEN
 
-      - task: AzurePowerShell@5
-        displayName: Deploy Runbooks to Azure Automation
-        inputs:
-          azureSubscription: $(azureServiceConnection)
-          scriptType: FilePath
-          scriptPath: '$(System.DefaultWorkingDirectory)/automation/runbooks/deploy-runbooks.ps1'
-          scriptArguments:
-            -ResourceGroupName $(resourceGroupName)
-          azurePowerShellVersion: latestVersion
+      # - task: AzurePowerShell@5
+      #   displayName: Deploy Runbooks to Azure Automation
+      #   inputs:
+      #     azureSubscription: $(azureServiceConnection)
+      #     scriptType: FilePath
+      #     scriptPath: '$(System.DefaultWorkingDirectory)/automation/runbooks/deploy-runbooks.ps1'
+      #     scriptArguments:
+      #       -ResourceGroupName $(resourceGroupName)
+      #     azurePowerShellVersion: latestVersion
 
-      - task: AzureResourceManagerTemplateDeployment@3
-        displayName: Deploy Azure AlertRuleGroup to start a Runbook
-        inputs:
-          deploymentScope: 'Resource Group'
-          azureResourceManagerConnection: '$(azureServiceConnection)'
-          action: 'Create Or Update Resource Group'
-          resourceGroupName: '$(resourceGroupName)'
-          location: '$(location)'
-          templateLocation: 'Linked artifact'
-          csmFile: '$(templateFile)'
-          deploymentMode: 'Incremental'
-          deploymentName: '$(resourceGroupName)-alerts'
+      # - task: AzureResourceManagerTemplateDeployment@3
+      #   displayName: Deploy Azure AlertRuleGroup to start a Runbook
+      #   inputs:
+      #     deploymentScope: 'Resource Group'
+      #     azureResourceManagerConnection: '$(azureServiceConnection)'
+      #     action: 'Create Or Update Resource Group'
+      #     resourceGroupName: '$(resourceGroupName)'
+      #     location: '$(location)'
+      #     templateLocation: 'Linked artifact'
+      #     csmFile: '$(templateFile)'
+      #     deploymentMode: 'Incremental'
+      #     deploymentName: '$(resourceGroupName)-alerts'
