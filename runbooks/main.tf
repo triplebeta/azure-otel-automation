@@ -120,6 +120,9 @@ locals {
   runbook_name = "ManuallyStartEventsRun"
   webhook_name = "webhook-sop-runbook-manual-run"
   webhook_expiry_date = timeadd(plantimestamp(),"8640h") # max. 360 days
+
+  actionGroupName = "On-Call Team" 
+  actionGroupEmail = "test@example.com"
 }
 
 resource "azurerm_automation_webhook" "sop_runbook_manual_run" {
@@ -149,15 +152,6 @@ resource "azurerm_key_vault_secret" "webhook_secret_sop_runbook_manual_run" {
   key_vault_id = data.azurerm_key_vault.kv.id
 }
 
-
-// For now: just show the uri so you can manually add it to the key vault
-# output "keyvault_secret_name_for_runbook_webhook_uri" {
-#   value = local.webhook_name
-# }
-# output "runbook_webhook_uri" {
-#   sensitive = true
-#   value = azurerm_automation_webhook.sop_runbook_manual_run.uri
-# }
 
 /*
 These items will not be used.
@@ -202,3 +196,52 @@ resource "azurerm_automation_job_schedule" "schedule_clean_log_job" {
 }
 
 */
+
+#
+# Now create an alert that will start a Runbook
+#
+
+// Create a group to define what to do: send an email and start a runbook
+resource "azurerm_monitor_action_group" "myActionGroup" {
+  name = local.actionGroupName
+  short_name = "oncallteam"
+  resource_group_name = data.azurerm_resource_group.parent_group.name
+  enabled = true
+
+  email_receiver {
+    name          = local.actionGroupName
+    email_address = local.actionGroupEmail
+    use_common_alert_schema = true
+  }
+
+  automation_runbook_receiver {
+    name = "myRunbookReceiver"
+    automation_account_id = data.azurerm_automation_account.sop_aa.id
+    is_global_runbook = false
+    runbook_name = local.runbook_name
+    webhook_resource_id = "${data.azurerm_automation_account.sop_aa.id}/webHooks/${local.webhook_name}"
+    service_uri = data.azurerm_key_vault_secret.webhook_secret_sop_runbook_manual_run.value
+  }
+}
+
+//
+resource "azurerm_monitor_action_rule_action_group" "alertRule" {
+  name = "alertRuleName"
+  resource_group_name = data.azurerm_resource_group.parent_group.name
+  action_group_id = azurerm_monitor_action_group.myActionGroup.id
+  enabled = true
+
+  condition {
+    monitor_service {
+      operator = "Equals"
+      values = [
+        "Azure Backup"
+      ] 
+    }
+  }
+
+  scope {
+    type         = "ResourceGroup"
+    resource_ids = [data.azurerm_resource_group.parent_group.id]
+  }
+}
