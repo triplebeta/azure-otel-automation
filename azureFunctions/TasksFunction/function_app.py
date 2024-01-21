@@ -64,7 +64,7 @@ def Tasks(myEvents: func.EventHubEvent, context):
      try:
           # Extract the info from the Event Hub message
           # Read json to get the parameter values
-          with tracer.start_as_current_span("Parse Tasker params") as span:
+          with tracer.start_as_current_span("Parse Tasks params") as span:
                try:
                     msgFromEvents = myEvents.get_body().decode("utf-8")
                     jsonBody = json.loads(msgFromEvents)
@@ -90,19 +90,19 @@ def Tasks(myEvents: func.EventHubEvent, context):
                metadata={"device_id":params.device_id, "batch_id":batch_id, "run_id":run_id, "iteration":counter+1}
                if (manual_retry): metadata["manual"]=manual_retry  # Only add this if it's a manual run 
 
-               # Start the simulation of a Tasker run
-               with tracer.start_as_current_span(f"Execute tasker (iteration={counter+1})", record_exception=False, attributes=metadata):
+               # Start the simulation of a Tasks run
+               with tracer.start_as_current_span(f"Execute tasks (iteration={counter+1})", record_exception=False, attributes=metadata):
                     try:
                          # Track the start of a new run (sample for using an observable up/down counter)
                          parallel_runs_tracker.register_start_run(params)
 
                          # Log start of the batch (which can consist of this one and possible retry runs)
                          if (counter==0):
-                              logging.info(f'Tasker started batch', extra=metadata)
+                              logging.info(f'Tasks started batch', extra=metadata)
                               metric_batch.add(1,attributes=metadata)
 
-                         # Consider: shouldn't we use the "Tasker started retry" for retries? More expressive but counting runs will have to count both. 
-                         logging.info(f'Tasker started run', extra=metadata)
+                         # Consider: shouldn't we use the "Tasks started retry" for retries? More expressive but counting runs will have to count both. 
+                         logging.info(f'Tasks started run', extra=metadata)
 
                          # Show the information also in the log text, as well as in the dimensions
                          if (counter>0):
@@ -126,15 +126,15 @@ def Tasks(myEvents: func.EventHubEvent, context):
                          # Add the tasks_created and duration in the meta data so we can report on it
                          metadata["tasks_created"] = tasks_created_count
                          metadata["duration"] = params.tasks_duration
-                         logging.info(f'Tasker completed run',extra=metadata)
+                         logging.info(f'Tasks completed run',extra=metadata)
                
                     except Exception as error:
                          # Log the exception (which includes the traceback)
                          # On the span, set record_exception=False because we handle it here and include more info
-                         logging.exception(f'Tasker error handled!',exc_info=error, extra=metadata)
+                         logging.exception(f'Tasks error handled!',exc_info=error, extra=metadata)
 
                          # And log a more simple error message
-                         logging.error(f'Tasker failed run',extra=metadata)
+                         logging.error(f'Tasks failed run',extra=metadata)
                          metric_run_failed.add(1,attributes=metadata)
 
                     finally:

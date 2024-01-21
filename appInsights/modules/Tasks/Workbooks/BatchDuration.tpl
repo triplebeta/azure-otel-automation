@@ -5,7 +5,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "// Duration of batches (each might consist of 1, 2 or 3 runs)\r\n// Get timestamp of start batch, join it with completed run on batchid\r\n// Also include the number of iterations needed to complete it.\r\n(AppTraces\r\n| where AppRoleName == 'Tasker (prod)'\r\n| where Message startswith 'Tasker started batch'\r\n| project-rename start_timestamp=TimeGenerated\r\n| extend batchid = tostring(Properties['batch_id'])\r\n| extend device_id = tostring(Properties['device_id'])\r\n| project start_timestamp, device_id, batchid\r\n| join kind=leftouter \r\n    (AppTraces\r\n    | where AppRoleName == 'Tasker (prod)'\r\n    | where Message startswith 'Tasker completed run'\r\n    | project-rename completed_timestamp=TimeGenerated\r\n    | extend batchid = tostring(Properties['batch_id'])\r\n    | extend iteration = toint(Properties['iteration'])\r\n    | project completed_timestamp, iteration, batchid) on batchid)\r\n| project start_timestamp, device_id, batchid, success=iff(isempty(iteration),\"FAILED\",\"SUCCESS\"), duration=completed_timestamp-start_timestamp, iteration",
+        "query": "// Duration of batches (each might consist of 1, 2 or 3 runs)\r\n// Get timestamp of start batch, join it with completed run on batchid\r\n// Also include the number of iterations needed to complete it.\r\n(AppTraces\r\n| where AppRoleName == 'Tasks (prod)'\r\n| where Message startswith 'Tasks started batch'\r\n| project-rename start_timestamp=TimeGenerated\r\n| extend batchid = tostring(Properties['batch_id'])\r\n| extend device_id = tostring(Properties['device_id'])\r\n| project start_timestamp, device_id, batchid\r\n| join kind=leftouter \r\n    (AppTraces\r\n    | where AppRoleName == 'Tasks (prod)'\r\n    | where Message startswith 'Tasks completed run'\r\n    | project-rename completed_timestamp=TimeGenerated\r\n    | extend batchid = tostring(Properties['batch_id'])\r\n    | extend iteration = toint(Properties['iteration'])\r\n    | project completed_timestamp, iteration, batchid) on batchid)\r\n| project start_timestamp, device_id, batchid, success=iff(isempty(iteration),\"FAILED\",\"SUCCESS\"), duration=completed_timestamp-start_timestamp, iteration",
         "size": 0,
         "timeContext": {
           "durationMs": 86400000
@@ -58,7 +58,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "AppTraces\r\n| where Message == \"Tasker failed run\"\r\n| extend device_id = tostring(Properties[\"device_id\"])\r\n| where device_id == \"{device_id}\"\r\n| project TimeGenerated, Message, SeverityLevel, Properties",
+        "query": "AppTraces\r\n| where Message == \"Tasks failed run\"\r\n| extend device_id = tostring(Properties[\"device_id\"])\r\n| where device_id == \"{device_id}\"\r\n| project TimeGenerated, Message, SeverityLevel, Properties",
         "size": 1,
         "noDataMessage": "No failed runs found for this batch.",
         "timeContext": {

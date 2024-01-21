@@ -2,16 +2,16 @@
 // Get timestamp of start batch, join it with completed run on batchid
 // Also include the number of iterations needed to complete it.
 (AppTraces
-| where AppRoleName == 'Tasker (prod)'
-| where Message startswith 'Tasker started batch'
+| where AppRoleName == 'Tasks (prod)'
+| where Message startswith 'Tasks started batch'
 | project-rename start_timestamp=TimeGenerated
 | extend batchid = tostring(Properties['batch_id'])
 | extend device_id = tostring(Properties['device_id'])
 | project start_timestamp, device_id, batchid
 | join kind=leftouter 
     (AppTraces
-    | where AppRoleName == 'Tasker (prod)'
-    | where Message startswith 'Tasker completed run'
+    | where AppRoleName == 'Tasks (prod)'
+    | where Message startswith 'Tasks completed run'
     | project-rename completed_timestamp=TimeGenerated
     | extend batchid = tostring(Properties['batch_id'])
     | extend iteration = toint(Properties['iteration'])

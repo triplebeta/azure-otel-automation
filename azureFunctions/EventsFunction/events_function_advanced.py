@@ -100,21 +100,21 @@ async def EventsAdvancedFunction(req: func.HttpRequest, context, tracer) -> func
 
         # Send an event to the Event Hub
         with tracer.start_as_current_span("Send trigger for tasks to Event Hub", attributes=metadata):
-            logging.info(f'Sending trigger from Events to Tasker', extra=metadata)
+            logging.info(f'Sending trigger from Events to Tasks', extra=metadata)
             EVENT_HUB_CONNECTION_STR = os.environ["EVENTHUB_CONNECTION_STRING"]
             producer = EventHubProducerClient.from_connection_string(EVENT_HUB_CONNECTION_STR, eventhub_name='events') # , transport_type=TransportType.AmqpOverWebsocket
             
             async with producer:
-                # Create the message for the Tasker with number of valid events.
+                # Create the message for the Tasks with number of valid events.
                 # TODO Add Start and End to the message, and # of events
-                taskerCmd = { "device_id": params.device_id, "tasks": { "iterations":params.tasks_iterations, "success": params.tasks_success, "manualRetry": params.is_manual_run, "error": params.tasks_error}  }
-                jsonTaskerCmd = json.dumps(taskerCmd)
+                tasksCmd = { "device_id": params.device_id, "tasks": { "iterations":params.tasks_iterations, "success": params.tasks_success, "manualRetry": params.is_manual_run, "error": params.tasks_error}  }
+                jsonTasksCmd = json.dumps(tasksCmd)
 
-                # Send trigger to the tasker via Event Hub
+                # Send trigger to the tasks via Event Hub
                 event_data_batch = await producer.create_batch()
-                event_data_batch.add(EventData(jsonTaskerCmd))
+                event_data_batch.add(EventData(jsonTasksCmd))
                 await producer.send_batch(event_data_batch)
-                logging.info(f'Sent trigger from Events to Tasker', extra=metadata)
+                logging.info(f'Sent trigger from Events to Tasks', extra=metadata)
 
         # Done with all of it
         metric_run_completed.add(1,attributes=metadata)

@@ -5,8 +5,8 @@ let _timespanStart = ago(_maxAge); // Start time for the timespan
 let _timespanEnd = now(-2m); // there is some ingestion lag, so we account for this by stripping the last 2m
 AppTraces
 | where TimeGenerated between (_timespanStart .. _timespanEnd)
-| where AppRoleName == 'Tasker (prod)'
-| where Message == "Tasker failed run"
+| where AppRoleName == 'Tasks (prod)'
+| where Message == "Tasks failed run"
 | extend iteration=toint(Properties["iteration"])
 | where iteration==3
 | summarize failedBatchCount=count() by bin(TimeGenerated,1m)

@@ -25,7 +25,7 @@ resource "azurerm_log_analytics_query_pack_query" "BatchDurationQuery" {
   name = "d26b7a8c-c723-441e-965b-fd591ce07649"  # must be hard-coded and unique
   query_pack_id = azurerm_log_analytics_query_pack.tasksQueryPack.id
   description = "How much time did the batch take."
-  display_name = "Tasker Batch Duration"
+  display_name = "Tasks Batch Duration"
   body = file("./modules/Tasks/TasksQueryPack/BatchDuration.kql")
   categories = [ "applications" ]
   resource_types = [

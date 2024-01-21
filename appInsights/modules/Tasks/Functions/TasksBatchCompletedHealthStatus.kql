@@ -5,7 +5,7 @@ let _timespanStart = ago(_maxAge); // Start time for the timespan
 let _timespanEnd = now(-2m); // there is some ingestion lag, so we account for this by stripping the last 2m
 AppMetrics
 | where TimeGenerated between (_timespanStart .. _timespanEnd)
-| where AppRoleName == 'Tasker (prod)'
+| where AppRoleName == 'Tasks (prod)'
 | where Name == "tasks.batches"
 | summarize batchCount=sum(Sum) by bin(TimeGenerated,1m), Name
 | union (
