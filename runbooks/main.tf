@@ -155,6 +155,7 @@ output "keyvault_secret_name_for_runbook_webhook_uri" {
   value = local.webhook_name
 }
 output "runbook_webhook_uri" {
+  sensitive = true
   value = azurerm_automation_webhook.sop_runbook_manual_run.uri
 }
 
