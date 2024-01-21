@@ -25,9 +25,9 @@ data "azurerm_resource_group" "parent_group" {
 }
 
 
-// Ensure the necessary Python packages are installed in the Automation Account
+// Get a reference to the Automation Account for Standard Operating Procedures runbooks.
 data "azurerm_automation_account" "sop_aa" {
-  name = "${data.azurerm_resource_group.parent_group.name}-aa"
+  name = "standard-operating-proc-aa"
   resource_group_name     = data.azurerm_resource_group.parent_group.name
 }
 
@@ -135,7 +135,7 @@ resource "azurerm_automation_webhook" "sop_runbook_manual_run" {
 }
 
 // Store the webhook credentials in the key vault
-
+/*
 // Get reference to the Key Vault
 data "azurerm_key_vault" kv {
   name = "${data.azurerm_resource_group.parent_group.name}-kv"
@@ -147,6 +147,15 @@ resource "azurerm_key_vault_secret" "webhook_secret_sop_runbook_manual_run" {
   name         = local.webhook_name
   value        = azurerm_automation_webhook.sop_runbook_manual_run.uri
   key_vault_id = data.azurerm_key_vault.kv.id
+}
+*/
+
+// For now: just show the uri so you can manually add it to the key vault
+output "keyvault_secret_name_for_runbook_webhook_uri" {
+  value = local.webhook_name
+}
+output "runbook_webhook_uri" {
+  value = azurerm_automation_webhook.sop_runbook_manual_run.uri
 }
 
 /*
