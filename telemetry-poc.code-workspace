@@ -37,10 +37,6 @@
 			"path": "appInsights"
 		},
 		{
-			"name": "Infra for Azure Automation",
-			"path": "automation/infra"
-		},
-		{
 			"name": "Azure Dashboard (deprecated)",
 			"path": "appInsights/modules/Tasks/Dashboards"
 		},

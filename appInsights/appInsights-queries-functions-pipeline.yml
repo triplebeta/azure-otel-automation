@@ -1,5 +1,8 @@
-# Azure Devops pipeline to deploy ApplicationInsights functions.
+#
+# Azure Devops pipeline to deploy ApplicationInsights queries and functions.
 # This cannot be done using Bicep because of a bug in the Bicep templates.
+#
+name: Deploy AppInSights Queries and Functions
 
 trigger:
   branches:
@@ -32,7 +35,7 @@ steps:
     backendServiceArm: $(azureServiceConnection)
     backendAzureRmResourceGroupName: $(resourceGroupName)
     backendAzureRmStorageAccountName: '$(resourceGroupName)storage'
-    backendAzureRmContainerName: 'tfstate'
+    backendAzureRmContainerName: 'tfstate-insights'
     backendAzureRmKey: 'terraform.tfstate'
 
 - task: TerraformTaskV4@4

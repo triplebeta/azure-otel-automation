@@ -1,3 +1,9 @@
+#
+# Main pipeline to setup all the core infrastructure.
+# All other pipelines deploy applications or content like queries, workbooks, runbooks etc.
+#
+name: Deploy Automation runbooks
+
 trigger:
   branches:
     include:

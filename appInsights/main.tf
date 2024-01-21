@@ -1,3 +1,10 @@
+#
+# Deploys the AppInsights elements:
+# - Query Packs
+# - Functions
+# - Workbooks
+#
+
 terraform {
   required_providers {
     azurerm = {
@@ -8,7 +15,7 @@ terraform {
   backend "azurerm" {
     resource_group_name  = "otelpoc"
     storage_account_name = "otelpocstorage"
-    container_name       = "tfstate"
+    container_name       = "tfstate-appinsights"
     key                  = "terraform.tfstate"
   }
 }

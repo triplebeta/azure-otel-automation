@@ -1,7 +1,0 @@
-# Utility script to help debug issues.
-# Prints the variables and directory structure.
-steps:
-  - pwsh: gci env:* | sort-object name
-    displayName: Print environment variables      
-  - pwsh: tree /F
-    displayName: Print directory tree

@@ -21,17 +21,43 @@ resource azStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
     name: 'default'
   }
 }
-  // Create container
-  resource containers 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
-    name: '${envResourceNamePrefix}storage/default/tfstate'
-    properties: {
-      publicAccess: 'None'
-      metadata: {}
+
+// Create a Key Vault to store the credentials for the webhooks
+// of the Runbooks, so we can invoke them from an alert.
+resource azKeyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
+  name: '${envResourceNamePrefix}-kv'
+  location: location
+  properties: {
+    tenantId: tenant().tenantId
+    sku: {
+      family: 'A'
+      name: 'standard'
     }
-    dependsOn: [
-      azStorageAccount
-    ]
+    enableRbacAuthorization: true
   }
+}
+
+// Create container for Terraform state of runbooks
+resource container_tf_runbooks 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
+  name: '${envResourceNamePrefix}storage/default/tfstate-runbooks'
+  properties: {
+    publicAccess: 'None'
+  }
+  dependsOn: [
+    azStorageAccount
+  ]
+}
+
+// Create container for Terraform state of runbooks
+resource container_tf_appinsights 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
+  name: '${envResourceNamePrefix}storage/default/tfstate-appinsights'
+  properties: {
+    publicAccess: 'None'
+  }
+  dependsOn: [
+    azStorageAccount
+  ]
+}
 
 // TODO Find a better way than using listKeys
 #disable-next-line use-resource-symbol-reference
@@ -76,6 +102,38 @@ resource azAppInsights 'Microsoft.Insights/components@2020-02-02' = {
 }
 var azAppInsightsInstrumentationKey = azAppInsights.properties.InstrumentationKey
 var azAppInsightsConnectionString = azAppInsights.properties.ConnectionString
+
+
+// ========================================================
+// Azure Automation account
+// ========================================================
+
+// Azure Account for Runbooks for the Standard Operating Procedures.
+resource sop_aa 'Microsoft.Automation/automationAccounts@2023-11-01' = {
+  name: 'standard-operating-proc-aa'
+  location: location
+  properties: {
+    sku: {
+      name: 'Basic'
+    }
+  }
+  identity: {
+    type: 'SystemAssigned'
+  }
+}
+
+// Grant Contributor role to system assigned identity
+resource AutomationAccountContributorRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, sop_aa.id) 
+  scope: resourceGroup()
+    properties: {
+    principalId: sop_aa.identity.principalId
+    
+    // See: https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
+    roleDefinitionId: 'b24988ac-6180-42a0-ab88-20f7382dd24c' // Contributor
+    principalType: 'ServicePrincipal'
+  }
+}
 
 // ========================================================
 // AppServicePlan
