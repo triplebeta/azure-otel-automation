@@ -27,6 +27,10 @@ stages:
       - checkout: self
         persistCredentials: true
 
+      - task: TerraformInstaller@1
+        inputs:
+          terraformVersion: 'latest'
+
       - task: TerraformTaskV4@4
         name: terraformInit
         displayName: Initialize Terraform
