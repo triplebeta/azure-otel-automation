@@ -26,10 +26,16 @@ data "azurerm_resource_group" "parent_group" {
 
 
 // Ensure the necessary Python packages are installed in the Automation Account
+data "azurerm_automation_account" "sop_aa" {
+  name = "${data.azurerm_resource_group.parent_group.name}-aa"
+  resource_group_name     = data.azurerm_resource_group.parent_group.name
+}
+
+// Ensure the necessary Python packages are installed in the Automation Account
 resource "azurerm_automation_python3_package" "requirements_azure_identity" {
   name = "azure-identity"
   resource_group_name     = data.azurerm_resource_group.parent_group.name
-  automation_account_name = azurerm_automation_account.sop_aa.name
+  automation_account_name = data.azurerm_automation_account.sop_aa.name
   content_uri             = "https://files.pythonhosted.org/packages/30/10/5dbf755b368d10a28d55b06ac1f12512a13e88874a23db82defdea9a8cd9/azure_identity-1.15.0-py3-none-any.whl"
 #   content_version         = "2.31.0"
 #   hash_algorithm          = "sha256"
@@ -39,21 +45,21 @@ resource "azurerm_automation_python3_package" "requirements_azure_identity" {
 resource "azurerm_automation_python3_package" "requirements_azure_core" {
   name = "azure-core"
   resource_group_name     = data.azurerm_resource_group.parent_group.name
-  automation_account_name = azurerm_automation_account.sop_aa.name
+  automation_account_name = data.azurerm_automation_account.sop_aa.name
   content_uri             = "https://files.pythonhosted.org/packages/9c/f8/1cf23a75cb8c2755c539ac967f3a7f607887c4979d073808134803720f0f/azure_core-1.29.5-py3-none-any.whl"
 }
 
 resource "azurerm_automation_python3_package" "requirements_typing_extensions" {
   name = "typing_extensions"
   resource_group_name     = data.azurerm_resource_group.parent_group.name
-  automation_account_name = azurerm_automation_account.sop_aa.name
+  automation_account_name = data.azurerm_automation_account.sop_aa.name
   content_uri             = "https://files.pythonhosted.org/packages/24/21/7d397a4b7934ff4028987914ac1044d3b7d52712f30e2ac7a2ae5bc86dd0/typing_extensions-4.8.0-py3-none-any.whl"
 }
 
 resource "azurerm_automation_python3_package" "requirements_msal" {
   name = "msal"
   resource_group_name     = data.azurerm_resource_group.parent_group.name
-  automation_account_name = azurerm_automation_account.sop_aa.name
+  automation_account_name = data.azurerm_automation_account.sop_aa.name
   content_uri             = "https://files.pythonhosted.org/packages/2a/45/d80a35ce701c1b3b53ab57a585813636acba39f3a8ed87ac01e0f1dfa3c1/msal-1.25.0-py2.py3-none-any.whl"
 }
 
@@ -76,13 +82,13 @@ resource "azurerm_automation_runbook" "sop_python_runbook" {
   name                    = substr(basename(each.value),0, length(basename(each.value))-3)
   location                = data.azurerm_resource_group.parent_group.location
   resource_group_name     = data.azurerm_resource_group.parent_group.name
-  automation_account_name = azurerm_automation_account.sop_aa.name
+  automation_account_name = data.azurerm_automation_account.sop_aa.name
   log_verbose             = "false"
   log_progress            = "true"
-  description             = "Standard Operating Procedure: " + replace(substr(basename(each.value),0, length(basename(each.value))-4),"_","")
+  description             = "Standard Operating Procedure: ${replace(substr(basename(each.value),0, length(basename(each.value))-3),"_","")}"
   runbook_type            = "Python3"
 
-  content = file("${each.value}")
+  content = file("${path.module}/std_operating_procedures/${each.value}")
 }
 
 // Deploy a PowerShell runbook to restart a run for Events
@@ -92,36 +98,37 @@ resource "azurerm_automation_runbook" "sop_powershell_runbooks" {
   name                    = substr(basename(each.value),0, length(basename(each.value))-4)
   location                = data.azurerm_resource_group.parent_group.location
   resource_group_name     = data.azurerm_resource_group.parent_group.name
-  automation_account_name = azurerm_automation_account.sop_aa.name
+  automation_account_name = data.azurerm_automation_account.sop_aa.name
   log_verbose             = "false"
   log_progress            = "true"
   description             = "Standard Operating Procedure"
   runbook_type            = "PowerShell"
 
-  content = file("${each.value}")
+  content = file("${path.module}/std_operating_procedures/${each.value}")
 }
 
 #
 # Create webhook for 1 or more runbooks
 #
 
-resource "local_file" "runbook_manual_run" {
+data "local_file" "runbook_manual_run" {
   filename = "${path.module}/std_operating_procedures/ManuallyStartEventsRun.py"
 }
 
 # Define the details of a webhook that is valid for 1 year
 locals {
-  webhook_name = "webhook_" + substr(basename(each.value),0, length(basename(each.value))-3)
+  runbook_name = "ManuallyStartEventsRun"
+  webhook_name = "webhook-sop-runbook-manual-run"
   webhook_expiry_date = timeadd(plantimestamp(),"8640h") # max. 360 days
 }
 
 resource "azurerm_automation_webhook" "sop_runbook_manual_run" {
   name                    = local.webhook_name
   resource_group_name     = data.azurerm_resource_group.parent_group.name
-  automation_account_name = azurerm_automation_account.sop_aa.name
+  automation_account_name = data.azurerm_automation_account.sop_aa.name
   expiry_time             = local.webhook_expiry_date
   enabled                 = true
-  runbook_name            = local_file.runbook_manual_run.filename
+  runbook_name            = local.runbook_name
   parameters = {
     input = "WEBHOOKDATA"
   }
@@ -130,15 +137,16 @@ resource "azurerm_automation_webhook" "sop_runbook_manual_run" {
 // Store the webhook credentials in the key vault
 
 // Get reference to the Key Vault
-data "azurerm_keyvault" kv {
+data "azurerm_key_vault" kv {
   name = "${data.azurerm_resource_group.parent_group.name}-kv"
+  resource_group_name     = data.azurerm_resource_group.parent_group.name
 }
 
 // Store the reference in the key vault
 resource "azurerm_key_vault_secret" "webhook_secret_sop_runbook_manual_run" {
   name         = local.webhook_name
   value        = azurerm_automation_webhook.sop_runbook_manual_run.uri
-  key_vault_id = azurerm_key_vault.kv.id
+  key_vault_id = data.azurerm_key_vault.kv.id
 }
 
 /*
