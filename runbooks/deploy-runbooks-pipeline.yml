@@ -41,7 +41,7 @@ stages:
           backendServiceArm: $(azureServiceConnection)
           backendAzureRmResourceGroupName: $(resourceGroupName)
           backendAzureRmStorageAccountName: '$(resourceGroupName)storage'
-          backendAzureRmContainerName: 'tfstate-runbook'
+          backendAzureRmContainerName: 'tfstate-runbooks'
           backendAzureRmKey: 'terraform.tfstate'
 
       - task: TerraformTaskV4@4
