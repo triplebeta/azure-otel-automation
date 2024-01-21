@@ -20,7 +20,7 @@ All resources can be deployed with Infrastructure as Code using Azure Devops pip
 2. Configure a pipeline for these files:
     * [azure-functions-infra-pipeline.yml](../azureFunctions/infra/azure-functions-infra-pipeline.yml)
     * [appInsights-queries-functions-pipeline.yml](../appInsights/appInsights-queries-functions-pipeline.yml)
-    * [azure-runbooks-pipeline.yml](../automation/infra/azure-runbooks-pipeline.yml)
+    * [deploy-runbooks-pipeline.yml](../runbooks/deploy-runbooks-pipeline.yml)
     * [deploy-events-function-pipeline.yml](../azureFunctions/EventsFunction/deploy-events-function-pipeline.yml)
     * [deploy-tasks-function-pipeline.yml](../azureFunctions/TasksFunction/deploy-tasks-function-pipeline.yml)
 

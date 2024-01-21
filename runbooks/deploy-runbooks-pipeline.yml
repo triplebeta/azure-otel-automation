@@ -6,7 +6,7 @@ trigger:
     - master
   paths:
     include:
-    - automation/runbooks
+    - runbooks
     exclude:
       - /**/*.md
 
@@ -17,7 +17,7 @@ variables:
 
 stages:
 - stage: DeployAutomationInfra
-  displayName: Deploy automation infra
+  displayName: Deploy Azure Automation Runbooks
   jobs:
   - job: Build
     displayName: Build
@@ -37,11 +37,11 @@ stages:
         inputs:
           provider: 'azurerm'
           command: 'init'
-          workingDirectory: 'automation'
+          workingDirectory: 'runbooks'
           backendServiceArm: $(azureServiceConnection)
           backendAzureRmResourceGroupName: $(resourceGroupName)
           backendAzureRmStorageAccountName: '$(resourceGroupName)storage'
-          backendAzureRmContainerName: 'tfstate-automation'
+          backendAzureRmContainerName: 'tfstate-runbook'
           backendAzureRmKey: 'terraform.tfstate'
 
       - task: TerraformTaskV4@4
@@ -50,7 +50,7 @@ stages:
         inputs:
           provider: 'azurerm'
           command: 'plan'
-          workingDirectory: 'automation'
+          workingDirectory: 'runbooks'
           commandOptions: '-out main.tfplan'
           environmentServiceNameAzureRM: $(azureServiceConnection)
 
@@ -61,7 +61,7 @@ stages:
         inputs:
           provider: 'azurerm'
           command: 'apply'
-          workingDirectory: 'automation'
+          workingDirectory: 'runbooks'
           commandOptions: 'main.tfplan'
           environmentServiceNameAzureRM: $(azureServiceConnection)
        
