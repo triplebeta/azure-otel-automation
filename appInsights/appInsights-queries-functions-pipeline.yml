@@ -35,7 +35,7 @@ steps:
     backendServiceArm: $(azureServiceConnection)
     backendAzureRmResourceGroupName: $(resourceGroupName)
     backendAzureRmStorageAccountName: '$(resourceGroupName)storage'
-    backendAzureRmContainerName: 'tfstate-insights'
+    backendAzureRmContainerName: 'tfstate-appinsights'
     backendAzureRmKey: 'terraform.tfstate'
 
 - task: TerraformTaskV4@4
