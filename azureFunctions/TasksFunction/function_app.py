@@ -15,6 +15,8 @@ import azure.functions as func
 # Open Telemetry
 from azure.monitor.opentelemetry import configure_azure_monitor
 from opentelemetry import trace
+from azure.core.settings import settings
+settings.tracing_implementation = "opentelemetry"
 
 # Workaround (part 1/3) specifically for Azure Functions, according to: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-python-opencensus-migrate
 from opentelemetry.context import attach, detach

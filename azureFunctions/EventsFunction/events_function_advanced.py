@@ -9,19 +9,15 @@ import random
 import json
 import os
 
-
 # For using the event hub
 from azure.eventhub import EventData
 from azure.eventhub.aio import EventHubProducerClient
-
-# Open telemetry packages
-from azure.monitor.opentelemetry import configure_azure_monitor
-from opentelemetry import metrics
 
 # Azure Functions specific workaround (part 1/3) for Python opentelemetry.
 # For details check out: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-python-opencensus-migrate
 from opentelemetry.context import attach, detach
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+from opentelemetry import metrics
 
 # NOTE: This code is not needed here since we pass the tracer from the function_app.py to avoid duplicate logs
 # Avoid duplicate logging

@@ -3,7 +3,9 @@ import azure.functions as func
 
 # Open Telemetry
 from azure.monitor.opentelemetry import configure_azure_monitor
-from opentelemetry import trace, metrics
+from opentelemetry import trace
+from azure.core.settings import settings
+settings.tracing_implementation = "opentelemetry"
 
 from events_function_advanced import EventsAdvancedFunction
 from events_function_simple import EventsSimpleFunction

@@ -1,7 +1,7 @@
 {
   "version": "2.0",
   "logging": {
-    "fileLoggingMode": "debugOnly",
+    "fileLoggingMode": "never",
     "logLevel": {
       "default": "None",
       "Host.Results": "Warning",
@@ -12,7 +12,7 @@
       "enableDependencyTracking": true,
       "samplingSettings": {
         "isEnabled": false,
-        "excludedTypes": "Request;Exception"
+        "excludedTypes": "Exception"
       }
     }
   },
