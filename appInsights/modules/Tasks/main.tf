@@ -48,6 +48,7 @@ data "azurerm_log_analytics_workspace" "myWorkspace" {
 # Create a set of all KQL files in the directory.
 locals {
   tasks_function_files = fileset("./modules/Tasks/Functions", "*.kql")
+  tasks_function_samples_files = fileset("./modules/Tasks/Functions/Sample", "*.kql")
 }
 
 #
@@ -94,8 +95,23 @@ resource "azurerm_log_analytics_saved_search" "laTasksFunctions" {
 }
 
 
+
+# Deploy sample functions for use in the Workbook. 
+resource "azurerm_log_analytics_saved_search" "laTasksSampleFunctions" {
+  for_each = local.tasks_function_samples_files
+
+  name                       = substr(basename(each.value),0, length(basename(each.value))-4)
+  log_analytics_workspace_id = data.azurerm_log_analytics_workspace.myWorkspace.id
+  function_alias = substr(basename(each.value),0, length(basename(each.value))-4) 
+
+  category     = "Sample"
+  display_name = substr(basename(each.value),0, length(basename(each.value))-4)
+  query        = file("./modules/Tasks/Functions/Sample/${each.value}")
+}
+
+
 # ======================================
-# Azure Workbooks - replacement of Azure Dashboards
+# Azure Workbooks
 # ======================================
 
 data "azurerm_subscription" "current" {}
@@ -117,25 +133,3 @@ resource "azurerm_application_insights_workbook" "overall-health-status-workbook
 }
 
 
-
-# ============================================================================
-#
-# Azure portal dashboard - Deprecated, use Azure Workbook instead
-#
-# ============================================================================
-
-# resource "azurerm_portal_dashboard" "device-dashboard" {
-#   name                = "device-dashboard"
-#   resource_group_name = data.azurerm_resource_group.parent_group.name
-#   location            = data.azurerm_resource_group.parent_group.location
-#   tags = {
-#     hidden-title = "Device Dashboard"
-#   }
-
-#   // In the tpl file you can use these like: ${dashboard_title}
-#   dashboard_properties =  templatefile("${path.module}/Dashboards/DeviceDashboard.tpl",
-#     {
-#       dashboard_title = "Device Dashboard",
-#       sub_id     = data.azurerm_subscription.current.subscription_id
-#       })
-# }
