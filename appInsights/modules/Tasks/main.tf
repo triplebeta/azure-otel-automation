@@ -116,12 +116,37 @@ resource "azurerm_log_analytics_saved_search" "laTasksSampleFunctions" {
 
 data "azurerm_subscription" "current" {}
 
+
+// Deploy Workbook template
+resource "azurerm_application_insights_workbook_template" "device-healt-workbook-template" {
+  name                = "DeviceHealthWorkbookTemplate"
+  resource_group_name = data.azurerm_resource_group.parent_group.name
+  location            = data.azurerm_resource_group.parent_group.location
+  
+  galleries {
+    category      = "Samples"
+    name          = "Device Health"
+    order         = 100
+    resource_type = "microsoft.insights/components"
+  }
+
+  template_data = templatefile("${path.module}/Workbooks/DeviceHealthWorkbookTemplates.tpl",
+    {
+      log_analytics_name = var.log_analytics_workspace_name
+      resource_group_name = data.azurerm_resource_group.parent_group.name
+      sub_id     = data.azurerm_subscription.current.subscription_id
+    })
+}
+
+
+// Deploy a workbook
 resource "azurerm_application_insights_workbook" "overall-health-status-workbook" {
   name                = "429a12ba-9aa9-400f-9838-adf92c496d60"
   resource_group_name = data.azurerm_resource_group.parent_group.name
   location            = data.azurerm_resource_group.parent_group.location
   description         = "Overall view of the health of the system for the Devops teams"
   display_name        = "Overall Health Status"
+  category            = "Samples"
   
   // In the tpl file you can use these like: ${sub_id}
   data_json =  templatefile("${path.module}/Workbooks/OverallHealthStatus.tpl",
