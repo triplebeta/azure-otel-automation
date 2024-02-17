@@ -3,10 +3,13 @@
     "configurations": [
         {
             "name": "Attach to Tasks",
-            "type": "python",
+            "type": "debugpy",
             "request": "attach",
-            "port": 9092,
-            "preLaunchTask": "func: host start"
+            "preLaunchTask": "func: host start",
+            "connect": {
+              "host": "localhost",
+              "port": 9092
+            }
         }
     ]
 }

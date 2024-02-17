@@ -1,12 +1,12 @@
 {
   "version": "2.0",
   "logging": {
-    "fileLoggingMode": "debugOnly",
+    "fileLoggingMode": "never",
     "logLevel": {
-      "default": "Trace",
-      "Host.Results": "Trace",
-      "Function": "Trace",
-      "Host.Aggregator": "Trace"
+      "default": "Error",
+      "Host.Results": "Error",
+      "Function": "Information",
+      "Host.Aggregator": "Error"
     },
     "applicationInsights": {
       "enableDependencyTracking": true,

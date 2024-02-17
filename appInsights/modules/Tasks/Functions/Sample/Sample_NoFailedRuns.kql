@@ -1,0 +1,27 @@
+// No failed run that failed per day.
+// A single run might fail but if a retry succeeds it is still ok.
+// green = no failed runs
+// yellow = one or more runs failes but batches eventually completed (CAN ALSO be manually)
+// red = at least 1 batch failed PERMANENTLY (so 3x retried) 
+let _timespanEnd = todatetime("2024-01-04 00:00:00"); 
+let _timespanStart = datetime_add('day',-3, _timespanEnd);
+// Returns only the machines that have at least one failed batch
+let failedRunsPerDay=SampleAppTraces1
+| where Message == "Tasks failed run"
+| extend device_id = tostring(Properties["device_id"])
+| extend run_failed=1
+| make-series run_failed=sum(run_failed) default=int(0) on TimeGenerated from _timespanStart to _timespanEnd step 1d by device_id
+| mv-expand TimeGenerated, run_failed
+| project todatetime(TimeGenerated), device_id, toint(run_failed);
+failedRunsPerDay
+| union
+    (SampleAppTraces1
+    | extend device_id = tostring(Properties["device_id"])
+    | distinct device_id
+    | extend TimeGenerated=todatetime(_timespanStart), run_failed=0
+    | project TimeGenerated, device_id, toint(run_failed))
+| make-series Value=max(run_failed) default=int(0) on TimeGenerated from _timespanStart to _timespanEnd step 1d by device_id
+| mv-expand TimeGenerated, Value
+| summarize Value = sum(tolong(Value)) by device_id
+| extend IsYellow=0, IsRed=iif(Value>0,1,0)
+| project-reorder device_id, Value, IsYellow, IsRed

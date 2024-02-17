@@ -1,19 +1,21 @@
+import sys
 import logging
 import azure.functions as func
 
 # Open Telemetry
 from azure.monitor.opentelemetry import configure_azure_monitor
 from opentelemetry import trace
-from azure.core.settings import settings
-settings.tracing_implementation = "opentelemetry"
 
 from events_function_advanced import EventsAdvancedFunction
 from events_function_simple import EventsSimpleFunction
 
-# Avoid duplicate logging
-root_logger = logging.getLogger()
-for handler in root_logger.handlers[:]:
-    root_logger.removeHandler(handler)
+# You might get duplicate logging. This can be prevented with this code
+# WARNING: this also removes the Console logger so you will no longer see your log lines there.
+# root_logger = logging.getLogger()
+# for handler in root_logger.handlers[:]:
+#    root_logger.removeHandler(handler)
+
+
 configure_azure_monitor()
 tracer = trace.get_tracer(__name__)
 

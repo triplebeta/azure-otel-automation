@@ -1,0 +1,30 @@
+// Get number of completed batches of the last 3 days
+// Is there a "Tasks completed batch" for every started batch?
+let _timespanEnd = todatetime("2024-01-04 00:00:00"); 
+let _timespanStart = datetime_add('day',-3, _timespanEnd);
+// All batches that are marked as Complete
+// batch_id identifies the batch, completing_batch_id indicates which batch completed it.
+// Normally it's the same batch but in case of a re-run it can be different.
+let completedBatchesPerDay = SampleAppTraces1
+| where Message == "Tasks completed batch"
+| extend device_id = tostring(Properties["device_id"])
+| extend completing_batch_id = toint(Properties["batch_id"])
+| extend original_batch_id = toint(Properties["original_batch_id"])
+| extend is_retried = isnotnull(original_batch_id) 
+| extend batch_id = iif(is_retried, original_batch_id, completing_batch_id)
+| project TimeGenerated, device_id, batch_id, completing_batch_id, is_retried, completed=1
+| make-series Value=sum(completed) default=int(0) on TimeGenerated from _timespanStart to _timespanEnd step 1d by device_id
+| mv-expand TimeGenerated, Value;
+//
+// Compute AtLeastOneCompletedBatchPerDay
+completedBatchesPerDay
+| extend AtLeastOneBatch = iif(Value>0,1,0) // Count 1 for each day with a completed batch
+| summarize Last3Days=sum(AtLeastOneBatch) by device_id
+| project device_id, IsYellow=0, IsRed = iif(Last3Days<3,1,0)
+// Ensure all devices are in the list
+| union
+    (SampleAppTraces1
+    | extend device_id = tostring(Properties["device_id"])
+    | distinct device_id
+    | extend TimeGenerated=_timespanStart, IsYellow=0, IsRed=0)
+| summarize IsYellow=sum(IsYellow), IsRed=sum(IsRed) by device_idSample_LastBatchOfMachineSuccessful

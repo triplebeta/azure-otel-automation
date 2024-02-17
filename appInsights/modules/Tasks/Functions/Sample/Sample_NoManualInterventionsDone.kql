@@ -1,0 +1,24 @@
+// If a manual intervention is done for a machine, its status will be set to yellow
+// to indicate something had to be corrected.
+// green = no manual interventions needed
+// yellow = at least one manual intervention was done for that machine on that day
+// red = N/A
+let _timespanEnd = todatetime("2024-01-04 00:00:00"); 
+let _timespanStart = datetime_add('day',-3, _timespanEnd);
+// Get all machines
+let allMachines=SampleAppTraces1
+| where Message == "Tasks started batch"
+| extend device_id = tostring(Properties["device_id"])
+| summarize Value=count() by bin(TimeGenerated,1d), device_id
+| project-away Value;
+// Returns only the machines that have at least one failed batch
+let manualRunsPerDay=SampleAppTraces1
+| where Message == "Tasks started batch"
+| extend is_manual_run = tobool(Properties["is_manual_run"])
+| extend device_id = tostring(Properties["device_id"])
+| project TimeGenerated, device_id, is_manual_run;
+//
+allMachines
+| join kind=leftouter manualRunsPerDay on device_id, TimeGenerated
+| make-series Value=count() default=int(0) on TimeGenerated from _timespanStart to _timespanEnd step 1d by device_id
+| mv-expand TimeGenerated, Value;

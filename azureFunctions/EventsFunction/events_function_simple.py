@@ -12,6 +12,7 @@ from opentelemetry import metrics
 
 # NOTE: This code is not needed here since we pass the tracer from the function_app.py to avoid duplicate logs
 # Avoid duplicate logging
+# WARNING: this also removes the Console logger so you will no longer see your log lines there.
 # root_logger = logging.getLogger()
 # for handler in root_logger.handlers[:]:
 #     root_logger.removeHandler(handler)

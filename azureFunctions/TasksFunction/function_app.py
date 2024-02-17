@@ -5,6 +5,7 @@
 #      "default": "None",    <-- This line
 #
 
+import sys
 import uuid
 import random
 import time
@@ -15,8 +16,6 @@ import azure.functions as func
 # Open Telemetry
 from azure.monitor.opentelemetry import configure_azure_monitor
 from opentelemetry import trace
-from azure.core.settings import settings
-settings.tracing_implementation = "opentelemetry"
 
 # Workaround (part 1/3) specifically for Azure Functions, according to: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-python-opencensus-migrate
 from opentelemetry.context import attach, detach
@@ -26,9 +25,10 @@ from task_simulation_request import TasksSimulationRequest
 from metrics import metric_batch, metric_run, metric_run_retried, metric_run_retried, metric_run_completed, metric_tasks_count, metric_run_failed
 
 # Avoid duplicate logging
-root_logger = logging.getLogger()
-for handler in root_logger.handlers[:]:
-    root_logger.removeHandler(handler)
+# WARNING: this also removes the Console logger so you will no longer see your log lines there.
+# root_logger = logging.getLogger()
+# for handler in root_logger.handlers[:]:
+#     root_logger.removeHandler(handler)
 
 # Enable telemetry for this Azure Function
 # TODO Pass a storage_directory for storing logs when offline
@@ -79,7 +79,7 @@ def Tasks(myEvents: func.EventHubEvent, context):
           # Generate an id for the batch (1 or more runs)
           batch_id = 'batch-' + uuid.uuid4().hex
 
-          # Note: if tasks_iterations = 1 then this loop will run once, with counter=0
+          # This loop will help to simulate retries.
           for counter in range(params.tasks_iterations):
                run_id = 'run-'+uuid.uuid4().hex
 
@@ -129,6 +129,9 @@ def Tasks(myEvents: func.EventHubEvent, context):
                          metadata["tasks_created"] = tasks_created_count
                          metadata["duration"] = params.tasks_duration
                          logging.info(f'Tasks completed run',extra=metadata)
+
+                         # Just for ease of querying: also register the batch completed successfully
+                         logging.info(f'Tasks completed batch',extra=metadata)
                
                     except Exception as error:
                          # Log the exception (which includes the traceback)
@@ -138,6 +141,11 @@ def Tasks(myEvents: func.EventHubEvent, context):
                          # And log a more simple error message
                          logging.error(f'Tasks failed run',extra=metadata)
                          metric_run_failed.add(1,attributes=metadata)
+
+                         # For ease of querying: register that all retries failed, so the batch failed.
+                         # It will not be retried automatically, manual intervention needed.
+                         if (counter+1==params.tasks_iterations and params.tasks_success==False):
+                              logging.info(f'Tasks failed batch',extra=metadata)
 
                     finally:
                          # Update the counter for the parallel runs

@@ -3,16 +3,26 @@
   "logging": {
     "fileLoggingMode": "never",
     "logLevel": {
-      "default": "None",
-      "Host.Results": "Warning",
-      "Function": "Warning",
-      "Host.Aggregator": "Warning"
+      "default": "Error",
+      "Host.Results": "Error",
+      "Function": "Information",
+      "Host.Aggregator": "Error"
+    },
+    "console": {
+      "isEnabled": false
     },
     "applicationInsights": {
-      "enableDependencyTracking": true,
       "samplingSettings": {
         "isEnabled": false,
-        "excludedTypes": "Exception"
+        "excludedTypes": "Request;Exception"
+      },
+      "enableLiveMetrics": true,
+      "enableDependencyTracking": true,
+      "enablePerformanceCountersCollection": true,            
+      "httpAutoCollectionOptions": {
+          "enableHttpTriggerExtendedInfoCollection": true,
+          "enableW3CDistributedTracing": true,
+          "enableResponseHeaderInjection": true
       }
     }
   },

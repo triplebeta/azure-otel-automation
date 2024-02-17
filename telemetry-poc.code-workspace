@@ -37,10 +37,6 @@
 			"path": "appInsights"
 		},
 		{
-			"name": "Azure Dashboard (deprecated)",
-			"path": "appInsights/modules/Tasks/Dashboards"
-		},
-		{
 			"path": "docs"
 		}
 	],

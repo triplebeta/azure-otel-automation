@@ -21,12 +21,18 @@ from opentelemetry import metrics
 
 # NOTE: This code is not needed here since we pass the tracer from the function_app.py to avoid duplicate logs
 # Avoid duplicate logging
+# WARNING: this also removes the Console logger so you will no longer see your log lines there.
 # root_logger = logging.getLogger()
 # for handler in root_logger.handlers[:]:
 #     root_logger.removeHandler(handler)
 # configure_azure_monitor()
 # tracer = trace.get_tracer(__name__)
 
+
+# See: https://learn.microsoft.com/en-us/azure/developer/python/sdk/azure-sdk-logging
+# Set the logging level for all azure-* libraries
+logger = logging.getLogger('azure')
+logger.setLevel(logging.ERROR)
 
 # Create metrics. unit must be one of the values from the UCUM, see: https://ucum.org/ucum
 # Types of telemetry, https://www.timescale.com/blog/a-deep-dive-into-open-telemetry-metrics/
