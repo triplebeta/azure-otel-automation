@@ -130,7 +130,7 @@ resource "azurerm_application_insights_workbook_template" "device-healt-workbook
     resource_type = "microsoft.insights/components"
   }
 
-  template_data = templatefile("${path.module}/Workbooks/DeviceHealthWorkbookTemplates.tpl",
+  template_data = templatefile("${path.module}/Workbooks/Templates/DeviceHealthWorkbookTemplates.tpl",
     {
       log_analytics_name = var.log_analytics_workspace_name
       resource_group_name = data.azurerm_resource_group.parent_group.name
