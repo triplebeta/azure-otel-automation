@@ -110,14 +110,14 @@ resource "azurerm_log_analytics_saved_search" "laTasksSampleFunctions" {
 # For parameterized functions we must specify the exact parameters
 # so they cannot be created in bulk.check
 resource "azurerm_log_analytics_saved_search" "laTasksFunctions_AppTracesBatchesAndRuns" {
-  name                       = substr(basename(each.value),0, length(basename(each.value))-4)
+  name                       = "Sample_AppTracesBatchesAndRuns"
   log_analytics_workspace_id = data.azurerm_log_analytics_workspace.myWorkspace.id
-  function_alias = substr(basename(each.value),0, length(basename(each.value))-4) 
+  function_alias = "Sample_AppTracesBatchesAndRuns" 
   function_parameters = [ "startDay:datetime"]
 
   category     = "Samples"
-  display_name = substr(basename(each.value),0, length(basename(each.value))-4)
-  query        = file("./modules/Tasks/Functions/FakeData/${each.value}")
+  display_name = "Sample_AppTracesBatchesAndRuns"
+  query        = file("./modules/Tasks/Functions/FakeData/Sample_AppTracesBatchesAndRuns.kql")
 }
 
 
