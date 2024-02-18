@@ -1,0 +1,7 @@
+Sample_AppTracesBatchesAndRuns(now())
+| where AppRoleName == "Tasks"
+| where Message == "Tasks completed batch"
+| extend device_id = tostring(Properties["device_id"])
+| extend batch_id = tostring(Properties["batch_id"])
+| extend duration = toint(Properties["duration"])
+| project TimeGenerated, device_id, duration, batch_id

@@ -1,99 +1,139 @@
 {
-    "version": "Notebook/1.0",
-    "items": [
-      {
-        "type": 12,
-        "content": {
-          "version": "NotebookGroup/1.0",
-          "groupType": "editable",
-          "items": [
-            {
-              "type": 3,
-              "content": {
-                "version": "KqlItem/1.0",
-                "query": "(AppTraces\r\n| where TimeGenerated >=ago(3d)\r\n| where AppRoleName == 'Tasks (prod)'\r\n| where Message startswith 'Tasks started batch'\r\n| project-rename start_timestamp=TimeGenerated\r\n| extend batchid = tostring(Properties['batch_id'])\r\n| extend device_id = tostring(Properties['device_id'])\r\n| project start_timestamp, device_id, batchid\r\n| join kind=leftouter \r\n    (AppTraces\r\n    | where AppRoleName == 'Tasks (prod)'\r\n    | where Message has 'Tasks completed run'\r\n    | extend batchid = tostring(Properties['batch_id'])\r\n    | extend iteration = toint(Properties['iteration'])\r\n    | project iteration, batchid) on batchid)\r\n| extend bin=bin(start_timestamp,1d)\r\n| summarize successful_runs=sum(iif(isnotnull(iteration),1,0)) by bin, device_id, valid=1\r\n| summarize successful_runs=sum(successful_runs), days=sum(valid) by device_id\r\n",
-                "size": 1,
-                "timeContext": {
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# Device Health\r\n\r\nShows some important statistics for a specific device."
+      },
+      "name": "text - 2"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "crossComponentResources": [
+          "/subscriptions/a6faafc0-def0-429a-bd0e-2c2550f163a3/resourceGroups/otelpoc/providers/Microsoft.Insights/components/otelpoc-ai"
+        ],
+        "parameters": [
+          {
+            "id": "16e516f9-dc10-4762-9a55-f7a913187389",
+            "version": "KqlParameterItem/1.0",
+            "name": "device_id",
+            "label": "Device",
+            "type": 2,
+            "query": "Sample_DeviceList()",
+            "crossComponentResources": [
+              "/subscriptions/a6faafc0-def0-429a-bd0e-2c2550f163a3/resourceGroups/otelpoc/providers/Microsoft.OperationalInsights/workspaces/otelpoc-la"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": [],
+              "showDefault": false
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "queryType": 0,
+            "resourceType": "microsoft.operationalinsights/workspaces",
+            "value": "CC33"
+          },
+          {
+            "id": "0db7d65e-d9e4-43d8-9582-8910cbfbd599",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "label": "Period",
+            "type": 4,
+            "isRequired": true,
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 300000
+                },
+                {
+                  "durationMs": 900000
+                },
+                {
+                  "durationMs": 1800000
+                },
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 14400000
+                },
+                {
+                  "durationMs": 43200000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 259200000
+                },
+                {
                   "durationMs": 604800000
                 },
-                "queryType": 0,
-                "resourceType": "microsoft.operationalinsights/workspaces",
-                "crossComponentResources": [
-                  "/subscriptions/${sub_id}/resourceGroups/${resource_group_name}/providers/Microsoft.OperationalInsights/workspaces/${log_analytics_name}"
-                ],
-                "visualization": "graph",
-                "graphSettings": {
-                  "type": 2,
-                  "topContent": {
-                    "columnMatch": "device_id"
-                  },
-                  "centerContent": {
-                    "columnMatch": "successful_runs"
-                  },
-                  "nodeIdField": "device_id",
-                  "graphOrientation": 3,
-                  "showOrientationToggles": false,
-                  "nodeSize": null,
-                  "staticNodeSize": 100,
-                  "colorSettings": {
-                    "nodeColorField": "days",
-                    "type": 3,
-                    "thresholdsGrid": [
-                      {
-                        "operator": "<=",
-                        "thresholdValue": "1",
-                        "representation": "redBright"
-                      },
-                      {
-                        "operator": "==",
-                        "thresholdValue": "2",
-                        "representation": "orange"
-                      },
-                      {
-                        "operator": ">",
-                        "thresholdValue": "2",
-                        "representation": "green"
-                      },
-                      {
-                        "operator": "Default",
-                        "thresholdValue": null,
-                        "representation": "lightBlue"
-                      }
-                    ]
-                  },
-                  "hivesMargin": 5,
-                  "edgeColorSettings": null
+                {
+                  "durationMs": 1209600000
+                },
+                {
+                  "durationMs": 2419200000
                 }
-              },
-              "name": "query - 2"
+              ],
+              "allowCustom": true
             },
-            {
-              "type": 11,
-              "content": {
-                "version": "LinkItem/1.0",
-                "style": "bullets",
-                "links": [
-                  {
-                    "id": "66844806-8a08-4521-8b84-545b627804ad",
-                    "cellValue": "Foo",
-                    "linkTarget": "GenericDetails",
-                    "linkLabel": "Here is the link",
-                    "preText": "Before link",
-                    "postText": "And after link",
-                    "style": "primary",
-                    "linkIsContextBlade": true
-                  }
-                ]
-              },
-              "name": "links - 1"
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "value": {
+              "durationMs": 4274280000,
+              "endTime": "2024-02-18T10:18:00.000Z"
             }
-          ]
+          }
+        ],
+        "style": "pills",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "parameters - 1"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "Sample_BatchDuration\r\n| where device_id == \"{device_id}\"\r\n| where TimeGenerated > {TimeRange:start} and TimeGenerated <= {TimeRange:end}",
+        "size": 1,
+        "aggregation": 2,
+        "title": "Batch duration",
+        "noDataMessage": "No batches available",
+        "noDataMessageStyle": 4,
+        "timeContext": {
+          "durationMs": 86400000
         },
-        "name": "group - 1"
-      }
-    ],
-    "fallbackResourceIds": [
-      "azure monitor"
-    ],
-    "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
-  }
+        "timeBrushParameterName": "period",
+        "timeBrushExportOnlyWhenBrushed": true,
+        "exportFieldName": "batch_id",
+        "exportParameterName": "batch_id",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "/subscriptions/a6faafc0-def0-429a-bd0e-2c2550f163a3/resourceGroups/otelpoc/providers/Microsoft.OperationalInsights/workspaces/otelpoc-la"
+        ],
+        "visualization": "barchart",
+        "chartSettings": {
+          "xAxis": "TimeGenerated",
+          "showMetrics": false,
+          "showLegend": true,
+          "customThresholdLine": "500",
+          "customThresholdLineStyle": 1
+        }
+      },
+      "name": "BatchDuration"
+    }
+  ],
+  "fallbackResourceIds": [
+    "/subscriptions/a6faafc0-def0-429a-bd0e-2c2550f163a3/resourceGroups/otelpoc/providers/Microsoft.Insights/components/otelpoc-ai"
+  ],
+  "fromTemplateId": "ArmTemplates-/subscriptions/a6faafc0-def0-429a-bd0e-2c2550f163a3/resourceGroups/otelpoc/providers/Microsoft.Insights/workbooktemplates/DeviceHealthWorkbookTemplate",
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}

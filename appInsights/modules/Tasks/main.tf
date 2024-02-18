@@ -127,7 +127,8 @@ resource "azurerm_application_insights_workbook_template" "device-healt-workbook
     category      = "Samples"
     name          = "Device Health"
     order         = 100
-    resource_type = "microsoft.insights/components"
+    resource_type = "microsoft.operationalinsights/workspaces"
+    type          = "workbook"
   }
 
   template_data = templatefile("${path.module}/Workbooks/Templates/DeviceHealthWorkbookTemplates.tpl",

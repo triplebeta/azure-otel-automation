@@ -6,14 +6,14 @@
 let _timespanEnd = todatetime("2024-01-04 00:00:00"); 
 let _timespanStart = datetime_add('day',-3, _timespanEnd);
 // Returns only the machines that have at least one failed batch
-let failedBatchesPerDay=SampleAppTraces1
+let failedBatchesPerDay=Sample_AppTracesBatchesAndRuns(now())
 | where Message == "Tasks failed batch"
 | extend device_id = tostring(Properties["device_id"])
 | extend batch_failed=1
 | project TimeGenerated, device_id, batch_failed;
 failedBatchesPerDay
 | union
-    (SampleAppTraces1
+    (Sample_AppTracesBatchesAndRuns(now())
     | extend device_id = tostring(Properties["device_id"])
     | distinct device_id
     | extend TimeGenerated=_timespanStart, batch_failed=0

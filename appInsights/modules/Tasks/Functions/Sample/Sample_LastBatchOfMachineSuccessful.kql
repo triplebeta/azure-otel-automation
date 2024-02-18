@@ -5,7 +5,7 @@ let _timespanStart = datetime_add('day',-3, _timespanEnd);
 // All batches that are marked as Complete
 // batch_id identifies the batch, completing_batch_id indicates which batch completed it.
 // Normally it's the same batch but in case of a re-run it can be different.
-let completedBatchesPerDay = SampleAppTraces1
+let completedBatchesPerDay = Sample_AppTracesBatchesAndRuns(now())
 | where Message == "Tasks completed batch"
 | extend device_id = tostring(Properties["device_id"])
 | extend completing_batch_id = toint(Properties["batch_id"])
@@ -23,7 +23,7 @@ completedBatchesPerDay
 | project device_id, IsYellow=0, IsRed = iif(Last3Days<3,1,0)
 // Ensure all devices are in the list
 | union
-    (SampleAppTraces1
+    (Sample_AppTracesBatchesAndRuns(now())
     | extend device_id = tostring(Properties["device_id"])
     | distinct device_id
     | extend TimeGenerated=_timespanStart, IsYellow=0, IsRed=0)

@@ -1,0 +1,3 @@
+Sample_AppTracesBatchesAndRuns(now())
+| extend device_id = tostring(Properties["device_id"])
+| distinct device_id
