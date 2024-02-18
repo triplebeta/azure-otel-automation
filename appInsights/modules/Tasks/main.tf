@@ -47,7 +47,7 @@ data "azurerm_log_analytics_workspace" "myWorkspace" {
 
 # Create a set of all KQL files in the directory.
 locals {
-  tasks_function_files = fileset("./modules/Tasks/Functions", "*.kql")
+  tasks_function_health_files = fileset("./modules/Tasks/Functions/Health", "*.kql")
   tasks_function_samples_files = fileset("./modules/Tasks/Functions/Sample", "*.kql")
 }
 
@@ -82,8 +82,8 @@ locals {
 # }
 
 # Create a function under Log Analytics for each file in the Functions folder. 
-resource "azurerm_log_analytics_saved_search" "laTasksFunctions" {
-  for_each = local.tasks_function_files
+resource "azurerm_log_analytics_saved_search" "laTasksHealthFunctions" {
+  for_each = local.tasks_function_health_files
 
   name                       = substr(basename(each.value),0, length(basename(each.value))-4)
   log_analytics_workspace_id = data.azurerm_log_analytics_workspace.myWorkspace.id
@@ -91,12 +91,10 @@ resource "azurerm_log_analytics_saved_search" "laTasksFunctions" {
 
   category     = "Health"
   display_name = substr(basename(each.value),0, length(basename(each.value))-4)
-  query        = file("./modules/Tasks/Functions/${each.value}")
+  query        = file("./modules/Tasks/Functions/Health/${each.value}")
 }
 
-
-
-# Deploy sample functions for use in the Workbook. 
+# Deploy sample functions for use in the sample Workbooks. 
 resource "azurerm_log_analytics_saved_search" "laTasksSampleFunctions" {
   for_each = local.tasks_function_samples_files
 
@@ -104,9 +102,22 @@ resource "azurerm_log_analytics_saved_search" "laTasksSampleFunctions" {
   log_analytics_workspace_id = data.azurerm_log_analytics_workspace.myWorkspace.id
   function_alias = substr(basename(each.value),0, length(basename(each.value))-4) 
 
-  category     = "Sample"
+  category     = "Samples"
   display_name = substr(basename(each.value),0, length(basename(each.value))-4)
   query        = file("./modules/Tasks/Functions/Sample/${each.value}")
+}
+
+# For parameterized functions we must specify the exact parameters
+# so they cannot be created in bulk.check
+resource "azurerm_log_analytics_saved_search" "laTasksFunctions_AppTracesBatchesAndRuns" {
+  name                       = substr(basename(each.value),0, length(basename(each.value))-4)
+  log_analytics_workspace_id = data.azurerm_log_analytics_workspace.myWorkspace.id
+  function_alias = substr(basename(each.value),0, length(basename(each.value))-4) 
+  function_parameters = [ "startDay:datetime"]
+
+  category     = "Samples"
+  display_name = substr(basename(each.value),0, length(basename(each.value))-4)
+  query        = file("./modules/Tasks/Functions/FakeData/${each.value}")
 }
 
 
